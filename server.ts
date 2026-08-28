@@ -373,6 +373,31 @@ async function runMigrations() {
 runMigrations();
 
 // Auth Middleware
+// Função Central de Logging de Segurança (Item 10)
+export function logSecurityEvent(eventType: string, req: any, details: any = {}) {
+  const forwarded = req.headers['x-forwarded-for'];
+  let ip = 'unknown-ip';
+  
+  if (forwarded) {
+    if (typeof forwarded === 'string') {
+      ip = forwarded.split(',')[0].trim();
+    } else if (Array.isArray(forwarded)) {
+      ip = forwarded[0];
+    }
+  } else {
+    ip = req.socket?.remoteAddress || req.ip || 'unknown-ip';
+  }
+
+  console.log(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    event_type: eventType,
+    ip: ip,
+    method: req.method,
+    path: req.originalUrl || req.path,
+    details: details
+  }));
+}
+
 const authenticateToken = (req: any, res: any, next: any) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -1446,6 +1471,12 @@ app.post('/api/provider/:slug/book', bookingLimiter.middleware(), async (req, re
     console.error('Booking error:', error);
     res.status(500).json({ error: 'Erro interno ao tentar realizar o agendamento.' });
   }
+});
+
+// Bloqueio de Scanners e Rotas Inexistentes da API (404)
+app.all('/api/*', (req, res) => {
+  logSecurityEvent('API_NOT_FOUND', req, { message: 'Tentativa de acesso a endpoint inexistente' });
+  res.status(404).json({ error: 'Endpoint não encontrado' });
 });
 
 // ====== VITE INTEGRATION ====== //
