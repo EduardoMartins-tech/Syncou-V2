@@ -384,7 +384,11 @@ const authenticateToken = (req: any, res: any, next: any) => {
   jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
     if (err) {
       console.warn(`[AUTH 403] ${req.method} ${req.path}: Falha na validação do JWT - ${err.name}: ${err.message}. Token recebido: ${token.substring(0, 20)}...`);
-      return res.status(403).json({ error: `Acesso negado: ${err.message}`, code: err.name });
+      if (err.name === 'TokenExpiredError') {
+        return res.status(403).json({ error: 'Sessão expirada, faça login novamente.', code: 'TOKEN_EXPIRED' });
+      } else {
+        return res.status(403).json({ error: 'Acesso negado.', code: 'INVALID_TOKEN' });
+      }
     }
     req.user = user;
     next();
@@ -478,7 +482,7 @@ app.post('/api/user/fcm-token', authenticateToken, async (req: any, res: any) =>
     res.json({ success: true });
   } catch (e: any) {
     console.error('[FCM-TOKEN] Erro ao salvar FCM token:', e);
-    res.status(500).json({ error: 'Error saving token', details: e.message });
+    res.status(500).json({ error: 'Falha ao salvar token de notificação. Tente novamente mais tarde.' });
   }
 });
 
@@ -553,7 +557,7 @@ app.post('/api/auth/google', authLimiter.middleware(), async (req, res) => {
     res.json({ token, user: { id, email } });
   } catch (error: any) {
     console.error('Google auth error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Erro interno ao autenticar via Google.' });
   }
 });
 
@@ -602,7 +606,8 @@ app.post('/api/auth/register', authLimiter.middleware(), async (req, res) => {
     if (error.code === '23505') { // Postgres unique constraint violation
       return res.status(400).json({ error: 'Email já cadastrado.' });
     }
-    res.status(500).json({ error: error.message });
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Erro interno ao processar o cadastro.' });
   }
 });
 
@@ -624,7 +629,8 @@ app.post('/api/auth/login', authLimiter.middleware(), async (req, res) => {
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user.id, email: user.email } });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Erro interno ao tentar fazer login.' });
   }
 });
 
@@ -645,7 +651,8 @@ app.get('/api/users/me', authenticateToken, async (req: any, res) => {
     }
     res.json(user);
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('Fetch user error:', error);
+    res.status(500).json({ error: 'Erro ao recuperar dados do usuário.' });
   }
 });
 
@@ -658,7 +665,8 @@ app.post('/api/subscription/upgrade', authenticateToken, async (req: any, res: a
     await pool.query('UPDATE users SET plan = $1 WHERE id = $2', [plan, req.user.id]);
     res.json({ success: true, plan });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('Upgrade plan error:', error);
+    res.status(500).json({ error: 'Erro ao atualizar plano.' });
   }
 });
 
@@ -667,7 +675,8 @@ app.post('/api/subscription/downgrade', authenticateToken, async (req: any, res:
     await pool.query("UPDATE users SET plan = 'free' WHERE id = $1", [req.user.id]);
     res.json({ success: true, plan: 'free' });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('Downgrade plan error:', error);
+    res.status(500).json({ error: 'Erro ao atualizar plano.' });
   }
 });
 
@@ -688,7 +697,8 @@ app.post('/api/users/google-token', authenticateToken, async (req: any, res: any
     );
     res.json({ success: true });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('Google token error:', error);
+    res.status(500).json({ error: 'Erro ao integrar calendário.' });
   }
 });
 
@@ -738,58 +748,14 @@ app.post('/api/users/test-calendar', authenticateToken, async (req: any, res: an
     
     res.json({ success: true });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('Test calendar error:', error);
+    res.status(500).json({ error: 'Erro interno ao testar integração.' });
   }
 });
 
 
 
-app.post('/api/test-book-sync', authenticateToken, async (req: any, res: any) => {
-  try {
-    const providerRes = await pool.query('SELECT google_access_token FROM users WHERE id = $1', [req.user.id]);
-    const googleAccessToken = providerRes.rows[0]?.google_access_token;
-    
-    if (!googleAccessToken) {
-      return res.status(400).json({ error: 'Nenhum token do Google encontrado' });
-    }
-    
-    const startAt = Date.now() + 86400000;
-    const endAt = startAt + 1800000;
-    
-    const clientEmail: string = ""; // Represents empty optional email
 
-    const event = {
-        summary: `Agendamento: Eduardo`,
-        description: `Cliente: Eduardo\nEmail: N/A\nWhatsApp: N/A\nServiços: Teste`,
-        start: {
-          dateTime: new Date(Number(startAt)).toISOString(),
-        },
-        end: {
-          dateTime: new Date(Number(endAt)).toISOString(),
-        },
-        ...((clientEmail && clientEmail.includes('@')) ? { attendees: [{ email: clientEmail }] } : {})
-    };
-
-    const gCalRes = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${googleAccessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(event),
-    });
-
-    if (!gCalRes.ok) {
-        const errText = await gCalRes.text();
-        console.error('Failed to create GCal test event:', errText);
-        return res.status(500).json({ error: 'Falha do GCal', details: errText, payload_sent: event });
-    }
-    
-    res.json({ success: true });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 app.post('/api/users/change-password', authenticateToken, authLimiter.middleware(), async (req: any, res: any) => {
   try {
@@ -825,9 +791,10 @@ app.post('/api/users/change-password', authenticateToken, authLimiter.middleware
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hashedPassword, userId]);
     
-    res.json({ success: true });
+    res.json({ success: true, message: 'Senha alterada com sucesso.' });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    console.error('Change password error:', err);
+    res.status(500).json({ error: 'Erro ao alterar a senha.' });
   }
 });
 
@@ -888,7 +855,7 @@ app.put('/api/users/me', authenticateToken, async (req: any, res: any) => {
     res.json({ success: true });
   } catch (error: any) {
     console.error("Erro interno no PUT /api/users/me:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Erro ao atualizar as informações de perfil.' });
   }
 });
 
@@ -900,7 +867,8 @@ app.get('/api/services', authenticateToken, async (req: any, res) => {
     );
     res.json(result.rows.map(r => ({...r, active: Boolean(r.active)})));
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('Fetch services error:', error);
+    res.status(500).json({ error: 'Erro ao buscar serviços.' });
   }
 });
 
@@ -937,7 +905,8 @@ app.post('/api/services', authenticateToken, async (req: any, res: any) => {
     );
     res.json({ id, name: title, title, description, duration, bufferTime, price, active });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('Create service error:', error);
+    res.status(500).json({ error: 'Erro ao criar o serviço.' });
   }
 });
 
@@ -946,7 +915,8 @@ app.delete('/api/services/:id', authenticateToken, async (req: any, res) => {
     await pool.query('DELETE FROM services WHERE id = $1 AND provider_id = $2', [req.params.id, req.user.id]);
     res.json({ success: true });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('Delete service error:', error);
+    res.status(500).json({ error: 'Erro ao excluir o serviço.' });
   }
 });
 
@@ -963,7 +933,8 @@ app.get('/api/appointments', authenticateToken, async (req: any, res) => {
         services: JSON.parse(r.services || '[]')
      })));
    } catch (error: any) {
-     res.status(500).json({ error: error.message });
+     console.error('Get appointments error:', error);
+     res.status(500).json({ error: 'Erro ao buscar agendamentos.' });
    }
 });
 
@@ -1112,7 +1083,8 @@ app.put('/api/appointments/:id', authenticateToken, async (req: any, res) => {
       }
       res.json({ success: true });
    } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      console.error('Update appointment error:', err);
+      res.status(500).json({ error: 'Erro ao atualizar agendamento.' });
    }
 });
 app.post('/api/appointments/sync-all', authenticateToken, async (req: any, res: any) => {
@@ -1177,7 +1149,8 @@ app.post('/api/appointments/sync-all', authenticateToken, async (req: any, res: 
 
       res.json({ success: true, synced: syncedCount, errors: errorCount, lastError });
    } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      console.error('Delete appointment error:', err);
+      res.status(500).json({ error: 'Erro ao excluir agendamento.' });
    }
 });
 // Public Provider Data
@@ -1205,7 +1178,8 @@ app.get('/api/provider/:slug', async (req, res) => {
     
     res.json({ user, services });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('Provider fetch error:', error);
+    res.status(500).json({ error: 'Erro ao carregar os dados do profissional.' });
   }
 });
 
@@ -1225,7 +1199,8 @@ app.get('/api/provider/:slug/appointments', async (req, res) => {
      
      res.json(resultApts.rows.map(r => ({ ...r, startAt: Number(r.startAt), endAt: Number(r.endAt) })));
    } catch (error: any) {
-     res.status(500).json({ error: error.message });
+     console.error('Fetch provider appointments error:', error);
+     res.status(500).json({ error: 'Erro ao carregar a agenda.' });
    }
 });
 
@@ -1468,7 +1443,8 @@ app.post('/api/provider/:slug/book', bookingLimiter.middleware(), async (req, re
     
     res.json({ success: true, appointmentId: id });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('Booking error:', error);
+    res.status(500).json({ error: 'Erro interno ao tentar realizar o agendamento.' });
   }
 });
 
