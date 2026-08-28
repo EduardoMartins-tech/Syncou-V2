@@ -373,6 +373,12 @@ async function runMigrations() {
 runMigrations();
 
 // Auth Middleware
+
+// Estruturas para controle de alertas no Discord (Anti-Spam)
+const ALERT_WORTHY_EVENTS = ['API_NOT_FOUND', 'CAPTCHA_FAILED'];
+const REPEATED_ALERT_EVENTS = ['RATE_LIMIT_EXCEEDED', 'AUTH_MISSING_TOKEN', 'AUTH_INVALID_TOKEN'];
+const suspiciousIpTracker = new Map<string, number[]>();
+
 // Função Central de Logging de Segurança (Item 10)
 export function logSecurityEvent(eventType: string, req: any, details: any = {}) {
   const forwarded = req.headers['x-forwarded-for'];
@@ -396,19 +402,60 @@ export function logSecurityEvent(eventType: string, req: any, details: any = {})
     path: req.originalUrl || req.path,
     details: details
   }));
+
+  // Disparo opcional de webhook (Discord) apenas com campos seguros e controle de spam
+  if (process.env.DISCORD_WEBHOOK_URL) {
+    let shouldAlert = false;
+    let alertReason = eventType;
+
+    if (ALERT_WORTHY_EVENTS.includes(eventType)) {
+      shouldAlert = true;
+    } else if (REPEATED_ALERT_EVENTS.includes(eventType)) {
+      const now = Date.now();
+      const tenMinutes = 10 * 60 * 1000; // 10 minutos
+      
+      let timestamps = suspiciousIpTracker.get(ip) || [];
+      // Mantém apenas logs dos últimos 10 minutos
+      timestamps = timestamps.filter(ts => now - ts < tenMinutes);
+      timestamps.push(now);
+      
+      if (timestamps.length >= 3) {
+        shouldAlert = true;
+        alertReason = `REPEATED_SUSPICIOUS_ACTIVITY (${eventType})`;
+        // Zera o rastreio do IP para evitar flood contínuo nos próximos alertas imediatos
+        suspiciousIpTracker.delete(ip);
+      } else {
+        suspiciousIpTracker.set(ip, timestamps);
+      }
+    }
+
+    if (shouldAlert) {
+      const safePayload = {
+        content: `🚨 **Alerta de Segurança**\n**Evento**: \`${alertReason}\`\n**IP**: \`${ip}\`\n**Rota**: \`${req.method} ${req.originalUrl || req.path}\`\n**Data**: \`${new Date().toISOString()}\``
+      };
+      
+      fetch(process.env.DISCORD_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(safePayload)
+      }).catch(err => {
+        console.error('Falha ao enviar webhook do Discord:', err.message);
+      });
+    }
+  }
 }
 
 const authenticateToken = (req: any, res: any, next: any) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   if (!token || token === 'null' || token === 'undefined') {
-    console.warn(`[AUTH 401] ${req.method} ${req.path}: Token de autenticação ausente ou inválido no header (${authHeader})`);
+    logSecurityEvent('AUTH_MISSING_TOKEN', req, { header: authHeader });
     return res.status(401).json({ error: 'Token de autenticação ausente' });
   }
 
   jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
     if (err) {
-      console.warn(`[AUTH 403] ${req.method} ${req.path}: Falha na validação do JWT - ${err.name}: ${err.message}. Token recebido: ${token.substring(0, 20)}...`);
+      logSecurityEvent('AUTH_INVALID_TOKEN', req, { error_name: err.name, error_message: err.message, token_prefix: token.substring(0, 20) });
       if (err.name === 'TokenExpiredError') {
         return res.status(403).json({ error: 'Sessão expirada, faça login novamente.', code: 'TOKEN_EXPIRED' });
       } else {
@@ -1270,7 +1317,7 @@ app.post('/api/provider/:slug/book', bookingLimiter.middleware(), async (req, re
       
       const verifyData = await verifyRes.json();
       if (!verifyData.success) {
-        console.error('Captcha validation failed:', verifyData);
+        logSecurityEvent('CAPTCHA_FAILED', req, { verifyData });
         return res.status(400).json({ error: 'Falha na verificação de segurança (Captcha inválido).' });
       }
     } catch (e) {
