@@ -12,6 +12,7 @@ import { getMessaging } from 'firebase-admin/messaging';
 import { initializeApp, cert } from 'firebase-admin/app';
 import nodemailer from 'nodemailer';
 import cron from 'node-cron';
+import { z } from 'zod';
 import { RateLimiter } from './server/rateLimiter';
 
 let transporter: nodemailer.Transporter | null = null;
@@ -556,10 +557,18 @@ app.post('/api/auth/google', authLimiter.middleware(), async (req, res) => {
   }
 });
 
+// Zod Schemas
+const registerSchema = z.object({
+  email: z.string().email('E-mail inválido'),
+  password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
+  code: z.string().length(6, 'O código deve ter 6 dígitos')
+});
+
 app.post('/api/auth/register', authLimiter.middleware(), async (req, res) => {
   try {
-    const { email, password, code } = req.body;
-    if (!email || !password || !code) return res.status(400).json({ error: 'Dados incompletos. Informe email, código e senha.' });
+    const validated = registerSchema.safeParse(req.body);
+    if (!validated.success) return res.status(400).json({ error: validated.error.issues[0].message });
+    const { email, password, code } = validated.data;
 
     const otpResult = await pool.query('SELECT code, expires_at FROM otp_codes WHERE email = $1', [email]);
     if (otpResult.rows.length === 0) {
@@ -733,14 +742,7 @@ app.post('/api/users/test-calendar', authenticateToken, async (req: any, res: an
   }
 });
 
-app.get('/api/test-db-info', async (req, res) => {
-  try {
-    const r = await pool.query("SELECT * FROM appointments ORDER BY created_at DESC LIMIT 5");
-    res.json(r.rows);
-  } catch(e) {
-    res.status(500).json({error: e.message});
-  }
-});
+
 
 app.post('/api/test-book-sync', authenticateToken, async (req: any, res: any) => {
   try {
@@ -789,7 +791,7 @@ app.post('/api/test-book-sync', authenticateToken, async (req: any, res: any) =>
   }
 });
 
-app.post('/api/users/change-password', authenticateToken, async (req: any, res: any) => {
+app.post('/api/users/change-password', authenticateToken, authLimiter.middleware(), async (req: any, res: any) => {
   try {
     const { currentPassword, newPassword } = req.body;
     const userId = req.user.id;
@@ -902,6 +904,15 @@ app.get('/api/services', authenticateToken, async (req: any, res) => {
   }
 });
 
+const serviceSchema = z.object({
+  title: z.string().min(2, 'O título do serviço é obrigatório'),
+  duration: z.number().int().positive('A duração deve ser maior que 0'),
+  bufferTime: z.number().int().nonnegative('O tempo de preparo não pode ser negativo').optional().default(0),
+  price: z.number().nonnegative('O preço não pode ser negativo'),
+  description: z.string().optional(),
+  active: z.boolean().optional().default(true)
+});
+
 app.post('/api/services', authenticateToken, async (req: any, res: any) => {
   try {
     // Disable plan checks for now
@@ -916,7 +927,9 @@ app.post('/api/services', authenticateToken, async (req: any, res: any) => {
       }
     }
     */
-    const { title, description, duration, bufferTime, price, active } = req.body;
+    const validated = serviceSchema.safeParse(req.body);
+    if (!validated.success) return res.status(400).json({ error: validated.error.issues[0].message });
+    const { title, description, duration, bufferTime, price, active } = validated.data;
     const id = generateId();
     await pool.query(
       'INSERT INTO services (id, provider_id, title, description, duration, buffer_time, price, active) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
@@ -1216,14 +1229,28 @@ app.get('/api/provider/:slug/appointments', async (req, res) => {
    }
 });
 
+const bookingSchema = z.object({
+  providerId: z.string().min(1, 'O ID do provedor é obrigatório'),
+  clientName: z.string().min(2, 'O nome do cliente é obrigatório'),
+  clientWhatsApp: z.string().optional().nullable(),
+  clientPhone: z.string().optional().nullable(),
+  clientEmail: z.string().email('E-mail inválido').optional().nullable().or(z.literal('')),
+  services: z.array(z.any()).min(1, 'Pelo menos um serviço é obrigatório'),
+  startAt: z.union([z.string(), z.number()]),
+  endAt: z.union([z.string(), z.number()]),
+  totalPrice: z.number().nonnegative(),
+  totalDuration: z.number().positive(),
+  bufferTime: z.number().nonnegative().optional(),
+  bookingSource: z.string().optional(),
+  status: z.string().optional(),
+  captchaToken: z.string().trim().min(1, 'Captcha obrigatório').refine(val => val !== 'undefined' && val !== 'null', 'Falha na verificação de segurança (Captcha ausente ou inválido).')
+});
+
 app.post('/api/provider/:slug/book', bookingLimiter.middleware(), async (req, res) => {
   try {
-    const { providerId, clientName, clientWhatsApp, clientPhone, clientEmail, services, totalPrice, totalDuration, bufferTime, bookingSource, status, startAt, endAt, captchaToken } = req.body;
-
-    // 3) Valida Captcha
-    if (!captchaToken || typeof captchaToken !== 'string' || captchaToken.trim() === '' || captchaToken === 'undefined' || captchaToken === 'null') {
-      return res.status(400).json({ error: 'Falha na verificação de segurança (Captcha ausente ou inválido).' });
-    }
+    const validated = bookingSchema.safeParse(req.body);
+    if (!validated.success) return res.status(400).json({ error: validated.error.issues[0].message });
+    const { providerId, clientName, clientWhatsApp, clientPhone, clientEmail, services, totalPrice, totalDuration, bufferTime, bookingSource, status, startAt, endAt, captchaToken } = validated.data;
     
     try {
       const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
