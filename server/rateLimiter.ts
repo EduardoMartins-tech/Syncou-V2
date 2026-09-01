@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { logSecurityEvent } from './securityLogger';
 
 interface RateLimiterOptions {
   windowMs: number; // timeframe
@@ -75,14 +76,7 @@ export class RateLimiter {
         const oldestTimestamp = filteredTimestamps[0];
         const resetTimeSec = Math.ceil((this.windowMs - (now - oldestTimestamp)) / 1000);
         
-        console.log(JSON.stringify({
-          timestamp: new Date().toISOString(),
-          event_type: 'RATE_LIMIT_EXCEEDED',
-          ip: ip,
-          method: req.method,
-          path: req.originalUrl || req.path,
-          details: { max: this.max, windowMs: this.windowMs, retryAfter: resetTimeSec }
-        }));
+        logSecurityEvent('RATE_LIMIT_EXCEEDED', req, { max: this.max, windowMs: this.windowMs, retryAfter: resetTimeSec });
         
         res.setHeader('Retry-After', resetTimeSec);
         res.setHeader('X-RateLimit-Limit', this.max);
