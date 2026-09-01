@@ -220,7 +220,7 @@ export function Onboarding() {
                     id="slug"
                     {...register('slug')}
                     placeholder="seu-nome"
-                    className="bg-[#0B0914] border-[#2D214F] text-white placeholder:text-[#5B4F81] focus-visible:ring-violet-500 focus:border-violet-500 pl-[100px] h-11"
+                    className="bg-[#0B0914] border-[#2D214F] text-white placeholder:text-[#5B4F81] focus-visible:ring-violet-500 focus:border-violet-500 pl-[115px] h-11"
                   />
                 </div>
 
