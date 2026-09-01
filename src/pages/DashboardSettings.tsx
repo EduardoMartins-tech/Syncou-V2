@@ -416,7 +416,7 @@ export function DashboardSettings() {
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 items-center p-4 bg-[#0B0914] border border-[#2D214F] rounded-xl">
               <div className="flex-1 font-mono text-[#E2D9F3] text-sm sm:text-base break-all">
-                syncou.app/<span className="text-violet-400 font-bold">{currentSlug || 'sua-slug-aqui'}</span>
+                syncou.app/p/<span className="text-violet-400 font-bold">{currentSlug || 'sua-slug-aqui'}</span>
               </div>
               <div className="flex gap-2 w-full sm:w-auto">
                  <Button onClick={copyLink} variant="secondary" className="flex-1 sm:flex-none bg-[#1A1333] hover:bg-[#2D214F] border border-[#2D214F] text-[#E2D9F3] hover:text-white">
@@ -447,7 +447,7 @@ export function DashboardSettings() {
                 <Label htmlFor="slug" className="text-[#E2D9F3]">Identificador URL (Slug)</Label>
                 <div className="flex bg-[#0B0914] rounded-lg border border-[#2D214F] focus-within:ring-1 focus-within:ring-violet-500 overflow-hidden">
                   <span className="flex items-center px-4 bg-[#130E20] text-[#9B8FC0] border-r border-[#2D214F] text-sm">
-                    syncou.app/
+                    syncou.app/p/
                   </span>
                   <input
                     id="slug"
@@ -826,7 +826,7 @@ export function DashboardSettings() {
               
               <h3 className="text-xl font-bold text-white mb-1">{watchedDisplayName || 'Seu Nome Aqui'}</h3>
               <p className="text-sm font-medium text-violet-400 mb-4 bg-violet-400/10 px-3 py-1 rounded-full border border-violet-500/20 font-mono">
-                syncou.app/{watchedSlug || 'seu-link'}
+                syncou.app/p/{watchedSlug || 'seu-link'}
               </p>
               
               {watchedBio ? (
