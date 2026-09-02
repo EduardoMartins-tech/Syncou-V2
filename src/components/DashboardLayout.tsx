@@ -56,7 +56,7 @@ export function DashboardLayout() {
         <div className="p-6">
           <div className="flex items-center gap-2 mb-10">
             <Logo className="w-8 h-8 text-violet-400 drop-shadow-[0_0_12px_rgba(139,92,246,0.3)]" />
-            <span className="font-semibold text-xl tracking-tight text-white">Syncou</span>
+            <span className="font-semibold text-xl tracking-tight text-white font-outfit">Syncou</span>
           </div>
           
           <nav className="space-y-1.5 flex-1">
@@ -64,9 +64,10 @@ export function DashboardLayout() {
               <Link key={item.path} to={item.path}>
                 <Button 
                   variant="ghost" 
-                  className={`w-full justify-start text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50 font-medium h-10 ${location.pathname === item.path ? 'bg-[#2D214F] text-white shadow-sm' : ''}`}
+                  className={`w-full justify-start font-medium h-10 rounded-lg transition-all relative overflow-hidden ${location.pathname === item.path ? 'text-white bg-white/5' : 'text-[#9B8FC0] hover:text-white hover:bg-white/5'}`}
                 >
-                  <item.icon className="mr-3 w-4 h-4" strokeWidth={2} />
+                  {location.pathname === item.path && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#F5A623] rounded-r-full" />}
+                  <item.icon className={`mr-3 w-4 h-4 ${location.pathname === item.path ? 'text-[#F5A623]' : ''}`} strokeWidth={2} />
                   {item.name}
                 </Button>
               </Link>
@@ -98,7 +99,7 @@ export function DashboardLayout() {
         <header className="md:hidden flex items-center justify-between bg-[#0B0914]/80 backdrop-blur-xl border-b border-[#2D214F] p-4 sticky top-0 z-40">
           <div className="flex items-center gap-3">
             <Logo className="w-8 h-8 text-violet-400 drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]" />
-            <span className="font-bold text-xl tracking-tight text-white">Syncou</span>
+            <span className="font-bold text-xl tracking-tight text-white font-outfit">Syncou</span>
           </div>
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
@@ -130,9 +131,10 @@ export function DashboardLayout() {
                       <Link to={item.path} className="block">
                         <Button 
                           variant="ghost" 
-                          className={`w-full justify-start font-medium h-14 text-lg rounded-xl transition-all ${location.pathname === item.path ? 'bg-[#8B5CF6]/10 text-violet-300 shadow-sm border border-violet-500/20' : 'text-[#9B8FC0] hover:text-white hover:bg-[#1A1333]'}`}
+                          className={`w-full justify-start font-medium h-14 text-lg rounded-xl transition-all relative overflow-hidden ${location.pathname === item.path ? 'text-white bg-white/5' : 'text-[#9B8FC0] hover:text-white hover:bg-white/5'}`}
                         >
-                          <item.icon className={`mr-4 w-6 h-6 ${location.pathname === item.path ? 'text-violet-400' : 'text-[#9B8FC0]'}`} strokeWidth={2} />
+                          {location.pathname === item.path && <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-[#F5A623] rounded-r-full" />}
+                          <item.icon className={`mr-4 w-6 h-6 ${location.pathname === item.path ? 'text-[#F5A623]' : 'text-[#9B8FC0]'}`} strokeWidth={2} />
                           {item.name}
                         </Button>
                       </Link>

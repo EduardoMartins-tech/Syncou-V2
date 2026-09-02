@@ -673,19 +673,24 @@ export function DashboardHome() {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+          className="bg-[#130E20] border border-[#2D214F] rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-lg"
         >
           <div className="flex items-start sm:items-center gap-3">
-            <div className="p-2 bg-amber-500/20 rounded-full text-amber-400">
-              <CalendarIcon className="w-5 h-5" />
+            <div className="relative p-3 bg-[#0B0914] border border-[#2D214F] rounded-xl text-[#9B8FC0] flex-shrink-0">
+              <CalendarIcon className="w-6 h-6" />
+              {/* Nó pulsante âmbar indicando desconexão/ação necessária */}
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F5A623] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#F5A623] border-2 border-[#130E20]"></span>
+              </span>
             </div>
             <div>
-              <h3 className="text-amber-400 font-medium">Sincronização pendente</h3>
-              <p className="text-amber-400/80 text-sm mt-0.5">Conecte sua conta do Google para sincronizar seus agendamentos automaticamente.</p>
+              <h3 className="text-white font-semibold font-outfit text-lg">Conecte sua Órbita</h3>
+              <p className="text-[#9B8FC0] text-sm mt-0.5">Vincule sua conta do Google Calendar para ativar a sincronização bidirecional automática.</p>
             </div>
           </div>
-          <Button onClick={() => navigate('/dashboard/settings#google-calendar')} variant="outline" className="w-full sm:w-auto bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-400">
-            Conectar agora
+          <Button onClick={() => navigate('/dashboard/settings#google-calendar')} className="w-full sm:w-auto bg-[#F5A623] hover:bg-[#E09612] text-[#0A0713] font-semibold h-11 px-6 rounded-lg transition-all shadow-[0_0_15px_rgba(245,166,35,0.15)]">
+            Conectar Agenda
           </Button>
         </motion.div>
       )}
@@ -1018,169 +1023,164 @@ export function DashboardHome() {
                     transition={{ duration: 0.4, delay: 0.1 + (index * 0.05), ease: [0.16, 1, 0.3, 1] }}
                     layout
                   >
-                    <Card className="bg-[#130E20] border-[#2D214F] shadow-sm hover:border-[#4B3B7A] transition-all">
-                    <CardContent className="p-5">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                           <h3 className="font-bold text-white text-lg">{apt.clientName}</h3>
-                           <div className="flex items-center gap-2 text-sm text-[#9B8FC0] mt-1">
-                             <a href={`https://wa.me/${apt.clientWhatsApp?.replace(/\D/g, '') || apt.clientPhone?.replace(/\D/g, '')}`} className="hover:text-violet-400 transition-colors" target="_blank" rel="noreferrer">
+                    <Card className="bg-[#130E20] border-[#2D214F] shadow-sm hover:border-violet-500/30 transition-all overflow-hidden group">
+                    <CardContent className="p-0">
+                      <div className="flex flex-col md:flex-row p-4 gap-4 items-start md:items-center">
+                        
+                        {/* Coluna 1: Data e Hora */}
+                        <div className="flex-shrink-0 md:w-32 md:border-r border-[#2D214F] md:pr-4 flex flex-row md:flex-col items-center md:items-start gap-3 md:gap-0">
+                          <div className="font-outfit font-bold text-2xl text-white">
+                             {new Date(apt.startAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                          <div className="text-xs text-[#9B8FC0] mt-0.5 font-medium">
+                             {new Date(apt.startAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                          </div>
+                        </div>
+
+                        {/* Coluna 2: Informações do Cliente */}
+                        <div className="flex-1 min-w-0">
+                           <div className="flex items-center gap-2">
+                             <h3 className="font-bold text-white text-lg truncate">{apt.clientName}</h3>
+                             {apt.bookingSource === 'public_link' && (
+                               <span className="text-[10px] uppercase font-bold tracking-wider text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded">via syncou</span>
+                             )}
+                           </div>
+                           <div className="flex items-center gap-3 text-sm text-[#9B8FC0] mt-1">
+                             <button onClick={() => openWhatsApp(apt)} className="hover:text-[#F5A623] transition-colors inline-flex items-center gap-1">
+                               <MessageSquare className="w-3.5 h-3.5" />
                                {apt.clientWhatsApp || apt.clientPhone}
-                             </a>
+                             </button>
+                             <span className="font-mono text-violet-300">
+                               R$ {apt.totalPrice?.toFixed(2) || '0.00'}
+                             </span>
                            </div>
                         </div>
-                        <div className="text-right">
-                          <div className={`text-xs px-2 py-1 rounded-full font-medium inline-flex items-center gap-1.5
-                            ${(apt.status === 'scheduled' || apt.status === 'Pendente' || !apt.status) ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 
-                              (apt.status === 'confirmed' || apt.status === 'Confirmado') ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30' : 
-                              (apt.status === 'completed' || apt.status === 'Concluído') ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 
-                              'bg-red-500/15 text-red-400 border border-red-500/30'}
+
+                        {/* Coluna 3: Status e Ações */}
+                        <div className="flex flex-col items-end gap-3 flex-shrink-0 w-full md:w-auto mt-4 md:mt-0 border-t border-[#2D214F] pt-4 md:border-t-0 md:pt-0">
+                          <div className={`text-xs px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1.5 w-fit
+                            ${(apt.status === 'scheduled' || apt.status === 'Pendente' || !apt.status) ? 'bg-amber-400/10 text-amber-400 border border-amber-400/20' : 
+                              (apt.status === 'confirmed' || apt.status === 'Confirmado') ? 'bg-violet-500/15 text-violet-300 border border-violet-500/20' : 
+                              (apt.status === 'completed' || apt.status === 'Concluído') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 
+                              'bg-slate-500/10 text-slate-400 border border-slate-500/20'}
                           `}>
                             {(apt.status === 'scheduled' || apt.status === 'Pendente' || !apt.status) && <><Clock className="w-3.5 h-3.5" /> Pendente</>}
                             {(apt.status === 'confirmed' || apt.status === 'Confirmado') && <><CheckCircle2 className="w-3.5 h-3.5" /> Confirmado</>}
                             {(apt.status === 'completed' || apt.status === 'Concluído') && <><CheckCircle2 className="w-3.5 h-3.5" /> Concluído</>}
                             {(apt.status === 'cancelled' || apt.status === 'Cancelado') && <><XCircle className="w-3.5 h-3.5" /> Cancelado</>}
                           </div>
-                          {apt.bookingSource === 'public_link' && (
-                             <div className="text-[10px] uppercase font-bold tracking-wider text-violet-500 mt-2">
-                               via syncou
-                             </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="bg-[#0B0914] rounded-lg p-3 text-sm flex gap-4 md:gap-0 flex-col md:flex-row justify-between md:items-center mb-4 border border-[#2D214F]">
-                         <div className="flex items-center gap-2 text-[#E2D9F3]">
-                           <Clock className="w-4 h-4 text-[#5B4F81]" />
-                           {new Date(apt.startAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                           {' as '}
-                           {new Date(apt.startAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                         </div>
-                         <div className="font-mono text-violet-400 font-medium md:border-l border-[#2D214F] md:pl-3">
-                           R$ {apt.totalPrice?.toFixed(2) || '0.00'}
-                         </div>
-                      </div>
-
-                      <div className="flex flex-col gap-2 mt-4">
-                        <div className={`grid gap-2 ${(apt.status === 'cancelled' || apt.status === 'Cancelado' || apt.status === 'completed' || apt.status === 'Concluído') ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => openWhatsApp(apt)} 
-                            className="bg-[#1A1333] border-[#2D214F] text-[#E2D9F3] hover:text-white hover:border-[#4B3B7A] hover:bg-[#2D214F]"
-                          >
-                            <MessageSquare className="w-4 h-4 mr-2 text-[#9B8FC0] group-hover:text-white" /> WhatsApp
-                          </Button>
                           
-                          {(apt.status !== 'cancelled' && apt.status !== 'Cancelado' && apt.status !== 'completed' && apt.status !== 'Concluído') && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => {
-                                setReschedulingApt(apt);
-                                const currentStart = new Date(apt.startAt);
-                                setRescheduleDate(currentStart.toISOString().split('T')[0]);
-                                setRescheduleTime(currentStart.toTimeString().slice(0, 5));
-                                setIsRescheduleModalOpen(true);
-                              }} 
-                              className="bg-[#1A1333] border-[#2D214F] text-[#E2D9F3] hover:text-white hover:border-[#4B3B7A] hover:bg-[#2D214F]"
-                            >
-                              <RefreshCcw className="w-4 h-4 mr-2" /> Remarcar
-                            </Button>
-                          )}
-                        </div>
-                        
-                        {(apt.status === 'scheduled' || apt.status === 'Pendente' || !apt.status) && (
-                          <div className="grid grid-cols-2 gap-2 mt-2">
-                            <Button size="sm" onClick={() => handleUpdateAppointmentStatus(apt.id, 'Confirmado')} className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white">
-                              Confirmar
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              onClick={() => {
-                                setCancelingApt(apt);
-                                setCancelReason('');
-                                setIsCancelModalOpen(true);
-                              }} 
-                              variant="destructive" 
-                              className="bg-red-500/20 text-red-400 hover:bg-red-500/30 hover:text-red-300 border-none"
-                            >
-                              Cancelar
-                            </Button>
-                          </div>
-                        )}
-                        {(apt.status === 'confirmed' || apt.status === 'Confirmado') && (
-                          <div className="flex gap-2 mt-2">
-                            <Button 
-                              size="sm" 
-                              onClick={() => {
-                                setConfirmModal({
-                                  isOpen: true,
-                                  title: 'Concluir Serviço',
-                                  description: 'Tem certeza que deseja marcar este serviço como concluído?',
-                                  confirmText: 'Sim, Concluir',
-                                  onConfirm: () => handleUpdateAppointmentStatus(apt.id, 'Concluído')
-                                });
-                              }}
-                              className="flex-1 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-300 border-none"
-                            >
-                              <CheckCircle2 className="w-4 h-4 mr-1 sm:mr-2" />
-                              <span className="hidden sm:inline">Concluir</span>
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              onClick={() => {
-                                setCancelingApt(apt);
-                                setCancelReason('');
-                                setIsCancelModalOpen(true);
-                              }}
-                              variant="destructive" 
-                              className="flex-1 bg-red-500/20 text-red-400 hover:bg-red-500/30 hover:text-red-300 border-none"
-                            >
-                              <XCircle className="w-4 h-4 mr-1 sm:mr-2" />
-                              <span className="hidden sm:inline">Cancelar</span>
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              onClick={() => {
-                                setConfirmModal({
-                                  isOpen: true,
-                                  title: 'Desfazer Confirmação',
-                                  description: 'Tem certeza que deseja desfazer a confirmação e voltar este agendamento para Pendente?',
-                                  confirmText: 'Sim, Desfazer',
-                                  onConfirm: () => handleUpdateAppointmentStatus(apt.id, 'Pendente')
-                                });
-                              }}
-                              variant="outline" 
-                              className="w-10 px-0 flex-shrink-0 bg-[#1A1333] border-[#2D214F] text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]"
-                              title="Desfazer e voltar para Pendente"
-                            >
-                              <RefreshCcw className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        )}
-                        {(apt.status === 'completed' || apt.status === 'Concluído') && (
-                          <div className="space-y-1 mt-2">
-                            <Button size="sm" disabled className="w-full bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-                              Serviço Concluído
-                            </Button>
-                          </div>
-                        )}
-                        {(apt.status === 'cancelled' || apt.status === 'Cancelado') && (
-                          <div className="space-y-1 mt-2">
-                            <Button size="sm" disabled className="w-full bg-red-500/10 text-red-400 border-red-500/20">
-                              Cancelado
-                            </Button>
-                            {apt.cancelReason && (
-                              <p className="text-xs text-[#9B8FC0] italic mt-1 bg-[#0A0713] p-2 rounded-md border border-[#2D214F]">
-                                Motivo: {apt.cancelReason}
-                              </p>
+                          <div className="flex flex-wrap md:flex-nowrap items-center gap-2 justify-end w-full">
+                            {(apt.status !== 'cancelled' && apt.status !== 'Cancelado' && apt.status !== 'completed' && apt.status !== 'Concluído') && (
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                onClick={() => {
+                                  setReschedulingApt(apt);
+                                  const currentStart = new Date(apt.startAt);
+                                  setRescheduleDate(currentStart.toISOString().split('T')[0]);
+                                  setRescheduleTime(currentStart.toTimeString().slice(0, 5));
+                                  setIsRescheduleModalOpen(true);
+                                }} 
+                                className="h-8 px-2 text-[#9B8FC0] hover:text-white hover:bg-white/5"
+                              >
+                                <RefreshCcw className="w-3.5 h-3.5 mr-1.5" /> Remarcar
+                              </Button>
+                            )}
+
+                            {(apt.status === 'scheduled' || apt.status === 'Pendente' || !apt.status) && (
+                               <>
+                                 <Button size="sm" onClick={() => handleUpdateAppointmentStatus(apt.id, 'Confirmado')} className="h-8 px-3 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-medium rounded-md">
+                                   Confirmar
+                                 </Button>
+                                 <Button 
+                                   size="sm" 
+                                   onClick={() => {
+                                     setCancelingApt(apt);
+                                     setCancelReason('');
+                                     setIsCancelModalOpen(true);
+                                   }} 
+                                   variant="ghost" 
+                                   className="h-8 px-2 text-red-400/80 hover:text-red-400 hover:bg-red-500/10"
+                                 >
+                                   Cancelar
+                                 </Button>
+                               </>
+                            )}
+
+                            {(apt.status === 'confirmed' || apt.status === 'Confirmado') && (
+                               <>
+                                 <Button 
+                                   size="sm" 
+                                   onClick={() => {
+                                     setConfirmModal({
+                                       isOpen: true,
+                                       title: 'Concluir Serviço',
+                                       description: 'Tem certeza que deseja marcar este serviço como concluído?',
+                                       confirmText: 'Sim, Concluir',
+                                       onConfirm: () => handleUpdateAppointmentStatus(apt.id, 'Concluído')
+                                     });
+                                   }}
+                                   className="h-8 px-3 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-300 border-none font-medium"
+                                 >
+                                   <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                                   Concluir
+                                 </Button>
+                                 <Button 
+                                   size="sm" 
+                                   onClick={() => {
+                                     setCancelingApt(apt);
+                                     setCancelReason('');
+                                     setIsCancelModalOpen(true);
+                                   }}
+                                   variant="ghost" 
+                                   className="h-8 px-2 text-red-400/80 hover:text-red-400 hover:bg-red-500/10"
+                                 >
+                                   Cancelar
+                                 </Button>
+                                 <Button 
+                                   size="sm" 
+                                   onClick={() => {
+                                     setConfirmModal({
+                                       isOpen: true,
+                                       title: 'Desfazer Confirmação',
+                                       description: 'Tem certeza que deseja desfazer a confirmação e voltar este agendamento para Pendente?',
+                                       confirmText: 'Sim, Desfazer',
+                                       onConfirm: () => handleUpdateAppointmentStatus(apt.id, 'Pendente')
+                                     });
+                                   }}
+                                   variant="ghost" 
+                                   className="h-8 w-8 p-0 text-[#9B8FC0] hover:text-white hover:bg-white/5"
+                                   title="Voltar para Pendente"
+                                 >
+                                   <RefreshCcw className="w-3.5 h-3.5" />
+                                 </Button>
+                               </>
+                            )}
+
+                            {(apt.status === 'completed' || apt.status === 'Concluído') && (
+                               <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-500">
+                                 Serviço Concluído
+                               </span>
+                            )}
+
+                            {(apt.status === 'cancelled' || apt.status === 'Cancelado') && (
+                              <div className="flex flex-col items-end gap-1">
+                                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">
+                                  Cancelado
+                                </span>
+                                {apt.cancelReason && (
+                                  <p className="text-[10px] text-slate-400 italic bg-[#0A0713] px-2 py-1 rounded border border-[#2D214F]">
+                                    Motivo: {apt.cancelReason}
+                                  </p>
+                                )}
+                              </div>
                             )}
                           </div>
-                        )}
+                        </div>
                       </div>
                     </CardContent>
-                  </Card>
+                    </Card>
                   </motion.div>
                 ))}
                 </AnimatePresence>

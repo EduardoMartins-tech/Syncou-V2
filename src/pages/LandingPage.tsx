@@ -262,12 +262,43 @@ export function LandingPage() {
                 </div>
                 <div className="absolute right-0 bottom-0 translate-y-1/4 translate-x-1/4 w-64 h-64 bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/20 transition-all duration-700" />
               </div>
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-8 w-[250px] h-[150px] bg-[#0B0914] border border-[#2D214F] rounded-xl shadow-2xl p-4 hidden sm:flex flex-col gap-3 rotate-[-5deg] group-hover:rotate-0 transition-transform duration-500">
-                <div className="h-4 w-1/3 bg-[#2D214F] rounded" />
-                <div className="flex gap-2 h-10 w-full bg-[#1A1333] rounded-md p-2 border border-violet-500/20">
-                  <div className="h-full w-full bg-violet-400/20 rounded" />
-                  <div className="h-full w-full bg-violet-400/20 rounded" />
-                  <div className="h-full w-full bg-violet-400/50 rounded border border-violet-400" />
+              {/* O Pulso de Sincronia */}
+              <div className="absolute right-8 top-1/2 -translate-y-1/2 w-[220px] h-20 hidden sm:flex items-center justify-between">
+                
+                {/* Linha Curva Tracejada de Fundo */}
+                <svg className="absolute top-1/2 left-0 w-full h-10 -translate-y-1/2 overflow-visible" preserveAspectRatio="none">
+                   <path d="M 30,20 Q 110,-10 190,20" fill="transparent" stroke="#2D214F" strokeWidth="2" strokeDasharray="4 4" />
+                </svg>
+
+                {/* Nó Origem (Syncou) */}
+                <div className="relative z-10 w-12 h-12 bg-[#130E20] border border-violet-500/30 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.2)]">
+                  <Logo className="w-6 h-6 text-violet-400" />
+                </div>
+
+                {/* Ícone de Check Centralizado na linha */}
+                <motion.div 
+                  animate={{ opacity: [0, 0, 1, 1, 0, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, times: [0, 0.4, 0.42, 0.7, 0.8, 1], ease: "easeInOut" }}
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[18px] bg-[#130E20] border border-[#F5A623] text-[#F5A623] rounded-full p-1 z-20 shadow-[0_0_10px_rgba(245,166,35,0.3)]"
+                >
+                  <CheckCircle2 className="w-3 h-3" />
+                </motion.div>
+
+                {/* Cometa (Pulso) */}
+                <motion.div 
+                  animate={{ x: [0, 160, 160], y: [0, -25, 0], opacity: [0, 1, 0, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, times: [0, 0.2, 0.4, 1], ease: "easeInOut" }}
+                  className="absolute left-6 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full shadow-[0_0_10px_#fff,0_0_20px_#8B5CF6] z-10"
+                />
+
+                {/* Nó Destino (Google Calendar) */}
+                <div className="relative z-10 w-12 h-12 bg-[#130E20] border border-[#2D214F] rounded-xl flex items-center justify-center">
+                  <motion.div 
+                    animate={{ scale: [1, 1, 1.8, 1.8], opacity: [0, 0, 0.5, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, times: [0, 0.38, 0.45, 1], ease: "easeOut" }}
+                    className="absolute inset-0 bg-[#F5A623] rounded-xl z-0"
+                  />
+                  <CalendarDays className="w-6 h-6 text-[#9B8FC0] relative z-10" />
                 </div>
               </div>
             </motion.div>
