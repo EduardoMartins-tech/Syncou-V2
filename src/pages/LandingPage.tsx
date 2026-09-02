@@ -154,7 +154,7 @@ export function LandingPage() {
 
 
   return (
-    <div className="min-h-screen bg-[#0B0914] text-[#E2D9F3] font-sans selection:bg-violet-500/30">
+    <div className="min-h-screen bg-[#0B0914] text-[#E2D9F3] font-sans selection:bg-[#F5A623]/30">
       <header className="fixed top-0 w-full bg-[#0B0914]/80 backdrop-blur-md border-b border-[#2D214F] z-50 animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -163,7 +163,7 @@ export function LandingPage() {
           </div>
           <nav className="flex items-center gap-3">
             <Button variant="ghost" className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50 font-medium" onClick={() => openAuthModal('login')}>Log in</Button>
-            <Button className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white shadow-[0_0_20px_rgba(139,92,246,0.2)] font-medium rounded-lg" onClick={() => openAuthModal('register')}>
+            <Button className="bg-[#F5A623] hover:bg-[#E09612] text-[#0A0713] shadow-[0_0_20px_rgba(245,166,35,0.2)] font-semibold rounded-lg" onClick={() => openAuthModal('register')}>
               Criar minha conta
             </Button>
           </nav>
@@ -171,284 +171,187 @@ export function LandingPage() {
       </header>
 
       <main className="pt-32 pb-16 px-4 overflow-hidden relative">
-        {/* Glow Background */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-violet-600/20 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-violet-600/10 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-[#F5A623]/5 blur-[100px] rounded-full pointer-events-none" />
 
+        {/* HERO SECTION */}
         <motion.section 
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-5xl mx-auto text-center mb-24 relative z-10"
+          className="max-w-5xl mx-auto mb-24 relative z-10 grid lg:grid-cols-2 gap-12 items-center"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-sm font-medium mb-8">
-            <span className="flex h-2 w-2 rounded-full bg-violet-500 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
-            </span>
-            Acesso Antecipado
-          </div>
-
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 text-white leading-[1.1]">
-            Seus agendamentos,<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">organizados de verdade.</span>
-          </h1>
-          <p className="text-xl text-[#9B8FC0] mb-10 max-w-2xl mx-auto font-normal leading-relaxed">
-            Seja um dos primeiros a experimentar uma plataforma criada para simplificar sua rotina. 
-            Crie sua página, libere seus horários e foque no que você faz de melhor.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <Button size="lg" className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white w-full sm:w-auto text-lg h-14 px-8 rounded-lg shadow-[0_0_30px_rgba(139,92,246,0.25)] font-medium transition-all" onClick={() => openAuthModal('register')}>
-              Começar Gratuitamente
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-            <div className="flex items-center justify-center gap-2 text-sm text-[#5B4F81] font-medium">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400/80" />
-              <span>Não pedimos cartão de crédito</span>
+          {/* Text Left */}
+          <div className="text-left text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-sm font-medium mb-8">
+              <span className="flex h-2 w-2 rounded-full bg-violet-500 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+              </span>
+              Acesso Antecipado
+            </div>
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-8 text-white leading-[1.1] font-outfit">
+              Clientes desistem enquanto você demora a responder.
+            </h1>
+            <p className="text-xl text-[#9B8FC0] mb-10 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
+              O fim da troca interminável de mensagens. Você envia um link, seu cliente escolhe o horário, e a sua agenda trabalha sozinha enquanto você atende quem já está no consultório.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-6">
+              <Button size="lg" className="bg-[#F5A623] hover:bg-[#E09612] text-[#0A0713] w-full sm:w-auto text-lg h-14 px-8 rounded-lg shadow-[0_0_30px_rgba(245,166,35,0.2)] font-semibold transition-all" onClick={() => openAuthModal('register')}>
+                Criar meu link grátis
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+              <div className="flex items-center gap-2 text-sm text-[#5B4F81] font-medium h-14">
+                <CheckCircle2 className="w-4 h-4 text-[#F5A623]/80" />
+                <span>Configuração em 2 min</span>
+              </div>
             </div>
           </div>
           
-
+          {/* Visual Right - Orbit Concept */}
+          <div className="relative h-[400px] w-full flex items-center justify-center hidden lg:flex">
+             <div className="absolute w-[350px] h-[350px] border border-[#2D214F] rounded-full animate-[spin_60s_linear_infinite] opacity-50" />
+             <div className="absolute w-[250px] h-[250px] border border-violet-500/30 rounded-full animate-[spin_40s_linear_infinite_reverse] opacity-70" />
+             
+             {/* Center Logo */}
+             <div className="relative z-10 w-20 h-20 bg-[#130E20] border border-[#2D214F] rounded-2xl flex items-center justify-center shadow-2xl shadow-violet-900/20">
+               <Logo className="w-10 h-10 text-violet-400" />
+             </div>
+             
+             {/* Orbiting Elements */}
+             <div className="absolute w-[350px] h-[350px] animate-[spin_60s_linear_infinite]">
+               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#0B0914] border border-[#2D214F] rounded-lg px-3 py-1.5 flex items-center gap-2 shadow-lg -rotate-0 text-xs text-[#E2D9F3] whitespace-nowrap">
+                  <div className="w-2 h-2 rounded-full bg-violet-400" />
+                  syncou.app/p/voce
+               </div>
+             </div>
+             
+             <div className="absolute w-[250px] h-[250px] animate-[spin_40s_linear_infinite_reverse]">
+               <div className="absolute bottom-4 -right-4 bg-[#130E20] border border-[#F5A623]/30 rounded-lg p-3 flex items-start gap-3 shadow-[0_0_15px_rgba(245,166,35,0.15)] rotate-0">
+                  <div className="w-8 h-8 rounded-full bg-[#F5A623]/20 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-4 h-4 text-[#F5A623]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white font-outfit">Novo Agendamento!</p>
+                    <p className="text-xs text-[#9B8FC0]">Hoje, às 14:30</p>
+                  </div>
+               </div>
+             </div>
+          </div>
         </motion.section>
 
-        {/* Browser Mockup */}
-        <motion.div 
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-5xl mx-auto relative z-10 mb-32"
-        >
-          <div className="rounded-xl overflow-hidden border border-[#2D214F] bg-[#130E20] shadow-2xl shadow-violet-900/20 ring-1 ring-white/10">
-            {/* Header */}
-            <div className="h-12 bg-[#1A1333] border-b border-[#2D214F] flex items-center px-4 gap-2">
-              <div className="flex gap-1.5 mr-4">
-                <div className="w-3 h-3 rounded-full bg-red-400/80" />
-                <div className="w-3 h-3 rounded-full bg-amber-400/80" />
-                <div className="w-3 h-3 rounded-full bg-emerald-400/80" />
-              </div>
-              <div className="flex-1 flex justify-center">
-                <div className="bg-[#0B0914] border border-[#2D214F] rounded-md px-3 py-1 flex items-center gap-2 text-xs text-[#5B4F81] w-48 sm:w-64 max-w-full shadow-inner">
-                  <Lock className="w-3 h-3 text-emerald-400/70" />
-                  <span>syncou.app/seu-nome</span>
-                </div>
-              </div>
-              <div className="w-10"></div>
-            </div>
+        {/* BENTO GRID ASSIMÉTRICO */}
+        <section className="max-w-5xl mx-auto mb-32 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[220px]">
             
-            {/* App Preview Content (Detailed UI Mockup) */}
-            <div className="h-[350px] md:h-[450px] bg-[#0B0914] relative overflow-hidden flex">
-              {/* Sidebar Mockup */}
-              <div className="w-48 bg-[#100C18] border-r border-[#2D214F] p-5 hidden md:flex flex-col gap-3 relative z-10">
-                <div className="h-5 w-24 bg-[#2D214F] rounded-md mb-6" />
-                <div className="h-9 w-full bg-violet-500/15 text-violet-400 rounded-lg flex items-center px-3 gap-3 border border-violet-500/30">
-                   <div className="w-4 h-4 bg-violet-400/50 rounded flex-shrink-0" />
-                   <div className="h-2 w-16 bg-violet-400/50 rounded-sm" />
-                </div>
-                <div className="h-9 w-full bg-[#1A1333]/50 rounded-lg flex items-center px-3 gap-3 hover:bg-[#1A1333] transition-colors border border-transparent">
-                   <div className="w-4 h-4 bg-[#5B4F81] rounded flex-shrink-0" />
-                   <div className="h-2 w-14 bg-[#5B4F81] rounded-sm" />
-                </div>
-                <div className="h-9 w-full bg-[#1A1333]/50 rounded-lg flex items-center px-3 gap-3 hover:bg-[#1A1333] transition-colors border border-transparent">
-                   <div className="w-4 h-4 bg-[#5B4F81] rounded flex-shrink-0" />
-                   <div className="h-2 w-20 bg-[#5B4F81] rounded-sm" />
-                </div>
-              </div>
-              
-              {/* Main Content Mockup */}
-              <div className="flex-1 p-6 relative z-10 flex flex-col">
-                 <div className="flex justify-between items-center mb-8">
-                    <div className="space-y-2">
-                       <div className="h-6 w-40 bg-[#E2D9F3] rounded-md" />
-                       <div className="h-3 w-64 bg-[#5B4F81] rounded-sm" />
-                    </div>
-                    <div className="h-10 w-10 bg-gradient-to-tr from-violet-500 to-fuchsia-500 rounded-full shadow-lg ring-2 ring-white/10" />
-                 </div>
-                 
-                 {/* Stats Cards */}
-                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                    {[
-                      { top: 'Faturamento', bottom: 'bg-emerald-400', w: 'w-24', icon: 'bg-emerald-400/20' },
-                      { top: 'Agendamentos', bottom: 'bg-violet-400', w: 'w-16', icon: 'bg-violet-400/20' },
-                      { top: 'Clientes', bottom: 'bg-amber-400', w: 'w-20', icon: 'bg-amber-400/20', hidden: 'hidden md:flex' }
-                    ].map((stat, i) => (
-                      <div key={i} className={`h-28 bg-[#130E20] border border-[#2D214F] rounded-xl p-5 flex flex-col justify-between ${stat.hidden || 'flex'}`}>
-                        <div className="flex justify-between items-start">
-                          <div className="h-3 w-20 bg-[#5B4F81] rounded-sm" />
-                          <div className={`w-6 h-6 rounded-md ${stat.icon}`} />
-                        </div>
-                        <div className={`h-7 ${stat.bottom} rounded-md ${stat.w}`} />
-                      </div>
-                    ))}
-                 </div>
-                 
-                 {/* Table / List Mockup */}
-                 <div className="bg-[#130E20] border border-[#2D214F] rounded-xl p-5 flex-1 flex flex-col">
-                    <div className="h-4 w-32 bg-[#E2D9F3] rounded-sm mb-6" />
-                    <div className="space-y-3 flex-1">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-12 w-full bg-[#1A1333]/50 rounded-lg border border-[#2D214F]/50 flex items-center px-4 justify-between group hover:bg-[#1A1333] transition-colors">
-                          <div className="flex items-center gap-4">
-                             <div className={`w-2.5 h-2.5 rounded-full ${i === 1 ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : i === 2 ? 'bg-amber-400' : 'bg-violet-400'}`} />
-                             <div>
-                               <div className="h-3 w-24 bg-[#E2D9F3] rounded-sm mb-2" />
-                               <div className="h-2 w-16 bg-[#5B4F81] rounded-sm" />
-                             </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <div className="h-6 w-16 bg-[#2D214F] rounded-md hidden sm:block" />
-                            <div className="h-6 w-20 bg-[#2D214F] rounded-md" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                 </div>
-              </div>
-              
-              {/* Decorative elements / Glow behind UI */}
-              <div className="absolute top-10 -right-20 w-64 h-64 bg-fuchsia-600/10 blur-[80px] rounded-full pointer-events-none" />
-              <div className="absolute bottom-10 -left-20 w-80 h-80 bg-violet-600/10 blur-[100px] rounded-full pointer-events-none" />
-            </div>
-          </div>
-        </motion.div>
-
-        <section className="max-w-5xl mx-auto py-16">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="text-3xl font-semibold text-center mb-16 text-white tracking-tight"
-          >
-            Tudo que você precisa em um só lugar
-          </motion.h2>
-          <div className="grid md:grid-cols-12 gap-6">
-            
-            <motion.div
+            {/* Bloco 1 (2 cols, 1 row): Sincronia em Tempo Real */}
+            <motion.div 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="md:col-span-2 row-span-1 bg-gradient-to-br from-[#130E20] to-[#0A0713] border border-[#2D214F] rounded-2xl p-8 relative overflow-hidden group"
+            >
+              <div className="relative z-10 w-full h-full flex flex-col justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-2 font-outfit">Sincronia em Tempo Real</h3>
+                  <p className="text-[#9B8FC0] max-w-[280px] leading-relaxed">Integração bidirecional com sua agenda atual. Sem delay, sem conflitos.</p>
+                </div>
+                <div className="absolute right-0 bottom-0 translate-y-1/4 translate-x-1/4 w-64 h-64 bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/20 transition-all duration-700" />
+              </div>
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-8 w-[250px] h-[150px] bg-[#0B0914] border border-[#2D214F] rounded-xl shadow-2xl p-4 hidden sm:flex flex-col gap-3 rotate-[-5deg] group-hover:rotate-0 transition-transform duration-500">
+                <div className="h-4 w-1/3 bg-[#2D214F] rounded" />
+                <div className="flex gap-2 h-10 w-full bg-[#1A1333] rounded-md p-2 border border-violet-500/20">
+                  <div className="h-full w-full bg-violet-400/20 rounded" />
+                  <div className="h-full w-full bg-violet-400/20 rounded" />
+                  <div className="h-full w-full bg-violet-400/50 rounded border border-violet-400" />
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Bloco 2 (1 col, 2 rows): Zero Conflitos */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="md:col-span-8"
+              className="md:col-span-1 row-span-2 bg-[#130E20] border border-[#2D214F] rounded-2xl p-8 relative overflow-hidden flex flex-col items-center text-center group"
             >
-              <Card className="border border-[#2D214F] bg-gradient-to-br from-[#130E20] to-[#0A0713] shadow-sm h-full group overflow-hidden relative">
-                <CardContent className="p-8 h-full flex flex-col justify-center">
-                  <div className="w-12 h-12 bg-violet-500/10 border border-violet-500/20 rounded-xl flex items-center justify-center mb-6 text-violet-400">
-                    <Share2 className="w-6 h-6" />
+              <div className="flex-1 flex flex-col items-center justify-center w-full mt-8">
+                <div className="relative w-full h-32 flex items-center justify-center">
+                  <div className="absolute inset-0 border border-red-500/20 bg-red-500/5 rounded-xl flex items-center justify-center translate-y-4 group-hover:opacity-0 transition-opacity duration-300">
+                    <span className="text-red-400 font-medium line-through">14:00 Ocupado</span>
                   </div>
-                  <h3 className="text-2xl font-semibold mb-3 text-white tracking-tight">Sua página exclusiva</h3>
-                  <p className="text-[#9B8FC0] leading-relaxed max-w-lg mb-8">
-                    Crie uma página de agendamentos profissional que reflete a sua marca. Compartilhe o link no seu Instagram, WhatsApp ou onde preferir. Otimizado para qualquer dispositivo.
-                  </p>
-                  
-                  {/* Visual mockup inside card */}
-                  <div className="mt-auto absolute -bottom-10 -right-10 w-[70%] sm:w-[50%] h-[200px] bg-[#1A1333] border border-[#2D214F] rounded-tl-xl p-4 opacity-50 group-hover:opacity-100 transition-opacity duration-500 transform group-hover:-translate-y-2 group-hover:-translate-x-2">
-                     <div className="h-full border border-violet-500/20 bg-[#130E20] rounded-lg p-3 space-y-3">
-                       <div className="w-full h-8 bg-[#2D214F]/40 rounded-md" />
-                       <div className="w-3/4 h-4 bg-[#2D214F]/40 rounded-md" />
-                       <div className="w-full h-12 bg-violet-500/20 border border-violet-500/30 rounded-md mt-4" />
-                     </div>
+                  <div className="absolute inset-0 border border-emerald-500/20 bg-emerald-500/10 rounded-xl flex items-center justify-center -translate-y-4 shadow-[0_0_20px_rgba(52,211,153,0.1)] opacity-50 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500">
+                    <span className="text-emerald-400 font-medium">14:00 Livre!</span>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+              <div className="mt-8">
+                <h3 className="text-2xl font-bold text-white mb-2 font-outfit">Zero Conflitos</h3>
+                <p className="text-[#9B8FC0] text-sm leading-relaxed">Bloqueia automaticamente horários que você já preencheu. O fim do choque de agendas.</p>
+              </div>
             </motion.div>
 
-            <motion.div
+            {/* Bloco 3 (1 col, 1 row): Seu Link Próprio */}
+            <motion.div 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
+              viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="md:col-span-4"
+              className="md:col-span-1 row-span-1 bg-[#130E20] border border-[#2D214F] rounded-2xl p-8 relative overflow-hidden flex flex-col justify-center"
             >
-              <Card className="border border-[#2D214F] bg-gradient-to-bl from-[#130E20] to-[#0A0713] shadow-sm h-full overflow-hidden relative">
-                <CardContent className="p-8 h-full flex flex-col items-start justify-center">
-                  <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center mb-6 text-emerald-400">
-                    <CheckCircle2 className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-2xl font-semibold mb-3 text-white tracking-tight">Sincronia Total</h3>
-                  <p className="text-[#9B8FC0] leading-relaxed">
-                    Sincronize com o Google Agenda e evite choques de horários automaticamente.
-                  </p>
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/3 opacity-10">
-                    <CalendarDays className="w-48 h-48" />
-                  </div>
-                </CardContent>
-              </Card>
+              <h3 className="text-xl font-bold text-white mb-4 font-outfit">Seu Link Próprio</h3>
+              <div className="bg-[#0B0914] border border-[#2D214F] rounded-lg p-3 font-mono text-sm text-[#E2D9F3] shadow-inner flex items-center break-all">
+                <span className="text-[#5B4F81] select-none">syncou.app/p/</span>
+                <span className="text-[#F5A623] font-bold">voce</span>
+              </div>
             </motion.div>
 
-            <motion.div
+            {/* Bloco 4 (1 col, 1 row): Notificações Silenciosas */}
+            <motion.div 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
+              viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="md:col-span-5"
+              className="md:col-span-1 row-span-1 bg-[#130E20] border border-[#2D214F] rounded-2xl p-8 relative overflow-hidden flex flex-col justify-center"
             >
-              <Card className="border border-[#2D214F] bg-gradient-to-tr from-[#130E20] to-[#0A0713] shadow-sm h-full overflow-hidden relative group">
-                <CardContent className="p-8 h-full flex flex-col justify-center">
-                  <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center justify-center mb-6 text-amber-400">
-                    <Star className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-2xl font-semibold mb-3 text-white tracking-tight">Menos Faltas</h3>
-                  <p className="text-[#9B8FC0] leading-relaxed relative z-10">
-                    Seus clientes são lembrados do agendamento, diminuindo o número de ausências (no-show) e garantindo seu faturamento.
-                  </p>
-                  
-                  {/* Decorative background element */}
-                  <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-amber-500/5 blur-2xl rounded-full group-hover:bg-amber-500/10 transition-colors" />
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="md:col-span-7"
-            >
-              <Card className="border border-[#2D214F] bg-gradient-to-tl from-[#130E20] to-[#0A0713] shadow-sm h-full overflow-hidden relative group">
-                <CardContent className="p-8 h-full flex flex-col justify-center">
-                  <div className="w-12 h-12 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center justify-center mb-6 text-blue-400">
-                    <Settings className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-2xl font-semibold mb-3 text-white tracking-tight">Gestão Inteligente</h3>
-                  <p className="text-[#9B8FC0] leading-relaxed max-w-md relative z-10">
-                    Tenha o controle total do seu negócio. Acompanhe métricas, gerencie seu portfólio de serviços, exporte relatórios (CSV) e gerencie sua disponibilidade em uma interface limpa e intuitiva.
-                  </p>
-                  
-                  <div className="mt-8 flex gap-3 h-12">
-                     <div className="h-full w-32 bg-[#1A1333] border border-[#2D214F] rounded-lg animate-pulse" />
-                     <div className="h-full w-24 bg-[#1A1333] border border-[#2D214F] rounded-lg animate-pulse delay-75" />
-                     <div className="h-full w-20 bg-[#1A1333] border border-[#2D214F] rounded-lg animate-pulse delay-150" />
-                  </div>
-                  
-                  <div className="absolute -top-10 -right-10 w-48 h-48 bg-blue-500/5 blur-3xl rounded-full group-hover:bg-blue-500/10 transition-colors" />
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="md:col-span-12 mt-8"
-            >
-              <Card className="border border-[#2D214F] bg-[#130E20] shadow-sm">
-                <CardContent className="p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
-                  <div className="max-w-xl">
-                    <h3 className="text-2xl font-semibold mb-3 text-white tracking-tight">Pronto para elevar o nível?</h3>
-                    <p className="text-[#9B8FC0] leading-relaxed">
-                      Junte-se a profissionais parceiros e transforme a maneira como você se conecta com seus clientes. Design brilhante, conversão impecável.
-                    </p>
-                  </div>
-                  <Button size="lg" className="bg-white text-black hover:bg-gray-200 w-full sm:w-auto h-12 px-8 font-semibold rounded-lg shrink-0" onClick={() => openAuthModal('register')}>
-                    Criar minha conta grátis
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-[#F5A623]/10 flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-[#F5A623]" />
+                </div>
+                <h3 className="text-xl font-bold text-white font-outfit">Notificações</h3>
+              </div>
+              <p className="text-[#9B8FC0] text-sm leading-relaxed">Avisos silenciosos e precisos para você e lembretes para seu cliente não faltar.</p>
             </motion.div>
           </div>
         </section>
-      </main>
 
+        {/* NOVO CTA SECTION */}
+        <section className="max-w-5xl mx-auto mb-16 mt-32">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <Card className="border border-[#F5A623]/20 bg-gradient-to-br from-[#1A1105] to-[#0A0713] shadow-[0_0_50px_rgba(245,166,35,0.05)] overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#F5A623]/10 blur-[120px] rounded-full pointer-events-none translate-x-1/2 -translate-y-1/2" />
+              <CardContent className="p-12 md:p-16 flex flex-col items-center text-center relative z-10">
+                <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white tracking-tight font-outfit leading-tight">
+                  Pare de perder clientes<br/>na DM.
+                </h2>
+                <p className="text-lg text-[#9B8FC0] leading-relaxed max-w-xl mb-10 font-sans">
+                  A configuração leva menos de 2 minutos. Resgate o controle do seu tempo e deixe sua agenda trabalhar para você.
+                </p>
+                <Button size="lg" className="bg-[#F5A623] text-[#0A0713] hover:bg-[#E09612] w-full sm:w-auto h-14 px-10 font-bold rounded-lg text-lg shadow-[0_0_30px_rgba(245,166,35,0.2)] transition-all" onClick={() => openAuthModal('register')}>
+                  Criar meu link grátis
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </section>
+
+      </main>
       <footer className="border-t border-[#2D214F] py-12 bg-[#08060F] mt-20">
         <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-4 text-center text-[#9B8FC0] text-sm">
           <div className="flex gap-4">
