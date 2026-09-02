@@ -1025,10 +1025,10 @@ export function DashboardHome() {
                   >
                     <Card className="bg-[#130E20] border-[#2D214F] shadow-sm hover:border-violet-500/30 transition-all overflow-hidden group">
                     <CardContent className="p-0">
-                      <div className="flex flex-col md:flex-row p-4 gap-4 items-start md:items-center">
+                      <div className="flex flex-col md:flex-row p-4 gap-4 items-start md:items-stretch">
                         
                         {/* Coluna 1: Data e Hora */}
-                        <div className="flex-shrink-0 md:w-32 md:border-r border-[#2D214F] md:pr-4 flex flex-row md:flex-col items-center md:items-start gap-3 md:gap-0">
+                        <div className="flex-shrink-0 md:w-32 md:border-r border-[#2D214F] md:pr-4 flex flex-row md:flex-col items-center md:items-start md:justify-center gap-3 md:gap-0">
                           <div className="font-outfit font-bold text-2xl text-white">
                              {new Date(apt.startAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                           </div>
@@ -1038,19 +1038,19 @@ export function DashboardHome() {
                         </div>
 
                         {/* Coluna 2: Informações do Cliente */}
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 md:py-1">
                            <div className="flex items-center gap-2">
                              <h3 className="font-bold text-white text-lg truncate">{apt.clientName}</h3>
                              {apt.bookingSource === 'public_link' && (
                                <span className="text-[10px] uppercase font-bold tracking-wider text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded">via syncou</span>
                              )}
                            </div>
-                           <div className="flex items-center gap-3 text-sm text-[#9B8FC0] mt-1">
-                             <button onClick={() => openWhatsApp(apt)} className="hover:text-[#F5A623] transition-colors inline-flex items-center gap-1">
+                           <div className="flex items-center gap-3 text-sm text-[#9B8FC0] mt-2">
+                             <button onClick={() => openWhatsApp(apt)} className="text-violet-400 hover:text-white bg-violet-500/10 hover:bg-violet-500/20 px-2 py-1 rounded transition-colors inline-flex items-center gap-1.5 focus:outline-none">
                                <MessageSquare className="w-3.5 h-3.5" />
-                               {apt.clientWhatsApp || apt.clientPhone}
+                               {apt.clientWhatsApp || apt.clientPhone || 'Sem número'}
                              </button>
-                             <span className="font-mono text-violet-300">
+                             <span className="font-mono text-violet-300 bg-violet-500/5 px-2 py-1 rounded">
                                R$ {apt.totalPrice?.toFixed(2) || '0.00'}
                              </span>
                            </div>
