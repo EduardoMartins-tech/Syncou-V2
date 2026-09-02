@@ -219,21 +219,25 @@ export function LandingPage() {
              
              {/* Orbiting Elements */}
              <div className="absolute w-[350px] h-[350px] animate-[spin_60s_linear_infinite]">
-               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#0B0914] border border-[#2D214F] rounded-lg px-3 py-1.5 flex items-center gap-2 shadow-lg -rotate-0 text-xs text-[#E2D9F3] whitespace-nowrap">
-                  <div className="w-2 h-2 rounded-full bg-violet-400" />
-                  syncou.app/p/voce
+               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                 <div className="animate-[spin_60s_linear_infinite_reverse] bg-[#0B0914] border border-[#2D214F] rounded-lg px-3 py-1.5 flex items-center gap-2 shadow-lg text-xs text-[#E2D9F3] whitespace-nowrap">
+                    <div className="w-2 h-2 rounded-full bg-violet-400" />
+                    syncou.app/p/voce
+                 </div>
                </div>
              </div>
              
              <div className="absolute w-[250px] h-[250px] animate-[spin_40s_linear_infinite_reverse]">
-               <div className="absolute bottom-4 -right-4 bg-[#130E20] border border-[#F5A623]/30 rounded-lg p-3 flex items-start gap-3 shadow-[0_0_15px_rgba(245,166,35,0.15)] rotate-0">
-                  <div className="w-8 h-8 rounded-full bg-[#F5A623]/20 flex items-center justify-center shrink-0">
-                    <CheckCircle2 className="w-4 h-4 text-[#F5A623]" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-white font-outfit">Novo Agendamento!</p>
-                    <p className="text-xs text-[#9B8FC0]">Hoje, às 14:30</p>
-                  </div>
+               <div className="absolute bottom-4 -right-4">
+                 <div className="animate-[spin_40s_linear_infinite] bg-[#130E20] border border-[#F5A623]/30 rounded-lg p-3 flex items-start gap-3 shadow-[0_0_15px_rgba(245,166,35,0.15)]">
+                    <div className="w-8 h-8 rounded-full bg-[#F5A623]/20 flex items-center justify-center shrink-0">
+                      <CheckCircle2 className="w-4 h-4 text-[#F5A623]" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-white font-outfit">Novo Agendamento!</p>
+                      <p className="text-xs text-[#9B8FC0]">Hoje, às 14:30</p>
+                    </div>
+                 </div>
                </div>
              </div>
           </div>
