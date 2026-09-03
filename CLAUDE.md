@@ -59,6 +59,31 @@ no Railway. Frontend React/Vite (PWA). Usado tanto em desktop quanto mobile
 - Analytics: em andamento — separando faturamento "Realizado" (Concluídos) 
   de "Previsto" (Confirmados), taxa de cancelamento, filtro de período, 
   ranking de Top Serviços.
+- Auditoria de UI/UX pós-redesign (relatório completo em `UI_UX_AUDIT.md`):
+  3 rodadas (quick wins de consistência, itens estruturais — prop
+  `loading` no `Button`, utilitário `.focus-ring`, área de toque 44px —
+  e polish/microinteração), seguidas de uma passada de motion dedicada
+  (`prefers-reduced-motion` global, stagger da aba Analytics reduzido,
+  `--ease-snappy` estendido). Ver `PROGRESS.md` pra detalhe por rodada.
+- Auditoria funcional + visual da página **Loja** (raio-x antes do diff,
+  metodologia registrada em `PROGRESS.md`): upload de foto/logo era
+  código morto (terceiro caso desse padrão — nunca fica implícito,
+  sempre checar se um handler/estado importado tem UI de verdade
+  conectada) e foi movido de `DashboardAccount.tsx` (onde funcionava mas
+  estava fora de lugar) pra `DashboardSettings.tsx`; adicionado botão de
+  desconectar o Google Calendar (não existia); rótulo de debug "Testar
+  (F5)" corrigido; botões que reinventavam variants do `Button` na mão
+  corrigidos pra usar `variant="destructive"`/`"secondary"` de verdade.
+  Pendente de validação visual real: dois pontos de mobile (calendário
+  de seleção múltipla, prefixo do slug) só receberam correção defensiva,
+  sem confirmação — Dashboard logado não é testável localmente (sem
+  Postgres).
+- Curadoria das skills do Claude Code instaladas no projeto: removidas
+  11 que não se aplicam ao Syncou (a `hyperframes-animation`, feita pra
+  motion-graphics de vídeo, não pra UI de app real; e 10 da família
+  "Caveman Cloud", que dependem de um gateway de observabilidade de LLM
+  que este projeto não usa — o Syncou não tem nenhuma chamada de LLM em
+  produção).
 
 ## Identidade visual atual
 
@@ -77,15 +102,20 @@ de UI para não perder ou reinventar o que já existe:
   antiga "violeta é a única cor de ação" (ver histórico do âmbar acima).
 - **`--secondary`** (`#F1EEFC` claro / `#1E1B2E` escuro) — superfície
   neutra para ações secundárias via `Button variant="secondary"`.
-  Vários componentes ainda recriam esse visual à mão com
-  `bg-muted border border-border` em vez de usar o variant — trocar
-  quando for mexer no arquivo.
+  Corrigido em `DashboardSettings.tsx` (auditoria da Loja); outros
+  arquivos ainda podem ter esse mesmo padrão de `bg-muted` cru
+  reinventando o variant — checar ao mexer.
 - **`--destructive`** (`oklch(0.577 0.245 27.325)` claro /
-  `oklch(0.704 0.191 22.216)` escuro) — via `Button variant="destructive"`.
-  Achado em auditoria: alguns botões destrutivos (ex.
-  `DashboardSettings.tsx`) ainda usam `red-500`/`red-600` cru do
-  Tailwind em vez desse token — mesma classe de problema que motivou
-  abandonar o âmbar, corrigir ao tocar no arquivo.
+  `oklch(0.704 0.191 22.216)` escuro) — via `Button variant="destructive"`
+  (ações destrutivas "pesadas", ex. botão que apaga algo) ou
+  `text-destructive hover:bg-destructive/10` (ações destrutivas
+  "leves", estilo ghost, ex. remover um item de uma lista). Corrigido em
+  `DashboardSettings.tsx`, que tinha `red-500`/`red-600` cru do Tailwind
+  em vez do token — inclusive um caso onde `variant="destructive"` já
+  estava no botão mas uma `className` sobrescrevia silenciosamente com a
+  cor errada. Os textos de erro de validação de formulário (Zod) na
+  mesma tela ainda usam `red-600`/`red-400` cru — não fazia parte do
+  escopo revisado, mesma correção se aplica quando for mexer neles.
 - **Verde/âmbar** (`emerald-*`, `amber-*`) — só como cor de **status**
   semântico (livre/conectado = verde, pendência = âmbar), nunca como
   cor de marca ou de CTA. Não reintroduzir âmbar como identidade.
