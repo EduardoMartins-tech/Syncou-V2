@@ -187,7 +187,6 @@ const globalLimiter = new RateLimiter({
   max: 180, // max 180 requests per minute
   message: 'Muitas requisições vindas deste IP. Por favor, tente novamente em 1 minuto.'
 });
-app.use('/api/', globalLimiter.middleware());
 
 // 2. Strict Auth / Account rate limiting (Protects Login, Register and Google Auth paths)
 const authLimiter = new RateLimiter({
