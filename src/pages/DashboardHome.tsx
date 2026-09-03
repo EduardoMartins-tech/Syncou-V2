@@ -1169,43 +1169,43 @@ export function DashboardHome() {
                    <Plus className="w-4 h-4 mr-1" /> Novo
                  </Button>
                </DialogTrigger>
-               <DialogContent className="sm:max-w-[425px] bg-[#130E20] border-[#2D214F] text-[#E2D9F3] shadow-2xl">
-                 <DialogHeader>
-                   <DialogTitle className="text-white text-xl">{editingService ? 'Editar Serviço' : 'Novo Serviço'}</DialogTitle>
-                 </DialogHeader>
-                 <form onSubmit={handleSaveService} className="space-y-4 pt-4">
-                   <div className="space-y-2">
-                     <Label htmlFor="name" className="text-[#9B8FC0]">Nome do Serviço</Label>
-                     <Input id="name" name="name" defaultValue={editingService?.name} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11" placeholder="Ex: Corte de Cabelo" />
-                   </div>
-                   <div className="space-y-2">
-                     <Label htmlFor="description" className="text-[#9B8FC0]">Descrição (Opcional)</Label>
-                     <Input id="description" name="description" defaultValue={editingService?.description} className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11" placeholder="Ex: Lavagem e finalização inclusos" />
-                   </div>
-                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                     <div className="space-y-2">
-                       <Label htmlFor="duration" className="text-[#9B8FC0]">Duração (min)</Label>
-                       <Input id="duration" name="duration" type="number" min="1" defaultValue={editingService?.duration} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11" />
-                     </div>
-                     <div className="space-y-2">
-                       <Label htmlFor="bufferTime" className="text-[#9B8FC0]">Respiro (min)</Label>
-                       <Input id="bufferTime" name="bufferTime" type="number" min="0" defaultValue={editingService?.bufferTime || 0} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11" />
-                     </div>
-                     <div className="space-y-2">
-                       <Label htmlFor="price" className="text-[#9B8FC0]">Preço (R$)</Label>
-                       <Input id="price" name="price" type="number" min="0" step="0.01" defaultValue={editingService?.price} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11" />
-                     </div>
-                   </div>
-                   <div className="flex items-center space-x-2 pt-2 border-t border-[#2D214F] mt-4 pb-2">
-                     <Switch id="active" name="active" defaultChecked={editingService ? editingService.active : true} />
-                     <Label htmlFor="active" className="text-white font-medium">Serviço Ativo</Label>
-                   </div>
-                   <DialogFooter className="pt-4 border-t border-[#2D214F]">
-                     <Button type="button" variant="ghost" onClick={() => setIsServiceModalOpen(false)} className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50">Cancelar</Button>
-                     <Button type="submit" className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white">Salvar Serviço</Button>
-                   </DialogFooter>
-                 </form>
-               </DialogContent>
+                <DialogContent className="sm:max-w-[425px] bg-[#130E20] border-[#2D214F] text-[#E2D9F3] shadow-2xl">
+                  <DialogHeader className="flex flex-row items-center justify-between pr-8">
+                    <DialogTitle className="text-white text-xl">{editingService ? "Editar Serviço" : "Novo Serviço"}</DialogTitle>
+                    <div className="flex items-center gap-2 mt-0">
+                      <Label htmlFor="active" className="text-sm font-medium text-white cursor-pointer">Ativo</Label>
+                      <Switch id="active" name="active" defaultChecked={editingService ? editingService.active !== false : true} />
+                    </div>
+                  </DialogHeader>
+                  <form onSubmit={handleSaveService} className="space-y-4 pt-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="name" className="text-[#9B8FC0]">Nome do Serviço</Label>
+                      <Input id="name" name="name" defaultValue={editingService?.title || editingService?.name} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11" placeholder="Ex: Corte de Cabelo" />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2 sm:col-span-2">
+                        <Label htmlFor="price" className="text-[#9B8FC0]">Preço (R$)</Label>
+                        <Input id="price" name="price" type="number" min="0" step="0.01" defaultValue={editingService?.price} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11 text-lg font-medium" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="duration" className="text-[#9B8FC0]">Duração (min)</Label>
+                        <Input id="duration" name="duration" type="number" min="1" defaultValue={editingService?.duration} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="bufferTime" className="text-[#9B8FC0]">Respiro (min)</Label>
+                        <Input id="bufferTime" name="bufferTime" type="number" min="0" defaultValue={editingService?.bufferTime || 0} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description" className="text-[#9B8FC0]">Descrição (Opcional)</Label>
+                      <textarea id="description" name="description" defaultValue={editingService?.description} className="flex min-h-[80px] w-full rounded-md bg-[#0B0914] border border-[#2D214F] px-3 py-2 text-sm text-white placeholder:text-[#9B8FC0]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 resize-none" placeholder="Ex: Lavagem e finalização inclusos" />
+                    </div>
+                    <DialogFooter className="pt-4 border-t border-[#2D214F] mt-2">
+                      <Button type="button" variant="ghost" onClick={() => setIsServiceModalOpen(false)} className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50">Cancelar</Button>
+                      <Button type="submit" className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white">Salvar Serviço</Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
              </Dialog>
            </div>
 
@@ -1216,19 +1216,41 @@ export function DashboardHome() {
                 </div>
              ) : (
                 services.map(service => (
-                  <Card key={service.id} className="bg-[#130E20] border-[#2D214F] hover:border-[#4B3B7A] transition-colors shadow-sm">
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-bold text-white">{service.title || service.name}</h4>
+                  <Card key={service.id} className={`transition-all shadow-sm overflow-hidden group ${service.active !== false ? 'bg-[#130E20] border-[#2D214F] hover:border-violet-500/30' : 'bg-[#0B0914] border-[#1A1333] opacity-75 grayscale-[30%]'}`}>
+                    <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2.5 mb-2">
+                          {service.active !== false ? (
+                            <span className="relative flex h-2 w-2 flex-shrink-0">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                          ) : (
+                            <span className="h-2 w-2 flex-shrink-0 rounded-full bg-slate-600"></span>
+                          )}
+                          <h4 className={`font-bold text-lg truncate ${service.active !== false ? 'text-white' : 'text-slate-400'}`}>{service.title || service.name}</h4>
+                          {service.active === false && <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 bg-slate-800/50 px-1.5 py-0.5 rounded">Inativo</span>}
                         </div>
-                        <div className="flex items-center gap-4 text-xs font-mono text-[#9B8FC0]">
-                           <span className="flex items-center"><Clock className="w-3 h-3 mr-1" /> {service.duration} min</span>
-                           <span className="flex items-center font-medium"><DollarSign className="w-3 h-3 mr-1" /> R$ {service.price.toFixed(2)}</span>
+                        
+                        <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono">
+                           <span className={`flex items-center px-2 py-1 rounded ${service.active !== false ? 'bg-[#2D214F]/40 text-[#9B8FC0]' : 'bg-white/5 text-slate-500'}`}>
+                             <Clock className="w-3 h-3 mr-1" /> {service.duration}m
+                           </span>
+                           {(service.bufferTime && service.bufferTime > 0) ? (
+                             <span className={`flex items-center px-2 py-1 rounded ${service.active !== false ? 'bg-amber-500/10 text-amber-500/80' : 'bg-white/5 text-slate-500'}`}>
+                               + {service.bufferTime}m respiro
+                             </span>
+                           ) : null}
+                           <span className={`flex items-center font-medium px-2 py-1 rounded ${service.active !== false ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/5 text-slate-500'}`}>
+                             R$ {service.price?.toFixed(2)}
+                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10" onClick={() => handleDeleteService(service.id)}>
+                      <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t border-[#2D214F] sm:border-0 pt-3 sm:pt-0">
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-[#9B8FC0] hover:text-white hover:bg-white/5" onClick={() => { setEditingService(service); setIsServiceModalOpen(true); }}>
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-red-400/80 hover:text-red-400 hover:bg-red-500/10" onClick={() => handleDeleteService(service.id)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
