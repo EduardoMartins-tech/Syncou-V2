@@ -1184,14 +1184,15 @@ export function DashboardHome() {
                  </Button>
                </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px] bg-[#130E20] border-[#2D214F] text-[#E2D9F3] shadow-2xl">
-                  <DialogHeader className="flex flex-row items-center justify-between pr-8">
+                <form onSubmit={handleSaveService} className="flex flex-col">
+                  <DialogHeader className="flex flex-row items-center justify-between pr-8 pb-4">
                     <DialogTitle className="text-white text-xl">{editingService ? "Editar Serviço" : "Novo Serviço"}</DialogTitle>
                     <div className="flex items-center gap-2 mt-0">
                       <Label htmlFor="active" className="text-sm font-medium text-white cursor-pointer">Ativo</Label>
                       <Switch id="active" name="active" defaultChecked={editingService ? editingService.active !== false : true} />
                     </div>
                   </DialogHeader>
-                  <form onSubmit={handleSaveService} className="space-y-4 pt-2">
+                  <div className="space-y-4 pt-2">
                     <div className="space-y-2">
                       <Label htmlFor="name" className="text-[#9B8FC0]">Nome do Serviço</Label>
                       <Input id="name" name="name" defaultValue={editingService?.title || editingService?.name} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11" placeholder="Ex: Corte de Cabelo" />
@@ -1218,8 +1219,9 @@ export function DashboardHome() {
                       <Button type="button" variant="ghost" onClick={() => setIsServiceModalOpen(false)} className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50">Cancelar</Button>
                       <Button type="submit" className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white">Salvar Serviço</Button>
                     </DialogFooter>
-                  </form>
-                </DialogContent>
+                  </div>
+                </form>
+              </DialogContent>
              </Dialog>
            </div>
 
