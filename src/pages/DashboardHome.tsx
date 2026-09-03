@@ -62,6 +62,7 @@ export function DashboardHome() {
   const [currentSlug, setCurrentSlug] = useState<string | null>(null);
 
   // Tabs State
+  const [analyticsPeriod, setAnalyticsPeriod] = useState<"today" | "7days" | "30days" | "all">("30days");
   const [activeTab, setActiveTab] = useState<'agendamentos' | 'servicos' | 'analytics'>('agendamentos');
 
   // Status Filter ("Todos", "Pendente", "Confirmado", "Concluído", "Cancelado")
@@ -572,36 +573,110 @@ export function DashboardHome() {
     return acc;
   }, { 'Todos': 0, 'Pendente': 0, 'Confirmado': 0, 'Concluído': 0, 'Cancelado': 0 } as Record<string, number>);
 
-  const now = new Date();
-  const currentMonthRevenue = appointments
-    .filter(a => {
-       const isConfirmed = a.status === 'confirmed' || a.status === 'Confirmado';
-       if (!isConfirmed) return false;
-       const dateObj = new Date(a.startAt || a.date || '');
-       return dateObj.getMonth() === now.getMonth() && dateObj.getFullYear() === now.getFullYear();
-    })
-    .reduce((sum, a) => sum + (Number(a.totalPrice) || 0), 0);
+  const filteredAnalyticsAppointments = React.useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
 
-  const getWeeklyData = () => {
+    return appointments.filter(a => {
+      if (analyticsPeriod === 'all') return true;
+      const aptDate = new Date(a.startAt || a.date || '');
+      if (isNaN(aptDate.getTime())) return false;
+      
+      const aptDateNormalized = new Date(aptDate);
+      aptDateNormalized.setHours(0, 0, 0, 0);
+      
+      const diffTime = now.getTime() - aptDateNormalized.getTime();
+      const diffDays = Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
+
+      if (analyticsPeriod === 'today') {
+        return aptDateNormalized.getTime() === now.getTime();
+      }
+      if (analyticsPeriod === '7days') return diffDays <= 7;
+      if (analyticsPeriod === '30days') return diffDays <= 30;
+      return true;
+    });
+  }, [appointments, analyticsPeriod]);
+
+  const analyticsMetrics = React.useMemo(() => {
+    let realizedRevenue = 0;
+    let projectedRevenue = 0;
+    let completed = 0;
+    let cancelled = 0;
+    let pending = 0;
+    let totalValid = 0;
+
+    const serviceCount: Record<string, { count: number, revenue: number, name: string }> = {};
+
+    filteredAnalyticsAppointments.forEach(a => {
+      const isConfirmed = a.status === 'confirmed' || a.status === 'Confirmado';
+      const isCompleted = a.status === 'completed' || a.status === 'Concluído';
+      const isCancelled = a.status === 'cancelled' || a.status === 'Cancelado';
+      const isPending = a.status === 'scheduled' || a.status === 'Pendente' || !a.status;
+
+      totalValid++;
+
+      if (isCompleted) realizedRevenue += (Number(a.totalPrice) || 0);
+      if (isConfirmed) projectedRevenue += (Number(a.totalPrice) || 0);
+      
+      if (isCompleted) completed++;
+      if (isCancelled) cancelled++;
+      if (isPending) pending++;
+
+      if (isConfirmed || isCompleted) {
+          let parsedServices: any[] = [];
+          try {
+            parsedServices = Array.isArray(a.services) ? a.services : (typeof a.services === 'string' ? JSON.parse(a.services) : []);
+          } catch (e) {
+            parsedServices = [];
+          }
+          
+          if (Array.isArray(parsedServices)) {
+              parsedServices.forEach((s: any) => {
+                if (!serviceCount[s.id]) {
+                    serviceCount[s.id] = { count: 0, revenue: 0, name: s.name || s.title || 'Serviço' };
+                }
+                serviceCount[s.id].count += 1;
+                serviceCount[s.id].revenue += (Number(s.price) || 0);
+              });
+          }
+      }
+    });
+
+    const cancellationRate = totalValid === 0 ? 0 : Math.round((cancelled / totalValid) * 100);
+    
+    const topServices = Object.values(serviceCount)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+
+    return { realizedRevenue, projectedRevenue, completed, cancelled, pending, cancellationRate, topServices, total: totalValid };
+  }, [filteredAnalyticsAppointments]);
+
+  const getChartData = React.useCallback(() => {
     const data = [];
     const today = new Date();
     today.setHours(0,0,0,0);
     
-    for (let i = 6; i >= 0; i--) {
+    let daysToLookBack = 7;
+    if (analyticsPeriod === 'today') daysToLookBack = 1;
+    if (analyticsPeriod === '30days') daysToLookBack = 30;
+    if (analyticsPeriod === 'all') daysToLookBack = 90;
+    
+    for (let i = daysToLookBack - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      const dateString = date.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' }).replace('.', '');
+      const dateString = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
       
       const count = appointments.filter(a => {
         if (a.status === 'cancelled' || a.status === 'Cancelado') return false;
         const aptDate = new Date(a.startAt || a.date || '');
+        if (isNaN(aptDate.getTime())) return false;
         return aptDate.getDate() === date.getDate() && aptDate.getMonth() === date.getMonth() && aptDate.getFullYear() === date.getFullYear();
       }).length;
       
       data.push({ name: dateString, appointments: count });
     }
     return data;
-  };
+  }, [appointments, analyticsPeriod]);
 
   const exportToCSV = () => {
     // Columns: Nome do Cliente, Data, Hora, Serviço, Valor
@@ -736,144 +811,162 @@ export function DashboardHome() {
       </div>
 
       {activeTab === 'analytics' && (
-        <div className="space-y-8 animate-in fade-in duration-300 slide-in-from-bottom-2">
-      {/* Weekly Activity Chart */}
-      {!isFetchingAppointments && (
-        <motion.div
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-           className="bg-[#130E20] border border-[#2D214F] rounded-2xl p-6 shadow-sm"
-        >
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-white">Atividade Semanal</h3>
-            <p className="text-sm text-[#9B8FC0]">Agendamentos confirmados/pendentes (últimos 7 dias)</p>
+        <div className="space-y-6 animate-in fade-in duration-300 slide-in-from-bottom-2 w-full lg:max-w-5xl mx-auto">
+          {/* Header & Filters */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-[#8B5CF6]" />
+              Visão de Negócio
+            </h2>
+            <div className="flex bg-[#1A1333] rounded-lg p-1 w-full sm:w-auto overflow-x-auto hide-scrollbar">
+              {[
+                { id: 'today', label: 'Hoje' },
+                { id: '7days', label: '7 Dias' },
+                { id: '30days', label: 'Este Mês' },
+                { id: 'all', label: 'Histórico' }
+              ].map(period => (
+                <button
+                  key={period.id}
+                  onClick={() => setAnalyticsPeriod(period.id as any)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap flex-1 sm:flex-none ${analyticsPeriod === period.id ? 'bg-[#2D214F] text-white shadow-sm' : 'text-[#9B8FC0] hover:text-white'}`}
+                >
+                  {period.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="h-[250px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={getWeeklyData()} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2D214F" vertical={false} />
-                <XAxis 
-                  dataKey="name" 
-                  stroke="#5B4F81" 
-                  fontSize={12} 
-                  tickLine={false} 
-                  axisLine={false} 
-                  dy={10}
-                />
-                <YAxis 
-                  stroke="#5B4F81" 
-                  fontSize={12} 
-                  tickLine={false} 
-                  axisLine={false}
-                  allowDecimals={false}
-                />
-                <Tooltip 
-                  cursor={{ fill: '#2D214F', opacity: 0.4 }}
-                  contentStyle={{ backgroundColor: '#1A1333', border: '1px solid #2D214F', borderRadius: '8px', color: '#fff' }}
-                  itemStyle={{ color: '#8B5CF6', fontWeight: 'bold' }}
-                />
-                <Bar 
-                  dataKey="appointments" 
-                  name="Agendamentos"
-                  fill="#8B5CF6" 
-                  radius={[4, 4, 0, 0]} 
-                  maxBarSize={50}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-      )}
 
-      {/* Metrics Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {isFetchingAppointments ? (
-          <>
-            <div className="bg-[#130E20] rounded-2xl h-32 animate-pulse border border-[#2D214F]" />
-            <div className="bg-[#130E20] rounded-2xl h-32 animate-pulse border border-[#2D214F]" />
-            <div className="bg-[#130E20] rounded-2xl h-32 animate-pulse border border-[#2D214F]" />
-            <div className="bg-[#130E20] rounded-2xl h-32 animate-pulse border border-[#2D214F]" />
-          </>
-        ) : (
-          <>
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-[#130E20] p-6 rounded-2xl border border-[#2D214F] hover:border-[#4B3B7A] transition-colors shadow-sm"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium text-[#9B8FC0]">Faturamento (Mês)</h3>
-                <DollarSign className="w-5 h-5 text-emerald-400" />
+          {isFetchingAppointments ? (
+            <div className="space-y-6">
+              <div className="bg-[#130E20] rounded-2xl h-32 animate-pulse border border-[#2D214F]" />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                 <div className="bg-[#130E20] rounded-2xl h-24 animate-pulse border border-[#2D214F]" />
+                 <div className="bg-[#130E20] rounded-2xl h-24 animate-pulse border border-[#2D214F]" />
+                 <div className="bg-[#130E20] rounded-2xl h-24 animate-pulse border border-[#2D214F]" />
               </div>
-              <div className="text-3xl font-bold text-white flex items-baseline gap-1">
-                <span className="text-lg font-medium text-[#9B8FC0]">R$</span>
-                {currentMonthRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </div>
-            </motion.div>
+            </div>
+          ) : (
+            <>
+              {/* Hero Card - Revenue */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="bg-[#130E20] border border-[#2D214F] rounded-2xl p-6 relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#8B5CF6]/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-[#9B8FC0] mb-2 flex items-center gap-2">
+                      Faturamento Realizado
+                    </h3>
+                    <div className="text-4xl sm:text-5xl font-bold text-white tracking-tight flex items-baseline gap-1">
+                      <span className="text-xl sm:text-2xl text-[#9B8FC0] font-medium">R$</span>
+                      {analyticsMetrics.realizedRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                    {analyticsMetrics.projectedRevenue > 0 && (
+                      <p className="mt-2 text-sm text-[#9B8FC0]">
+                        <span className="text-emerald-400 font-medium">+ R$ {analyticsMetrics.projectedRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> adicionais previstos
+                      </p>
+                    )}
+                  </div>
+                  <div className="bg-[#1A1333] border border-[#2D214F] rounded-xl px-4 py-3 text-center min-w-[120px]">
+                    <span className="block text-xs font-medium text-[#9B8FC0] mb-1">Taxa Cancelamento</span>
+                    <span className={`text-xl font-bold ${analyticsMetrics.cancellationRate > 20 ? 'text-rose-400' : 'text-white'}`}>
+                      {analyticsMetrics.cancellationRate}%
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
 
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-[#130E20] p-6 rounded-2xl border border-[#2D214F] hover:border-[#4B3B7A] transition-colors shadow-sm"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium text-[#9B8FC0]">Total de Agendamentos</h3>
-                <TrendingUp className="w-5 h-5 text-[#8B5CF6]" />
+              {/* Secondary Metrics */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="bg-[#130E20] p-5 rounded-2xl border border-[#2D214F]">
+                  <h3 className="text-xs font-medium text-[#9B8FC0] uppercase tracking-wider mb-2">Concluídos</h3>
+                  <div className="text-3xl font-bold text-white">{analyticsMetrics.completed}</div>
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }} className="bg-[#130E20] p-5 rounded-2xl border border-[#2D214F] border-l-2 border-l-amber-500/50">
+                  <h3 className="text-xs font-medium text-[#9B8FC0] uppercase tracking-wider mb-2">Pendentes</h3>
+                  <div className="text-3xl font-bold text-white">{analyticsMetrics.pending}</div>
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }} className="bg-[#130E20] p-5 rounded-2xl border border-[#2D214F]">
+                  <h3 className="text-xs font-medium text-[#9B8FC0] uppercase tracking-wider mb-2">Cancelados</h3>
+                  <div className="text-3xl font-bold text-white">{analyticsMetrics.cancelled}</div>
+                </motion.div>
               </div>
-              <div className="text-4xl font-bold text-white">{appointments.length}</div>
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-[#130E20] p-6 rounded-2xl border border-[#2D214F] hover:border-[#4B3B7A] transition-colors shadow-sm"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium text-[#9B8FC0]">Pendentes</h3>
-                <Clock className="w-5 h-5 text-amber-400" />
-              </div>
-              <div className="text-4xl font-bold text-white">
-                {appointments.filter(a => a.status === 'scheduled' || a.status === 'Pendente' || !a.status).length}
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-[#130E20] p-6 rounded-2xl border border-[#2D214F] hover:border-[#4B3B7A] transition-colors shadow-sm"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium text-[#9B8FC0]">Confirmados</h3>
-                <CheckCircle2 className="w-5 h-5 text-blue-400" />
-              </div>
-              <div className="text-4xl font-bold text-white">
-                {appointments.filter(a => a.status === 'confirmed' || a.status === 'Confirmado').length}
-              </div>
-            </motion.div>
 
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-[#130E20] p-6 rounded-2xl border border-[#2D214F] hover:border-[#4B3B7A] transition-colors shadow-sm"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium text-[#9B8FC0]">Concluídos</h3>
-                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              {/* Bottom Visualizations */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Chart */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.4 }}
+                  className="bg-[#130E20] border border-[#2D214F] rounded-2xl p-6 lg:col-span-2"
+                >
+                  <h3 className="text-sm font-semibold text-white mb-6">Volume de Agendamentos</h3>
+                  <div className="h-[220px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={getChartData()} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                        <XAxis 
+                          dataKey="name" 
+                          stroke="#5B4F81" 
+                          fontSize={11} 
+                          tickLine={false} 
+                          axisLine={false} 
+                          dy={10}
+                        />
+                        <Tooltip 
+                          cursor={{ fill: '#2D214F', opacity: 0.4 }}
+                          contentStyle={{ backgroundColor: '#1A1333', border: '1px solid #2D214F', borderRadius: '8px', color: '#fff' }}
+                          itemStyle={{ color: '#8B5CF6', fontWeight: 'bold' }}
+                        />
+                        <Bar 
+                          dataKey="appointments" 
+                          name="Agendamentos"
+                          fill="#8B5CF6" 
+                          radius={[4, 4, 0, 0]} 
+                          maxBarSize={40}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </motion.div>
+
+                {/* Top Services */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.5 }}
+                  className="bg-[#130E20] border border-[#2D214F] rounded-2xl p-6 flex flex-col"
+                >
+                  <h3 className="text-sm font-semibold text-white mb-6">Top Serviços</h3>
+                  {analyticsMetrics.topServices.length === 0 ? (
+                    <div className="flex-1 flex items-center justify-center text-sm text-[#5B4F81] text-center">
+                      Nenhum serviço agendado no período.
+                    </div>
+                  ) : (
+                    <div className="space-y-4 flex-1">
+                      {analyticsMetrics.topServices.map((service, idx) => (
+                        <div key={idx} className="flex items-center justify-between group">
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <div className="w-6 h-6 rounded bg-[#2D214F] text-[#9B8FC0] flex items-center justify-center text-xs font-bold shrink-0">
+                              {idx + 1}
+                            </div>
+                            <span className="text-sm text-[#E2D9F3] font-medium truncate">{service.name}</span>
+                          </div>
+                          <span className="text-sm text-white font-bold ml-2 shrink-0">
+                            R$ {service.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
               </div>
-              <div className="text-4xl font-bold text-white">
-                {appointments.filter(a => a.status === 'completed' || a.status === 'Concluído').length}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </div>
-      </div>
+            </>
+          )}
+        </div>
       )}
 
       {activeTab === 'agendamentos' && (
