@@ -515,7 +515,7 @@ export function DashboardSettings() {
                     placeholder="seu-nome"
                   />
                 </div>
-                {errors.slug && <p className="text-red-600 dark:text-red-400 text-sm">{errors.slug.message}</p>}
+                {errors.slug && <p className="text-destructive text-sm">{errors.slug.message}</p>}
                 <p className="text-xs text-muted-foreground/70">Apenas letras minúsculas, números e hífens.</p>
               </div>
 
@@ -526,7 +526,7 @@ export function DashboardSettings() {
                   {...register('displayName')}
                   className="bg-muted border-border text-foreground focus-visible:ring-primary h-11"
                 />
-                {errors.displayName && <p className="text-red-600 dark:text-red-400 text-sm">{errors.displayName.message}</p>}
+                {errors.displayName && <p className="text-destructive text-sm">{errors.displayName.message}</p>}
               </div>
 
               <div className="space-y-2">
@@ -537,7 +537,7 @@ export function DashboardSettings() {
                   className="bg-muted border-border text-foreground focus-visible:ring-primary min-h-[100px] placeholder:text-muted-foreground"
                   placeholder="Conte um pouco sobre você, sua formação ou seus serviços..."
                 />
-                {errors.bio && <p className="text-red-600 dark:text-red-400 text-sm">{errors.bio.message}</p>}
+                {errors.bio && <p className="text-destructive text-sm">{errors.bio.message}</p>}
               </div>
 
               <div className="space-y-2 pt-4 border-t border-border">
@@ -550,7 +550,7 @@ export function DashboardSettings() {
                   placeholder="Ex: 5511999999999"
                 />
                 <p className="text-xs text-muted-foreground/70">Adicione o DDI e DDD (ex: 5511999999999) para que clientes possam enviar mensagens.</p>
-                {errors.whatsapp && <p className="text-red-600 dark:text-red-400 text-sm">{errors.whatsapp.message}</p>}
+                {errors.whatsapp && <p className="text-destructive text-sm">{errors.whatsapp.message}</p>}
                 
                 <div className="flex items-center justify-between mt-4 mb-1">
                   <Label htmlFor="whatsappMessageTemplate" className="text-foreground block">Mensagem de Confirmação (WhatsApp)</Label>
@@ -584,7 +584,7 @@ export function DashboardSettings() {
                     {...register('workingHoursStart')}
                     className="bg-muted border-border text-foreground focus-visible:ring-primary block h-11"
                   />
-                  {errors.workingHoursStart && <p className="text-red-600 dark:text-red-400 text-sm">{errors.workingHoursStart.message}</p>}
+                  {errors.workingHoursStart && <p className="text-destructive text-sm">{errors.workingHoursStart.message}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -595,7 +595,7 @@ export function DashboardSettings() {
                     {...register('workingHoursEnd')}
                     className="bg-muted border-border text-foreground focus-visible:ring-primary block h-11"
                   />
-                  {errors.workingHoursEnd && <p className="text-red-600 dark:text-red-400 text-sm">{errors.workingHoursEnd.message}</p>}
+                  {errors.workingHoursEnd && <p className="text-destructive text-sm">{errors.workingHoursEnd.message}</p>}
                 </div>
               </div>
 
@@ -631,7 +631,7 @@ export function DashboardSettings() {
                      );
                    })}
                  </div>
-                 {errors.workingDays && <p className="text-red-600 dark:text-red-400 text-sm">{errors.workingDays.message}</p>}
+                 {errors.workingDays && <p className="text-destructive text-sm">{errors.workingDays.message}</p>}
               </div>
 
               <div className="space-y-3 pt-4 border-t border-border/50">
@@ -797,7 +797,7 @@ export function DashboardSettings() {
                           <p className="font-bold text-foreground">{formattedDate}</p>
                           <p className="text-sm text-muted-foreground">
                             {override.isClosed 
-                              ? <span className="text-red-600 dark:text-red-400 font-medium">Dia Fechado</span>
+                              ? <span className="text-destructive font-medium">Dia Fechado</span>
                               : <span>Aberto das {override.start} às {override.end}</span>
                             }
                           </p>

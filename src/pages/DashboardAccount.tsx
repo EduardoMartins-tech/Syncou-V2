@@ -12,10 +12,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useNotification } from '../hooks/useNotification';
 import { useAuth } from '../contexts/AuthContext';
 
-const accountSchema = z.object({
-  displayName: z.string().min(2, "O nome deve ter no mínimo 2 caracteres").max(60, "O nome pode ter no máximo 60 caracteres"),
-});
-
 const standardPasswordSchema = z.object({
   currentPassword: z.string().min(1, "A senha atual é obrigatória"),
   newPassword: z.string()
@@ -42,46 +38,18 @@ const googlePasswordSchema = z.object({
   path: ["confirmPassword"],
 });
 
-type AccountForm = z.infer<typeof accountSchema>;
 type PasswordForm = z.infer<typeof standardPasswordSchema>;
 
 export function DashboardAccount() {
-  const { currentUser, getAuthHeaders, updateUser, refreshUser } = useAuth();
+  const { currentUser, getAuthHeaders, refreshUser } = useAuth();
   const { notifySuccess, notifyError, notifyLoading, dismiss } = useNotification();
-  const [loading, setLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
 
   const isGoogleUser = currentUser?.authProvider === 'google';
 
-  const { register: registerAccount, handleSubmit: handleSubmitAccount, formState: { errors: accountErrors } } = useForm<AccountForm>({
-    resolver: zodResolver(accountSchema),
-    defaultValues: {
-      displayName: currentUser?.displayName || '',
-    }
-  });
-
   const { register: registerPassword, handleSubmit: handleSubmitPassword, formState: { errors: passwordErrors }, reset: resetPassword } = useForm<any>({
     resolver: zodResolver(isGoogleUser ? googlePasswordSchema : standardPasswordSchema),
   });
-
-  const onSubmitAccount = async (data: AccountForm) => {
-    setLoading(true);
-    const loadingToast = notifyLoading('Salvando dados...');
-    try {
-      const success = await updateUser({ displayName: data.displayName });
-      if (success) {
-        dismiss(loadingToast);
-        notifySuccess('Dados salvos com sucesso!');
-      } else {
-        dismiss(loadingToast);
-      }
-    } catch (err) {
-       dismiss(loadingToast);
-       notifyError("Erro interno ao salvar dados.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const onSubmitPassword = async (data: any) => {
     setPasswordLoading(true);
@@ -137,54 +105,36 @@ export function DashboardAccount() {
                <User className="w-5 h-5 text-primary" /> Detalhes Pessoais
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              Suas informações principais de acesso.
+              Suas informações principais de acesso, editadas na Loja.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmitAccount(onSubmitAccount)} className="space-y-6">
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-                <Avatar className="w-24 h-24 border-2 border-border">
-                  <AvatarImage src={currentUser?.avatarUrl || ''} className="object-cover" />
-                  <AvatarFallback className="bg-muted text-muted-foreground text-xl font-bold">
-                    {currentUser?.displayName?.charAt(0) || <User className="w-10 h-10" />}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="space-y-1 flex-1 text-center sm:text-left">
-                  <p className="text-sm text-foreground">Sua foto pública</p>
-                  <p className="text-xs text-muted-foreground">
-                    Para trocar sua foto, acesse <span className="font-medium text-primary">Loja</span> — ela é editada junto com o resto do seu perfil público.
-                  </p>
-                </div>
+          <CardContent className="space-y-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+              <Avatar className="w-24 h-24 border-2 border-border">
+                <AvatarImage src={currentUser?.avatarUrl || ''} className="object-cover" />
+                <AvatarFallback className="bg-muted text-muted-foreground text-xl font-bold">
+                  {currentUser?.displayName?.charAt(0) || <User className="w-10 h-10" />}
+                </AvatarFallback>
+              </Avatar>
+              <div className="space-y-1 flex-1 text-center sm:text-left">
+                <p className="text-sm text-foreground">Sua foto pública</p>
+                <p className="text-xs text-muted-foreground">
+                  Para trocar sua foto, acesse <span className="font-medium text-primary">Loja</span> — ela é editada junto com o resto do seu perfil público.
+                </p>
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                 <div className="space-y-2">
-                    <Label className="text-muted-foreground">Nome</Label>
-                    <Input 
-                      {...registerAccount('displayName')} 
-                      className="bg-muted border-border text-foreground focus-visible:ring-primary" 
-                      placeholder="Seu nome"
-                    />
-                    {accountErrors.displayName && (
-                      <p className="text-sm text-red-600 dark:text-red-400 mt-1">{accountErrors.displayName.message as string}</p>
-                    )}
-                 </div>
-                 <div className="space-y-2">
-                    <Label className="text-muted-foreground">E-mail</Label>
-                    <Input disabled value={currentUser?.email || ''} className="bg-muted/50 border-border/50 text-foreground opacity-70" />
-                 </div>
-              </div>
-
-              <div className="pt-2">
-                <Button
-                  type="submit"
-                  loading={loading}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                >
-                  Salvar Alterações
-                </Button>
-              </div>
-            </form>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+               <div className="space-y-2">
+                  <Label className="text-muted-foreground">Nome</Label>
+                  <Input disabled value={currentUser?.displayName || ''} className="bg-muted/50 border-border/50 text-foreground opacity-70" />
+                  <p className="text-xs text-muted-foreground">Para editar seu nome, acesse <span className="font-medium text-primary">Loja</span>.</p>
+               </div>
+               <div className="space-y-2">
+                  <Label className="text-muted-foreground">E-mail</Label>
+                  <Input disabled value={currentUser?.email || ''} className="bg-muted/50 border-border/50 text-foreground opacity-70" />
+               </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -203,24 +153,25 @@ export function DashboardAccount() {
                 <div className="space-y-2">
                   <Label className="text-muted-foreground">Senha Atual</Label>
                   <Input type="password" {...registerPassword('currentPassword')} className="bg-muted border-border text-foreground focus-visible:ring-primary" />
-                  {passwordErrors.currentPassword && <p className="text-red-600 dark:text-red-400 text-sm">{passwordErrors.currentPassword.message as string}</p>}
+                  {passwordErrors.currentPassword && <p className="text-destructive text-sm">{passwordErrors.currentPassword.message as string}</p>}
                 </div>
               )}
               <div className="space-y-2">
                 <Label className="text-muted-foreground">Nova Senha</Label>
                 <Input type="password" {...registerPassword('newPassword')} className="bg-muted border-border text-foreground focus-visible:ring-primary" />
-                {passwordErrors.newPassword && <p className="text-red-600 dark:text-red-400 text-sm">{passwordErrors.newPassword.message as string}</p>}
+                {passwordErrors.newPassword && <p className="text-destructive text-sm">{passwordErrors.newPassword.message as string}</p>}
               </div>
               <div className="space-y-2">
                 <Label className="text-muted-foreground">Confirmar Nova Senha</Label>
                 <Input type="password" {...registerPassword('confirmPassword')} className="bg-muted border-border text-foreground focus-visible:ring-primary" />
-                {passwordErrors.confirmPassword && <p className="text-red-600 dark:text-red-400 text-sm">{passwordErrors.confirmPassword.message as string}</p>}
+                {passwordErrors.confirmPassword && <p className="text-destructive text-sm">{passwordErrors.confirmPassword.message as string}</p>}
               </div>
               <div className="pt-2">
                  <Button
                    type="submit"
+                   variant="secondary"
                    loading={passwordLoading}
-                   className="w-full bg-muted border border-border text-foreground hover:text-foreground hover:bg-muted/70"
+                   className="w-full"
                  >
                    {isGoogleUser ? 'Salvar Senha' : 'Atualizar Senha'}
                  </Button>
@@ -251,7 +202,7 @@ export function DashboardAccount() {
              <p className="text-sm text-muted-foreground">
                Em breve você poderá gerenciar sua assinatura, métodos de pagamento e faturas por aqui.
              </p>
-             <Button disabled className="w-full bg-muted border border-border text-muted-foreground">
+             <Button disabled variant="secondary" className="w-full">
                Gerenciar Assinatura (Em breve)
              </Button>
           </CardContent>
