@@ -315,7 +315,21 @@ export function DashboardHome() {
 
     try {
       if (editingService) {
-        notifyError('Edição de serviço atual não suportada direto na api demo.');
+        const res = await fetch(`/api/services/${editingService.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders()
+          },
+          body: JSON.stringify({ title, description, duration, bufferTime, price, active })
+        });
+        if (res.ok) {
+          notifySuccess('Serviço atualizado com sucesso!');
+          fetchServices();
+        } else {
+          const resData = await res.json().catch(() => ({}));
+          notifyError(resData.error || 'Erro ao atualizar serviço');
+        }
       } else {
         const res = await fetch('/api/services', {
           method: 'POST',

@@ -912,6 +912,28 @@ app.post('/api/services', authenticateToken, async (req: any, res: any) => {
   }
 });
 
+app.put('/api/services/:id', authenticateToken, async (req: any, res: any) => {
+  try {
+    const validated = serviceSchema.safeParse(req.body);
+    if (!validated.success) return res.status(400).json({ error: validated.error.issues[0].message });
+    
+    const { title, description, duration, bufferTime, price, active } = validated.data;
+    
+    const result = await pool.query(
+      'UPDATE services SET title = $1, description = $2, duration = $3, buffer_time = $4, price = $5, active = $6 WHERE id = $7 AND provider_id = $8 RETURNING *',
+      [title, description, duration, bufferTime || 0, price || 0, active ? 1 : 0, req.params.id, req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Serviço não encontrado ou acesso negado' });
+    }
+    res.json(result.rows[0]);
+  } catch (error: any) {
+    console.error('Update service error:', error);
+    res.status(500).json({ error: 'Erro ao atualizar o serviço.' });
+  }
+});
+
 app.delete('/api/services/:id', authenticateToken, async (req: any, res) => {
   try {
     await pool.query('DELETE FROM services WHERE id = $1 AND provider_id = $2', [req.params.id, req.user.id]);
