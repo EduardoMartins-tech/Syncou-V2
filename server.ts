@@ -703,6 +703,19 @@ app.post('/api/users/google-token', authenticateToken, async (req: any, res: any
   }
 });
 
+app.delete('/api/users/google-token', authenticateToken, async (req: any, res: any) => {
+  try {
+    await pool.query(
+      'UPDATE users SET google_access_token = NULL WHERE id = $1',
+      [req.user.id]
+    );
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error('Google token disconnect error:', error);
+    res.status(500).json({ error: 'Erro ao desconectar o Google Calendar.' });
+  }
+});
+
 app.post('/api/users/test-calendar', authenticateToken, async (req: any, res: any) => {
   try {
     // Disable plan checks for now

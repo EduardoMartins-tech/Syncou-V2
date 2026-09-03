@@ -125,6 +125,23 @@ export function DashboardSettings() {
     }
   };
 
+  const handleDisconnectGoogleCalendar = async () => {
+    try {
+      const res = await fetch('/api/users/google-token', {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      if (res.ok) {
+        setGoogleCalendarConnected(false);
+        notifySuccess("Google Agenda desconectado.");
+      } else {
+        notifyError("Falha ao desconectar o Google Agenda.");
+      }
+    } catch (err) {
+      notifyError("Erro interno ao desconectar.");
+    }
+  };
+
   const handleTestGoogleCalendar = async () => {
     try {
       const loadingToast = notifyLoading("Enviando evento de teste...");
@@ -163,6 +180,7 @@ export function DashboardSettings() {
   const watchedDisplayName = watch('displayName');
   const watchedBio = watch('bio');
   const watchedSlug = watch('slug');
+  const watchedAvatarUrl = watch('avatarUrl');
 
   // Prevent tab close if dirty
   useEffect(() => {
@@ -199,7 +217,7 @@ export function DashboardSettings() {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX_SIZE = 256;
+          const MAX_SIZE = 400;
           let width = img.width;
           let height = img.height;
 
@@ -376,7 +394,7 @@ export function DashboardSettings() {
             <Button variant="ghost" onClick={() => blocker.state === "blocked" && blocker.reset()} className="text-muted-foreground hover:text-foreground hover:bg-muted">
               Continuar editando
             </Button>
-            <Button variant="destructive" onClick={() => blocker.state === "blocked" && blocker.proceed()} className="bg-red-500/20 text-red-600 hover:bg-red-500/30 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 border-none">
+            <Button variant="destructive" onClick={() => blocker.state === "blocked" && blocker.proceed()}>
               Sair sem salvar
             </Button>
             <Button 
@@ -418,7 +436,7 @@ export function DashboardSettings() {
                 syncou.app/p/<span className="text-primary font-bold">{currentSlug || 'sua-slug-aqui'}</span>
               </div>
               <div className="flex gap-2 w-full sm:w-auto">
-                 <Button onClick={copyLink} variant="secondary" className="flex-1 sm:flex-none bg-muted hover:bg-muted border border-border text-foreground hover:text-foreground">
+                 <Button onClick={copyLink} variant="secondary" className="flex-1 sm:flex-none">
                    <Copy className="w-4 h-4 mr-2" />
                    Copiar
                  </Button>
@@ -441,17 +459,59 @@ export function DashboardSettings() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-               
+
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6 border-b border-border">
+                <Avatar className="w-24 h-24 border-2 border-border">
+                  <AvatarImage src={watchedAvatarUrl || ''} className="object-cover" />
+                  <AvatarFallback className="bg-muted text-muted-foreground text-xl font-bold">
+                    {watchedDisplayName?.charAt(0) || <User className="w-10 h-10" />}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="space-y-3 flex-1 text-center sm:text-left">
+                  <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="bg-muted border-border text-foreground hover:text-foreground hover:border-primary/40 hover:bg-muted/70"
+                      onClick={() => document.getElementById('avatar-upload')?.click()}
+                      loading={uploading}
+                    >
+                      {!uploading && <Upload className="w-4 h-4" />}
+                      Alterar Foto
+                    </Button>
+                    {watchedAvatarUrl && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => setValue('avatarUrl', '', { shouldDirty: true, shouldValidate: true })}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        Remover
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">JPG ou PNG. Tamanho máximo 2MB. Essa é a foto que os clientes veem na sua página pública.</p>
+                  <input
+                    type="file"
+                    id="avatar-upload"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                  <input type="hidden" {...register('avatarUrl')} />
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="slug" className="text-foreground">Identificador URL (Slug)</Label>
                 <div className="flex bg-muted rounded-lg border border-border focus-within:ring-1 focus-within:ring-primary overflow-hidden">
-                  <span className="flex items-center px-4 bg-card text-muted-foreground border-r border-border text-sm">
+                  <span className="flex items-center shrink-0 whitespace-nowrap px-2.5 sm:px-4 bg-card text-muted-foreground border-r border-border text-xs sm:text-sm">
                     syncou.app/p/
                   </span>
                   <input
                     id="slug"
                     {...register('slug')}
-                    className="flex-1 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                    className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                     placeholder="seu-nome"
                   />
                 </div>
@@ -603,7 +663,7 @@ export function DashboardSettings() {
             </CardContent>
           </Card>
 
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-card p-4 rounded-xl border border-border sticky bottom-4 z-10 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.5)]">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-card p-4 rounded-xl border border-border sticky bottom-4 z-10 shadow-lg">
              <div className="text-sm text-muted-foreground">
                 Lembre-se de salvar suas alterações para atualizar a página pública.
              </div>
@@ -669,7 +729,7 @@ export function DashboardSettings() {
                   id="overrideIsClosed"
                   checked={overrideIsClosed}
                   onChange={(e) => setOverrideIsClosed(e.target.checked)}
-                  className="w-4 h-4 rounded border-border bg-card text-primary focus:ring-primary focus:ring-offset-background"
+                  className="w-4 h-4 rounded border-border bg-card text-primary focus-ring"
                 />
                 <Label htmlFor="overrideIsClosed" className="text-sm font-medium text-foreground cursor-pointer">
                   Não trabalharei
@@ -678,10 +738,11 @@ export function DashboardSettings() {
 
               <Button
                 type="button"
+                variant="secondary"
                 onClick={handleAddOverride}
                 loading={savingOverride}
                 disabled={!overrideDate}
-                className="w-full md:w-auto bg-muted hover:bg-muted border border-border text-foreground h-11"
+                className="w-full md:w-auto h-11"
               >
                 {!savingOverride && <Plus className="w-4 h-4" />}
                 Adicionar
@@ -692,13 +753,15 @@ export function DashboardSettings() {
                <div>
                   <h4 className="text-foreground font-medium mb-1">Selecionar Múltiplos Dias</h4>
                   <p className="text-sm text-muted-foreground mb-4">Clique nos dias no calendário para marcá-os como "Folga" ou "Fechado".</p>
-                  <Calendar
-                    mode="multiple"
-                    selected={multipleClosedDates}
-                    onSelect={setMultipleClosedDates}
-                    locale={ptBR}
-                    className="bg-card border border-border rounded-lg p-3 text-foreground max-w-fit pointer-events-auto"
-                  />
+                  <div className="w-full overflow-x-auto">
+                    <Calendar
+                      mode="multiple"
+                      selected={multipleClosedDates}
+                      onSelect={setMultipleClosedDates}
+                      locale={ptBR}
+                      className="bg-card border border-border rounded-lg p-3 text-foreground max-w-fit pointer-events-auto"
+                    />
+                  </div>
                </div>
                <div className="flex flex-col justify-end h-full mt-auto mb-2 space-y-3">
                   <div className="p-3 bg-muted border border-border rounded-lg">
@@ -708,10 +771,11 @@ export function DashboardSettings() {
                   </div>
                   <Button
                     type="button"
+                    variant="destructive"
                     onClick={handleMarkMultipleAsClosed}
                     loading={savingMultiple}
                     disabled={!multipleClosedDates?.length}
-                    className="w-full sm:w-auto bg-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/30 border border-red-500/30 h-11"
+                    className="w-full sm:w-auto h-11"
                   >
                     {!savingMultiple && <CalendarX2 className="w-4 h-4" />}
                     Marcar como Fechado
@@ -742,7 +806,7 @@ export function DashboardSettings() {
                           variant="ghost" 
                           size="icon" 
                           onClick={() => handleRemoveOverride(dateKey)}
-                          className="text-muted-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10"
+                          className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -778,14 +842,24 @@ export function DashboardSettings() {
                </div>
                <div className="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0">
                  {googleCalendarConnected && (
-                   <Button
-                     type="button"
-                     variant="outline"
-                     onClick={handleTestGoogleCalendar}
-                     className="bg-transparent text-foreground border-border hover:bg-muted hover:text-foreground transition font-medium shadow-sm"
-                   >
-                     Testar (F5)
-                   </Button>
+                   <>
+                     <Button
+                       type="button"
+                       variant="outline"
+                       onClick={handleTestGoogleCalendar}
+                       className="bg-transparent text-foreground border-border hover:bg-muted hover:text-foreground transition font-medium shadow-sm"
+                     >
+                       Enviar evento de teste
+                     </Button>
+                     <Button
+                       type="button"
+                       variant="ghost"
+                       onClick={handleDisconnectGoogleCalendar}
+                       className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                     >
+                       Desconectar
+                     </Button>
+                   </>
                  )}
                  <Button
                    type="button"
@@ -819,7 +893,7 @@ export function DashboardSettings() {
             </div>
             <CardContent className="px-6 pb-6 pt-0 relative flex flex-col items-center text-center">
               <Avatar className="w-24 h-24 border-4 border-card bg-muted -mt-12 mb-4 shadow-xl">
-                <AvatarImage src={currentUser?.avatarUrl || ''} className="object-cover" />
+                <AvatarImage src={watchedAvatarUrl || ''} className="object-cover" />
                 <AvatarFallback className="bg-muted text-muted-foreground text-2xl font-bold">
                   {watchedDisplayName?.charAt(0) || <User className="w-10 h-10" />}
                 </AvatarFallback>

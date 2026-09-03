@@ -7,13 +7,12 @@ import { motion } from 'motion/react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Upload, User, Key, CreditCard } from 'lucide-react';
+import { User, Key, CreditCard } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useNotification } from '../hooks/useNotification';
 import { useAuth } from '../contexts/AuthContext';
 
 const accountSchema = z.object({
-  avatarUrl: z.string().optional().or(z.literal('')),
   displayName: z.string().min(2, "O nome deve ter no mínimo 2 caracteres").max(60, "O nome pode ter no máximo 60 caracteres"),
 });
 
@@ -50,15 +49,13 @@ export function DashboardAccount() {
   const { currentUser, getAuthHeaders, updateUser, refreshUser } = useAuth();
   const { notifySuccess, notifyError, notifyLoading, dismiss } = useNotification();
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
 
   const isGoogleUser = currentUser?.authProvider === 'google';
 
-  const { register: registerAccount, handleSubmit: handleSubmitAccount, formState: { errors: accountErrors }, setValue, watch } = useForm<AccountForm>({
+  const { register: registerAccount, handleSubmit: handleSubmitAccount, formState: { errors: accountErrors } } = useForm<AccountForm>({
     resolver: zodResolver(accountSchema),
     defaultValues: {
-      avatarUrl: currentUser?.avatarUrl || '',
       displayName: currentUser?.displayName || '',
     }
   });
@@ -67,67 +64,11 @@ export function DashboardAccount() {
     resolver: zodResolver(isGoogleUser ? googlePasswordSchema : standardPasswordSchema),
   });
 
-  const avatarUrl = watch('avatarUrl');
-
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024) {
-      notifyError("A imagem deve ter no máximo 2MB.");
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 400;
-          const MAX_HEIGHT = 400;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-            setValue('avatarUrl', dataUrl, { shouldDirty: true, shouldValidate: true });
-          } else {
-             notifyError("Erro ao processar imagem.");
-          }
-        };
-        img.src = event.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
-      console.error(err);
-      notifyError('Falha ao processar imagem.');
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const onSubmitAccount = async (data: AccountForm) => {
     setLoading(true);
     const loadingToast = notifyLoading('Salvando dados...');
     try {
-      const success = await updateUser({ avatarUrl: data.avatarUrl, displayName: data.displayName });
+      const success = await updateUser({ displayName: data.displayName });
       if (success) {
         dismiss(loadingToast);
         notifySuccess('Dados salvos com sucesso!');
@@ -196,52 +137,23 @@ export function DashboardAccount() {
                <User className="w-5 h-5 text-primary" /> Detalhes Pessoais
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              Sua foto de perfil e informações principais.
+              Suas informações principais de acesso.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmitAccount(onSubmitAccount)} className="space-y-6">
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                 <Avatar className="w-24 h-24 border-2 border-border">
-                  <AvatarImage src={avatarUrl} className="object-cover" />
+                  <AvatarImage src={currentUser?.avatarUrl || ''} className="object-cover" />
                   <AvatarFallback className="bg-muted text-muted-foreground text-xl font-bold">
                     {currentUser?.displayName?.charAt(0) || <User className="w-10 h-10" />}
                   </AvatarFallback>
                 </Avatar>
-                <div className="space-y-3 flex-1 text-center sm:text-left">
-                  <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="bg-muted border-border text-foreground hover:text-foreground hover:border-primary/40 hover:bg-muted/70"
-                      onClick={() => document.getElementById('avatar-upload')?.click()}
-                      loading={uploading}
-                      disabled={loading}
-                    >
-                      {!uploading && <Upload className="w-4 h-4" />}
-                      Alterar Foto
-                    </Button>
-                    {avatarUrl && (
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        onClick={() => setValue('avatarUrl', '', { shouldDirty: true, shouldValidate: true })}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-500/10 dark:text-red-400 dark:hover:text-red-300"
-                        disabled={loading}
-                      >
-                        Remover
-                      </Button>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">JPG ou PNG. Tamanho máximo 2MB.</p>
-                  <input 
-                    type="file" 
-                    id="avatar-upload" 
-                    accept="image/*" 
-                    className="hidden" 
-                    onChange={handleAvatarUpload}
-                  />
-                  <input type="hidden" {...registerAccount('avatarUrl')} />
+                <div className="space-y-1 flex-1 text-center sm:text-left">
+                  <p className="text-sm text-foreground">Sua foto pública</p>
+                  <p className="text-xs text-muted-foreground">
+                    Para trocar sua foto, acesse <span className="font-medium text-primary">Loja</span> — ela é editada junto com o resto do seu perfil público.
+                  </p>
                 </div>
               </div>
 
