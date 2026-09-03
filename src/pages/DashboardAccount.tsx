@@ -210,15 +210,16 @@ export function DashboardAccount() {
                 </Avatar>
                 <div className="space-y-3 flex-1 text-center sm:text-left">
                   <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
+                    <Button
+                      type="button"
+                      variant="outline"
                       className="bg-muted border-border text-foreground hover:text-foreground hover:border-primary/40 hover:bg-muted/70"
                       onClick={() => document.getElementById('avatar-upload')?.click()}
-                      disabled={uploading || loading}
+                      loading={uploading}
+                      disabled={loading}
                     >
-                      <Upload className="w-4 h-4 mr-2" /> 
-                      {uploading ? 'Processando...' : 'Alterar Foto'}
+                      {!uploading && <Upload className="w-4 h-4" />}
+                      Alterar Foto
                     </Button>
                     {avatarUrl && (
                       <Button 
@@ -263,12 +264,12 @@ export function DashboardAccount() {
               </div>
 
               <div className="pt-2">
-                <Button 
-                  type="submit" 
-                  disabled={loading} 
+                <Button
+                  type="submit"
+                  loading={loading}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
-                  {loading ? 'Salvando...' : 'Salvar Alterações'}
+                  Salvar Alterações
                 </Button>
               </div>
             </form>
@@ -304,12 +305,12 @@ export function DashboardAccount() {
                 {passwordErrors.confirmPassword && <p className="text-red-600 dark:text-red-400 text-sm">{passwordErrors.confirmPassword.message as string}</p>}
               </div>
               <div className="pt-2">
-                 <Button 
-                   type="submit" 
-                   disabled={passwordLoading}
+                 <Button
+                   type="submit"
+                   loading={passwordLoading}
                    className="w-full bg-muted border border-border text-foreground hover:text-foreground hover:bg-muted/70"
                  >
-                   {passwordLoading ? 'Atualizando...' : (isGoogleUser ? 'Salvar Senha' : 'Atualizar Senha')}
+                   {isGoogleUser ? 'Salvar Senha' : 'Atualizar Senha'}
                  </Button>
               </div>
             </form>

@@ -59,20 +59,20 @@ const CustomToolbar = (toolbar: any) => {
       <div className="flex items-center gap-2">
         <button
           onClick={goToCurrent}
-          className="px-4 py-2 text-sm font-medium rounded-md bg-muted hover:bg-accent text-foreground transition-colors"
+          className="px-4 py-2 text-sm font-medium rounded-md bg-muted hover:bg-accent text-foreground transition-colors focus-ring"
         >
           Hoje
         </button>
         <div className="flex items-center bg-muted rounded-md overflow-hidden">
           <button
             onClick={goToBack}
-            className="p-2 hover:bg-accent text-foreground transition-colors"
+            className="p-2 hover:bg-accent text-foreground transition-colors focus-ring"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={goToNext}
-            className="p-2 hover:bg-accent text-foreground transition-colors"
+            className="p-2 hover:bg-accent text-foreground transition-colors focus-ring"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -86,7 +86,7 @@ const CustomToolbar = (toolbar: any) => {
           <button
             key={viewName}
             onClick={() => toolbar.onView(viewName)}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors focus-ring ${
               toolbar.view === viewName
                 ? 'bg-primary text-primary-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground hover:bg-accent'
@@ -484,7 +484,7 @@ export function DashboardCalendar() {
               />
               <div className="flex justify-start sm:justify-end items-center gap-4 pt-4 border-t border-border text-sm font-medium">
                 <span className="text-muted-foreground/70 mr-2">Legenda:</span>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-md transition-all duration-300">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-md transition duration-300">
                   <div className="w-2.5 h-2.5 rounded-full bg-primary" />
                   <span className="text-primary flex items-center">
                     Confirmado (
@@ -504,7 +504,7 @@ export function DashboardCalendar() {
                     )
                   </span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-md transition-all duration-300">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-md transition duration-300">
                   <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                   <span className="text-amber-700 dark:text-amber-400 flex items-center">
                     Pendente (

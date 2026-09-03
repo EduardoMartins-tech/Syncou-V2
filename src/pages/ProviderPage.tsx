@@ -317,6 +317,16 @@ export function ProviderPage() {
                <p className="text-[10px] text-muted-foreground font-medium tracking-wide uppercase font-mono">Agendamento Online</p>
              </div>
           </div>
+          <div className="flex gap-1.5 ml-auto" aria-label={`Etapa ${step} de 3`}>
+            {[1, 2, 3].map((s) => (
+              <div
+                key={s}
+                className={`h-1 rounded-full transition-all duration-300 ease-snappy ${
+                  s <= step ? 'w-6 bg-primary' : 'w-3 bg-muted'
+                }`}
+              />
+            ))}
+          </div>
         </header>
       )}
 
@@ -347,7 +357,7 @@ export function ProviderPage() {
               return (
                 <Card
                   key={svc.id}
-                  className={`cursor-pointer transition-all duration-200 border bg-card rounded-xl ${isSelected ? 'border-primary ring-1 ring-primary' : 'border-border shadow-sm hover:border-primary/40 hover:bg-muted'}`}
+                  className={`cursor-pointer transition duration-200 ease-snappy border bg-card rounded-xl ${isSelected ? 'border-primary ring-1 ring-primary' : 'border-border shadow-sm hover:border-primary/40 hover:bg-muted hover:-translate-y-0.5 hover:shadow-md'}`}
                   onClick={() => toggleService(svc.id)}
                 >
                   <CardContent className="p-4 flex items-center justify-between">
@@ -377,7 +387,7 @@ export function ProviderPage() {
                    <p className="text-xs text-muted-foreground font-medium tracking-wide">{selectedServices.size} serviços • {totalDuration} min</p>
                    <p className="font-mono text-lg font-semibold text-foreground tracking-tight tabular-nums">Total: R$ {totalPrice.toFixed(2)}</p>
                  </div>
-                 <Button variant="cta" className="px-8 h-12 font-semibold transition-all" onClick={() => setStep(2)}>
+                 <Button variant="cta" className="px-8 h-12 font-semibold transition" onClick={() => setStep(2)}>
                    Continuar <ArrowRight className="w-4 h-4 ml-2" />
                  </Button>
                </div>
@@ -459,7 +469,7 @@ export function ProviderPage() {
                       <Button
                         key={time}
                         variant={selectedTime === time ? 'default' : 'outline'}
-                        className={`h-11 font-mono font-medium tabular-nums transition-all ${selectedTime === time ? 'shadow-md ring-1 ring-primary' : 'bg-card border-border text-foreground hover:border-primary/40 hover:bg-muted shadow-sm'}`}
+                        className={`h-11 font-mono font-medium tabular-nums transition ${selectedTime === time ? 'shadow-md ring-1 ring-primary' : 'bg-card border-border text-foreground hover:border-primary/40 hover:bg-muted shadow-sm'}`}
                         onClick={() => setSelectedTime(time)}
                       >
                         {time}
@@ -477,7 +487,7 @@ export function ProviderPage() {
           <div className="fixed bottom-0 left-0 w-full bg-background border-t border-border p-4 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.5)] z-20">
             <div className="max-w-xl mx-auto flex justify-between">
               <Button variant="ghost" onClick={() => setStep(1)} className="text-muted-foreground hover:text-foreground hover:bg-muted/50 font-medium">Voltar</Button>
-              <Button variant="cta" disabled={!selectedTime} className="px-8 font-medium transition-all" onClick={() => setStep(3)}>
+              <Button variant="cta" disabled={!selectedTime} className="px-8 font-medium transition" onClick={() => setStep(3)}>
                 Avançar
               </Button>
             </div>
@@ -520,15 +530,15 @@ export function ProviderPage() {
            <form id="booking-form" onSubmit={handleBooking} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-foreground font-medium">Seu nome completo</Label>
-                <Input id="name" required value={clientName} onChange={e => setClientName(e.target.value)} className="bg-background border-border text-foreground text-base h-12 placeholder:text-muted-foreground/60 focus-visible:ring-primary shadow-sm rounded-xl" placeholder="Ex: Maria Silva" />
+                <Input id="name" required value={clientName} onChange={e => setClientName(e.target.value)} className="bg-background border-border text-foreground text-base h-12 placeholder:text-muted-foreground focus-visible:ring-primary shadow-sm rounded-xl" placeholder="Ex: Maria Silva" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="whatsapp" className="text-foreground font-medium">WhatsApp</Label>
-                <Input id="whatsapp" required value={clientWhatsApp} onChange={e => setClientWhatsApp(maskWhatsApp(e.target.value))} placeholder="(00) 00000-0000" className="bg-background border-border text-foreground text-base h-12 placeholder:text-muted-foreground/60 focus-visible:ring-primary shadow-sm rounded-xl" />
+                <Input id="whatsapp" required value={clientWhatsApp} onChange={e => setClientWhatsApp(maskWhatsApp(e.target.value))} placeholder="(00) 00000-0000" className="bg-background border-border text-foreground text-base h-12 placeholder:text-muted-foreground focus-visible:ring-primary shadow-sm rounded-xl" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-foreground font-medium">E-mail <span className="text-muted-foreground/60 font-normal">(opcional)</span></Label>
-                <Input id="email" type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} className="bg-background border-border text-foreground text-base h-12 placeholder:text-muted-foreground/60 focus-visible:ring-primary shadow-sm rounded-xl" placeholder="seu@email.com" />
+                <Input id="email" type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} className="bg-background border-border text-foreground text-base h-12 placeholder:text-muted-foreground focus-visible:ring-primary shadow-sm rounded-xl" placeholder="seu@email.com" />
               </div>
            </form>
 
@@ -538,8 +548,8 @@ export function ProviderPage() {
             </div>
             <div className="max-w-xl mx-auto flex justify-between">
               <Button variant="ghost" type="button" onClick={() => setStep(2)} className="text-muted-foreground hover:text-foreground hover:bg-muted/50 font-medium">Voltar</Button>
-              <Button type="submit" variant="cta" form="booking-form" disabled={isSubmitting} className="px-8 font-medium transition-all">
-                {isSubmitting ? 'Confirmando...' : 'Confirmar Reserva'}
+              <Button type="submit" variant="cta" form="booking-form" loading={isSubmitting} className="px-8 font-medium transition">
+                Confirmar Reserva
               </Button>
             </div>
           </div>
@@ -581,12 +591,12 @@ export function ProviderPage() {
            </Card>
 
            {provider?.whatsapp && (
-             <Button className="w-full h-12 mb-4 bg-emerald-600 hover:bg-emerald-600/90 text-white font-medium shadow-sm transition-all" onClick={handleWhatsAppConfirm}>
+             <Button className="w-full h-12 mb-4 bg-emerald-600 hover:bg-emerald-600/90 text-white font-medium shadow-sm transition" onClick={handleWhatsAppConfirm}>
                Acompanhar pelo WhatsApp
              </Button>
            )}
 
-           <Button variant="outline" className="w-full h-12 border-border bg-muted text-foreground hover:bg-border hover:text-foreground font-medium shadow-sm transition-all" onClick={() => window.location.reload()}>
+           <Button variant="outline" className="w-full h-12 border-border bg-muted text-foreground hover:bg-border hover:text-foreground font-medium shadow-sm transition" onClick={() => window.location.reload()}>
              Fazer nova reserva
            </Button>
         </motion.main>

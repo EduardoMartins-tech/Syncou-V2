@@ -174,7 +174,7 @@ export function Onboarding() {
                   id="displayName"
                   {...register('displayName')}
                   placeholder="Seu Nome Completo"
-                  className="bg-background border-border text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-primary focus:border-primary h-11"
+                  className="bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary focus:border-primary h-11"
                 />
                 {errors.displayName && (
                   <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
@@ -192,7 +192,7 @@ export function Onboarding() {
                   id="whatsapp"
                   {...register('whatsapp')}
                   placeholder="Ex: 5511999999999"
-                  className="bg-background border-border text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-primary focus:border-primary h-11"
+                  className="bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary focus:border-primary h-11"
                 />
                 <p className="text-[11px] text-muted-foreground">
                   DDI + DDD + Número (apenas dígitos). Exemplo: 5511999999999.
@@ -217,12 +217,12 @@ export function Onboarding() {
                     id="slug"
                     {...register('slug')}
                     placeholder="seu-nome"
-                    className="bg-background border-border text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-primary focus:border-primary pl-[115px] h-11"
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary focus:border-primary pl-[115px] h-11"
                   />
                 </div>
 
                 {slugValue && slugValue.length >= 3 && (
-                  <div className="flex items-center gap-2 mt-1.5 transition-all text-xs">
+                  <div className="flex items-center gap-2 mt-1.5 transition text-xs">
                     {checkingSlug ? (
                       <span className="text-muted-foreground flex items-center gap-1">
                         <Loader2 className="w-3 h-3 animate-spin text-primary" />
@@ -251,7 +251,7 @@ export function Onboarding() {
                 type="submit"
                 variant="cta"
                 disabled={saving || checkingSlug || slugAvailable === false}
-                className="w-full h-12 font-semibold transition-all flex items-center justify-center gap-2"
+                className="w-full h-12 font-semibold transition flex items-center justify-center gap-2"
               >
                 {saving ? (
                   <>

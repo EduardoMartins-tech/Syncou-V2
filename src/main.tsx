@@ -136,7 +136,20 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <GoogleReCaptchaProvider reCaptchaKey={siteKey}>
           <RouterProvider router={router} />
-          <Toaster />
+          <Toaster
+            toastOptions={{
+              classNames: {
+                toast: '!bg-card !text-foreground !border-border',
+                success: '!border-emerald-500/30',
+                error: '!border-red-500/30',
+                warning: '!border-amber-500/30',
+                info: '!border-primary/30',
+                icon: 'text-primary',
+                title: '!text-foreground',
+                description: '!text-muted-foreground',
+              },
+            }}
+          />
         </GoogleReCaptchaProvider>
       </AuthProvider>
     </ThemeProvider>

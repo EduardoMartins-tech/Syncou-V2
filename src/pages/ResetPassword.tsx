@@ -28,7 +28,7 @@ export function ResetPassword() {
               <Button
                 onClick={() => navigate('/')}
                 variant="cta"
-                className="w-full font-bold h-11 transition-all flex items-center justify-center gap-2"
+                className="w-full font-bold h-11 transition flex items-center justify-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Voltar ao Início

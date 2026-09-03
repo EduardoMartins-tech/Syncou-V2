@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Copy, ExternalLink, RefreshCw, Upload, User, Plus, Trash2, CalendarX2, Calendar as CalendarIcon, CheckCircle2 } from 'lucide-react';
+import { Copy, ExternalLink, Upload, User, Plus, Trash2, CalendarX2, Calendar as CalendarIcon, CheckCircle2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '../contexts/AuthContext';
@@ -451,7 +451,7 @@ export function DashboardSettings() {
                   <input
                     id="slug"
                     {...register('slug')}
-                    className="flex-1 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/70"
+                    className="flex-1 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                     placeholder="seu-nome"
                   />
                 </div>
@@ -474,7 +474,7 @@ export function DashboardSettings() {
                 <Textarea
                   id="bio"
                   {...register('bio')}
-                  className="bg-muted border-border text-foreground focus-visible:ring-primary min-h-[100px] placeholder:text-muted-foreground/70"
+                  className="bg-muted border-border text-foreground focus-visible:ring-primary min-h-[100px] placeholder:text-muted-foreground"
                   placeholder="Conte um pouco sobre você, sua formação ou seus serviços..."
                 />
                 {errors.bio && <p className="text-red-600 dark:text-red-400 text-sm">{errors.bio.message}</p>}
@@ -486,7 +486,7 @@ export function DashboardSettings() {
                 <Input
                   id="whatsapp"
                   {...register('whatsapp')}
-                  className="bg-muted border-border text-foreground focus-visible:ring-primary h-11 placeholder:text-muted-foreground/70"
+                  className="bg-muted border-border text-foreground focus-visible:ring-primary h-11 placeholder:text-muted-foreground"
                   placeholder="Ex: 5511999999999"
                 />
                 <p className="text-xs text-muted-foreground/70">Adicione o DDI e DDD (ex: 5511999999999) para que clientes possam enviar mensagens.</p>
@@ -498,7 +498,7 @@ export function DashboardSettings() {
                 <Textarea
                   id="whatsappMessageTemplate"
                   {...register('whatsappMessageTemplate')}
-                  className="bg-muted border-border text-foreground focus-visible:ring-primary min-h-[100px] placeholder:text-muted-foreground/70"
+                  className="bg-muted border-border text-foreground focus-visible:ring-primary min-h-[100px] placeholder:text-muted-foreground"
                   placeholder="Ex: Olá {NOME}, passando para confirmar seu agendamento de {SERVICOS} no dia {DATA} às {HORA}. Te aguardo!"
                 />
                 <p className="text-xs text-muted-foreground/70">Você pode usar as aspas dinâmicas: {"{NOME}"}, {"{SERVICOS}"}, {"{DATA}"} e {"{HORA}"}.</p>
@@ -560,7 +560,7 @@ export function DashboardSettings() {
                            }
                            setValue('workingDays', newDays, { shouldDirty: true, shouldValidate: true });
                          }}
-                         className={`flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md border cursor-pointer transition-all ${
+                         className={`flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md border cursor-pointer transition focus-ring ${
                            isSelected 
                              ? 'bg-primary border-primary text-primary-foreground shadow-sm'
                              : 'bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
@@ -585,7 +585,7 @@ export function DashboardSettings() {
                    <button
                      type="button"
                      onClick={() => setValue('workOnHolidays', !watch('workOnHolidays'), { shouldDirty: true, shouldValidate: true })}
-                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
+                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-ring ${
                        watch('workOnHolidays') ? 'bg-primary' : 'bg-muted'
                      }`}
                    >
@@ -607,8 +607,8 @@ export function DashboardSettings() {
              <div className="text-sm text-muted-foreground">
                 Lembre-se de salvar suas alterações para atualizar a página pública.
              </div>
-             <Button type="submit" disabled={loading} className="w-full sm:w-auto min-w-[150px] shadow-sm">
-               {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : "Salvar Alterações"}
+             <Button type="submit" loading={loading} className="w-full sm:w-auto min-w-[150px] shadow-sm">
+               Salvar Alterações
              </Button>
           </div>
         </form>
@@ -676,13 +676,14 @@ export function DashboardSettings() {
                 </Label>
               </div>
 
-              <Button 
-                type="button" 
-                onClick={handleAddOverride} 
-                disabled={savingOverride || !overrideDate} 
+              <Button
+                type="button"
+                onClick={handleAddOverride}
+                loading={savingOverride}
+                disabled={!overrideDate}
                 className="w-full md:w-auto bg-muted hover:bg-muted border border-border text-foreground h-11"
               >
-                {savingOverride ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                {!savingOverride && <Plus className="w-4 h-4" />}
                 Adicionar
               </Button>
             </div>
@@ -708,10 +709,11 @@ export function DashboardSettings() {
                   <Button
                     type="button"
                     onClick={handleMarkMultipleAsClosed}
-                    disabled={!multipleClosedDates?.length || savingMultiple}
+                    loading={savingMultiple}
+                    disabled={!multipleClosedDates?.length}
                     className="w-full sm:w-auto bg-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/30 border border-red-500/30 h-11"
                   >
-                    {savingMultiple ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <CalendarX2 className="w-4 h-4 mr-2" />}
+                    {!savingMultiple && <CalendarX2 className="w-4 h-4" />}
                     Marcar como Fechado
                   </Button>
                </div>
@@ -780,7 +782,7 @@ export function DashboardSettings() {
                      type="button"
                      variant="outline"
                      onClick={handleTestGoogleCalendar}
-                     className="bg-transparent text-foreground border-border hover:bg-muted hover:text-foreground transition-all font-medium shadow-sm"
+                     className="bg-transparent text-foreground border-border hover:bg-muted hover:text-foreground transition font-medium shadow-sm"
                    >
                      Testar (F5)
                    </Button>
@@ -789,7 +791,7 @@ export function DashboardSettings() {
                    type="button"
                    onClick={handleConnectGoogleCalendar}
                    disabled={googleCalendarConnected}
-                   className={`${googleCalendarConnected ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 cursor-default' : 'bg-primary text-primary-foreground hover:bg-primary/90'} transition-all font-semibold shadow-sm`}
+                   className={`${googleCalendarConnected ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 cursor-default' : 'bg-primary text-primary-foreground hover:bg-primary/90'} transition font-semibold shadow-sm`}
                  >
                    {googleCalendarConnected ? (
                       <><CheckCircle2 className="w-4 h-4 mr-2" /> Conectado</>

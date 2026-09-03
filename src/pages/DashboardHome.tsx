@@ -726,7 +726,7 @@ export function DashboardHome() {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-card border border-border rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-lg"
+          className="bg-card border border-border rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-sm"
         >
           <div className="flex items-start sm:items-center gap-3">
             <div className="relative p-3 bg-muted border border-border rounded-xl text-muted-foreground flex-shrink-0">
@@ -742,7 +742,7 @@ export function DashboardHome() {
               <p className="text-muted-foreground text-sm mt-0.5">Vincule sua conta do Google Calendar para ativar a sincronização bidirecional automática.</p>
             </div>
           </div>
-          <Button variant="cta" onClick={() => navigate('/dashboard/settings#google-calendar')} className="w-full sm:w-auto font-semibold h-11 px-6 transition-all">
+          <Button variant="cta" onClick={() => navigate('/dashboard/settings#google-calendar')} className="w-full sm:w-auto font-semibold h-11 px-6 transition">
             Conectar Agenda
           </Button>
         </motion.div>
@@ -789,21 +789,21 @@ export function DashboardHome() {
       <div className="flex space-x-2 rounded-xl bg-muted p-1 border border-border w-full lg:w-fit mb-6 overflow-x-auto hide-scrollbar">
         <button
           onClick={() => setActiveTab('agendamentos')}
-          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'agendamentos' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap focus-ring ${activeTab === 'agendamentos' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <CalendarIcon className="w-4 h-4 inline-block mr-2 mb-0.5" />
           Agendamentos
         </button>
         <button
           onClick={() => setActiveTab('servicos')}
-          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'servicos' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap focus-ring ${activeTab === 'servicos' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <span className="w-4 h-4 inline-flex items-center justify-center rounded-sm bg-primary/20 text-primary text-[10px] font-bold mr-2 mb-0.5">S</span>
           Serviços
         </button>
         <button
           onClick={() => setActiveTab('analytics')}
-          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'analytics' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap focus-ring ${activeTab === 'analytics' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <TrendingUp className="w-4 h-4 inline-block mr-2 mb-0.5" />
           Analytics
@@ -828,7 +828,7 @@ export function DashboardHome() {
                 <button
                   key={period.id}
                   onClick={() => setAnalyticsPeriod(period.id as any)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap flex-1 sm:flex-none ${analyticsPeriod === period.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap flex-1 sm:flex-none focus-ring ${analyticsPeriod === period.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                 >
                   {period.label}
                 </button>
@@ -838,11 +838,11 @@ export function DashboardHome() {
 
           {isFetchingAppointments ? (
             <div className="space-y-6">
-              <div className="bg-card rounded-2xl h-32 animate-pulse border border-border" />
+              <div className="bg-card rounded-xl h-32 animate-pulse border border-border" />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                 <div className="bg-card rounded-2xl h-24 animate-pulse border border-border" />
-                 <div className="bg-card rounded-2xl h-24 animate-pulse border border-border" />
-                 <div className="bg-card rounded-2xl h-24 animate-pulse border border-border" />
+                 <div className="bg-card rounded-xl h-24 animate-pulse border border-border" />
+                 <div className="bg-card rounded-xl h-24 animate-pulse border border-border" />
+                 <div className="bg-card rounded-xl h-24 animate-pulse border border-border" />
               </div>
             </div>
           ) : (
@@ -852,7 +852,7 @@ export function DashboardHome() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className="bg-card border border-border rounded-2xl p-6 relative overflow-hidden"
+                className="bg-card border border-border rounded-xl p-6 relative overflow-hidden"
               >
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                   <div>
@@ -880,15 +880,15 @@ export function DashboardHome() {
 
               {/* Secondary Metrics */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="bg-card p-5 rounded-2xl border border-border">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="bg-card p-5 rounded-xl border border-border">
                   <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Concluídos</h3>
                   <div className="text-3xl font-bold text-foreground">{analyticsMetrics.completed}</div>
                 </motion.div>
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }} className="bg-card p-5 rounded-2xl border border-border border-l-2 border-l-amber-500/50">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }} className="bg-card p-5 rounded-xl border border-border border-l-2 border-l-amber-500/50">
                   <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Pendentes</h3>
                   <div className="text-3xl font-bold text-foreground">{analyticsMetrics.pending}</div>
                 </motion.div>
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }} className="bg-card p-5 rounded-2xl border border-border">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }} className="bg-card p-5 rounded-xl border border-border">
                   <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Cancelados</h3>
                   <div className="text-3xl font-bold text-foreground">{analyticsMetrics.cancelled}</div>
                 </motion.div>
@@ -901,7 +901,7 @@ export function DashboardHome() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.4 }}
-                  className="bg-card border border-border rounded-2xl p-6 lg:col-span-2"
+                  className="bg-card border border-border rounded-xl p-6 lg:col-span-2"
                 >
                   <h3 className="text-sm font-semibold text-foreground mb-6">Volume de Agendamentos</h3>
                   <div className="h-[220px] w-full">
@@ -937,7 +937,7 @@ export function DashboardHome() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.5 }}
-                  className="bg-card border border-border rounded-2xl p-6 flex flex-col"
+                  className="bg-card border border-border rounded-xl p-6 flex flex-col"
                 >
                   <h3 className="text-sm font-semibold text-foreground mb-6">Top Serviços</h3>
                   {analyticsMetrics.topServices.length === 0 ? (
@@ -1008,7 +1008,7 @@ export function DashboardHome() {
                    placeholder="Filtrar por nome..." 
                    value={filterName}
                    onChange={e => setFilterName(e.target.value)}
-                   className="bg-card border-border text-foreground h-9 placeholder:text-muted-foreground/70 focus-visible:ring-primary w-[150px] sm:w-[200px]"
+                   className="bg-card border-border text-foreground h-9 placeholder:text-muted-foreground focus-visible:ring-primary w-[150px] sm:w-[200px]"
                  />
                  <Button onClick={exportToCSV} variant="outline" className="border-border text-foreground hover:text-foreground hover:bg-muted/50 h-9 px-3 shrink-0">
                    <Download className="w-4 h-4 sm:mr-2" />
@@ -1023,7 +1023,7 @@ export function DashboardHome() {
                  <button
                    key={status}
                    onClick={() => setFilterStatus(status)}
-                   className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 shrink-0 snap-start ${
+                   className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 shrink-0 snap-start focus-ring ${
                      filterStatus === status
                        ? 'bg-primary text-primary-foreground shadow-sm border border-primary'
                        : 'bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
@@ -1093,7 +1093,7 @@ export function DashboardHome() {
                     transition={{ duration: 0.4, delay: 0.1 + (index * 0.05), ease: [0.16, 1, 0.3, 1] }}
                     layout
                   >
-                    <Card className="bg-card border-border shadow-sm hover:border-primary/30 transition-all overflow-hidden group">
+                    <Card className="bg-card border-border shadow-sm hover:border-primary/30 transition overflow-hidden group">
                     <CardContent className="p-0">
                       <div className="flex flex-col md:flex-row p-4 gap-4 items-start md:items-stretch">
                         
@@ -1154,7 +1154,7 @@ export function DashboardHome() {
                                   setRescheduleTime(currentStart.toTimeString().slice(0, 5));
                                   setIsRescheduleModalOpen(true);
                                 }} 
-                                className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted"
+                                className="relative h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted before:absolute before:inset-[-4px]"
                               >
                                 <RefreshCcw className="w-3.5 h-3.5 mr-1.5" /> Remarcar
                               </Button>
@@ -1173,7 +1173,7 @@ export function DashboardHome() {
                                      setIsCancelModalOpen(true);
                                    }} 
                                    variant="ghost" 
-                                   className="h-8 px-2 text-red-600/80 hover:text-red-600 hover:bg-red-500/10 dark:text-red-400/80 dark:hover:text-red-400"
+                                   className="relative h-8 px-2 text-red-600/80 hover:text-red-600 hover:bg-red-500/10 dark:text-red-400/80 dark:hover:text-red-400 before:absolute before:inset-[-4px]"
                                  >
                                    Cancelar
                                  </Button>
@@ -1206,7 +1206,7 @@ export function DashboardHome() {
                                      setIsCancelModalOpen(true);
                                    }}
                                    variant="ghost" 
-                                   className="h-8 px-2 text-red-600/80 hover:text-red-600 hover:bg-red-500/10 dark:text-red-400/80 dark:hover:text-red-400"
+                                   className="relative h-8 px-2 text-red-600/80 hover:text-red-600 hover:bg-red-500/10 dark:text-red-400/80 dark:hover:text-red-400 before:absolute before:inset-[-4px]"
                                  >
                                    Cancelar
                                  </Button>
@@ -1222,7 +1222,7 @@ export function DashboardHome() {
                                      });
                                    }}
                                    variant="ghost" 
-                                   className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
+                                   className="relative h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted before:absolute before:inset-[-4px]"
                                    title="Voltar para Pendente"
                                  >
                                    <RefreshCcw className="w-3.5 h-3.5" />
@@ -1305,7 +1305,7 @@ export function DashboardHome() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="description" className="text-muted-foreground">Descrição (Opcional)</Label>
-                      <textarea id="description" name="description" defaultValue={editingService?.description} className="flex min-h-[80px] w-full rounded-md bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 resize-none" placeholder="Ex: Lavagem e finalização inclusos" />
+                      <textarea id="description" name="description" defaultValue={editingService?.description} className="flex min-h-[80px] w-full rounded-md bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 resize-none" placeholder="Ex: Lavagem e finalização inclusos" />
                     </div>
                     <DialogFooter className="pt-4 border-t border-border mt-2">
                       <Button type="button" variant="ghost" onClick={() => setIsServiceModalOpen(false)} className="text-muted-foreground hover:text-foreground hover:bg-muted/50">Cancelar</Button>
@@ -1324,7 +1324,7 @@ export function DashboardHome() {
                 </div>
              ) : (
                 services.map(service => (
-                  <Card key={service.id} className={`transition-all shadow-sm overflow-hidden group ${service.active !== false ? 'bg-card border-border hover:border-primary/30' : 'bg-muted border-border opacity-75 grayscale-[30%]'}`}>
+                  <Card key={service.id} className={`transition shadow-sm overflow-hidden group ${service.active !== false ? 'bg-card border-border hover:border-primary/30' : 'bg-muted border-border opacity-75 grayscale-[30%]'}`}>
                     <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2.5 mb-2">
@@ -1355,10 +1355,10 @@ export function DashboardHome() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t border-border sm:border-0 pt-3 sm:pt-0">
-                        <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => { setEditingService(service); setIsServiceModalOpen(true); }}>
+                        <Button variant="ghost" size="icon" className="relative h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted before:absolute before:inset-[-4px]" onClick={() => { setEditingService(service); setIsServiceModalOpen(true); }}>
                           <Edit2 className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-9 w-9 text-red-600/80 hover:text-red-600 hover:bg-red-500/10 dark:text-red-400/80 dark:hover:text-red-400" onClick={() => handleDeleteService(service.id)}>
+                        <Button variant="ghost" size="icon" className="relative h-9 w-9 text-red-600/80 hover:text-red-600 hover:bg-red-500/10 dark:text-red-400/80 dark:hover:text-red-400 before:absolute before:inset-[-4px]" onClick={() => handleDeleteService(service.id)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1417,7 +1417,7 @@ export function DashboardHome() {
                 value={cancelReason}
                 onChange={e => setCancelReason(e.target.value)}
                 placeholder="Exemplo: Fora do horário de disponibilidade, imprevisto de força maior, etc."
-                className="w-full h-24 bg-muted border border-border rounded-lg p-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/70"
+                className="w-full h-24 bg-muted border border-border rounded-lg p-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
               />
             </div>
             <DialogFooter className="pt-2 flex sm:justify-end gap-2">

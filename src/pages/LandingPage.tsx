@@ -220,7 +220,7 @@ export function LandingPage() {
             transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className="relative"
           >
-            <div className="bg-card border border-border rounded-2xl shadow-xl shadow-primary/5 overflow-hidden max-w-[340px] mx-auto">
+            <div className="bg-card border border-border rounded-xl shadow-xl shadow-primary/5 overflow-hidden max-w-[340px] mx-auto">
               <div className="p-5 pb-4 flex items-center gap-3 border-b border-border">
                 <div className="w-10 h-10 rounded-full bg-accent text-primary flex items-center justify-center font-extrabold text-sm shrink-0">MS</div>
                 <div>
@@ -279,7 +279,7 @@ export function LandingPage() {
 
         {/* FINAL CTA */}
         <section className="max-w-2xl mx-auto text-center">
-          <div className="border border-border rounded-2xl p-12 md:p-14 bg-card shadow-sm">
+          <div className="border border-border rounded-xl p-12 md:p-14 bg-card shadow-sm">
             <p className="font-mono text-xs tracking-widest text-primary uppercase mb-4 bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full inline-block">Sem mais fila</p>
             <h2 className="text-3xl md:text-4xl font-extrabold mb-5 text-foreground leading-tight">
               Pare de perder cliente pra fila do WhatsApp.
@@ -328,7 +328,7 @@ export function LandingPage() {
             <div className="grid grid-cols-2 p-1 bg-muted rounded-lg my-6 border border-border">
               <button
                 onClick={() => setAuthMode('login')}
-                className={`py-2 text-sm font-medium rounded-md transition-all ${
+                className={`py-2 text-sm font-medium rounded-md transition ${
                   authMode === 'login'
                     ? 'bg-card text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
@@ -338,7 +338,7 @@ export function LandingPage() {
               </button>
               <button
                 onClick={() => setAuthMode('register')}
-                className={`py-2 text-sm font-medium rounded-md transition-all ${
+                className={`py-2 text-sm font-medium rounded-md transition ${
                   authMode === 'register'
                     ? 'bg-card text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
@@ -364,7 +364,7 @@ export function LandingPage() {
                         value={otpCode}
                         onChange={(e) => setOtpCode(e.target.value)}
                         placeholder="Ex: 123456"
-                        className="bg-background border-border text-foreground placeholder:text-muted-foreground/50 pl-10 focus-visible:ring-primary h-11 shadow-sm"
+                        className="bg-background border-border text-foreground placeholder:text-muted-foreground pl-10 focus-visible:ring-primary h-11 shadow-sm"
                       />
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">Enviamos um código para {email}.</p>
@@ -384,7 +384,7 @@ export function LandingPage() {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="voce@exemplo.com"
-                          className="bg-background border-border text-foreground placeholder:text-muted-foreground/50 pl-10 focus-visible:ring-primary h-11 shadow-sm"
+                          className="bg-background border-border text-foreground placeholder:text-muted-foreground pl-10 focus-visible:ring-primary h-11 shadow-sm"
                         />
                       </div>
                     </div>
@@ -402,7 +402,7 @@ export function LandingPage() {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder={authMode === 'register' ? "Mínimo 6 caracteres" : "Sua senha"}
-                          className="bg-background border-border text-foreground placeholder:text-muted-foreground/50 pl-10 focus-visible:ring-primary h-11 shadow-sm"
+                          className="bg-background border-border text-foreground placeholder:text-muted-foreground pl-10 focus-visible:ring-primary h-11 shadow-sm"
                         />
                       </div>
 
@@ -455,7 +455,7 @@ export function LandingPage() {
                   type="submit"
                   variant="cta"
                   disabled={isSubmitting || (authMode === 'register' && authStep === 'form' && (!isValidPassword || !hasAcceptedTerms))}
-                  className="w-full font-medium h-11 transition-all flex items-center justify-center gap-2 mt-4"
+                  className="w-full font-medium h-11 transition flex items-center justify-center gap-2 mt-4"
                 >
                   {isSubmitting ? (
                     <>
@@ -509,7 +509,7 @@ export function LandingPage() {
                 <button
                   type="button"
                   onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
-                  className="text-sm text-muted-foreground hover:text-foreground hover:underline decoration-muted-foreground/50 underline-offset-4 transition-all"
+                  className="text-sm text-muted-foreground hover:text-foreground hover:underline decoration-muted-foreground/50 underline-offset-4 transition"
                 >
                   {authMode === 'login'
                     ? 'Não tem uma conta? Comece aqui'

@@ -8,6 +8,11 @@
     --font-heading: var(--font-sans);
     --font-sans: 'Plus Jakarta Sans', sans-serif;
     --font-mono: 'IBM Plex Mono', 'SFMono-Regular', monospace;
+    /* Same expo-out curve the Framer Motion page-load reveals already use
+       (ease: [0.16, 1, 0.3, 1]) — lets plain CSS transitions share the
+       product's one motion "signature" instead of falling back to the
+       browser's generic ease. */
+    --ease-snappy: cubic-bezier(0.16, 1, 0.3, 1);
     --color-cta: var(--cta);
     --color-cta-foreground: var(--cta-foreground);
     --color-cta-strong: var(--cta-strong);
@@ -153,6 +158,9 @@
   }
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 }
 .grecaptcha-badge { visibility: hidden !important; }

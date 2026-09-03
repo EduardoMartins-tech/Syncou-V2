@@ -66,7 +66,7 @@ export function DashboardLayout() {
               <Link key={item.path} to={item.path}>
                 <Button
                   variant="ghost"
-                  className={`w-full justify-start font-medium h-10 rounded-lg transition-all relative overflow-hidden ${location.pathname === item.path ? 'text-primary bg-accent' : 'text-muted-foreground hover:text-foreground hover:bg-accent/60'}`}
+                  className={`w-full justify-start font-medium h-10 rounded-lg transition relative overflow-hidden ${location.pathname === item.path ? 'text-primary bg-accent' : 'text-muted-foreground hover:text-foreground hover:bg-accent/60'}`}
                 >
                   {location.pathname === item.path && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary rounded-r-full" />}
                   <item.icon className={`mr-3 w-4 h-4 ${location.pathname === item.path ? 'text-primary' : ''}`} strokeWidth={2} />
@@ -89,7 +89,18 @@ export function DashboardLayout() {
             </div>
           </div>
           <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent/60 font-medium h-10 mb-1.5" onClick={toggleTheme}>
-            {theme === 'dark' ? <Sun className="mr-3 w-4 h-4" strokeWidth={2} /> : <Moon className="mr-3 w-4 h-4" strokeWidth={2} />}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={theme}
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="mr-3 inline-flex"
+              >
+                {theme === 'dark' ? <Sun className="w-4 h-4" strokeWidth={2} /> : <Moon className="w-4 h-4" strokeWidth={2} />}
+              </motion.span>
+            </AnimatePresence>
             {theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
           </Button>
           <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 font-medium h-10" onClick={logout}>
@@ -109,7 +120,7 @@ export function DashboardLayout() {
           </div>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`p-2.5 rounded-xl transition-all duration-300 relative z-50 flex items-center justify-center ${mobileMenuOpen ? 'bg-accent text-primary' : 'bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 shadow-sm'}`}
+            className={`p-2.5 rounded-xl transition duration-300 relative z-50 flex items-center justify-center ${mobileMenuOpen ? 'bg-accent text-primary' : 'bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 shadow-sm'}`}
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -137,7 +148,7 @@ export function DashboardLayout() {
                       <Link to={item.path} className="block">
                         <Button
                           variant="ghost"
-                          className={`w-full justify-start font-medium h-14 text-lg rounded-xl transition-all relative overflow-hidden ${location.pathname === item.path ? 'text-primary bg-accent' : 'text-muted-foreground hover:text-foreground hover:bg-accent/60'}`}
+                          className={`w-full justify-start font-medium h-14 text-lg rounded-xl transition relative overflow-hidden ${location.pathname === item.path ? 'text-primary bg-accent' : 'text-muted-foreground hover:text-foreground hover:bg-accent/60'}`}
                         >
                           {location.pathname === item.path && <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-primary rounded-r-full" />}
                           <item.icon className={`mr-4 w-6 h-6 ${location.pathname === item.path ? 'text-primary' : 'text-muted-foreground'}`} strokeWidth={2} />
@@ -154,7 +165,7 @@ export function DashboardLayout() {
                   transition={{ delay: 0.3, duration: 0.3 }}
                   className="mt-auto pt-8 border-t border-border"
                 >
-                  <div className="flex items-center gap-4 mb-6 bg-card p-4 rounded-2xl border border-border shadow-sm">
+                  <div className="flex items-center gap-4 mb-6 bg-card p-4 rounded-xl border border-border shadow-sm">
                     <Avatar className="w-12 h-12 ring-2 ring-border ring-offset-2 ring-offset-card">
                       <AvatarImage src={currentUser?.avatarUrl || ''} />
                       <AvatarFallback className="bg-primary text-primary-foreground font-medium">{currentUser?.displayName?.charAt(0) || 'U'}</AvatarFallback>
@@ -166,15 +177,26 @@ export function DashboardLayout() {
                   </div>
                   <Button
                     variant="outline"
-                    className="w-full justify-start border-border bg-card text-foreground hover:text-foreground hover:bg-accent/60 font-medium h-14 rounded-xl transition-all mb-3"
+                    className="w-full justify-start border-border bg-card text-foreground hover:text-foreground hover:bg-accent/60 font-medium h-14 rounded-xl transition mb-3"
                     onClick={toggleTheme}
                   >
-                    {theme === 'dark' ? <Sun className="mr-3 w-5 h-5" strokeWidth={2} /> : <Moon className="mr-3 w-5 h-5" strokeWidth={2} />}
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.span
+                        key={theme}
+                        initial={{ rotate: -90, opacity: 0 }}
+                        animate={{ rotate: 0, opacity: 1 }}
+                        exit={{ rotate: 90, opacity: 0 }}
+                        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                        className="mr-3 inline-flex"
+                      >
+                        {theme === 'dark' ? <Sun className="w-5 h-5" strokeWidth={2} /> : <Moon className="w-5 h-5" strokeWidth={2} />}
+                      </motion.span>
+                    </AnimatePresence>
                     {theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full justify-start border-border bg-card text-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/30 font-medium h-14 rounded-xl transition-all"
+                    className="w-full justify-start border-border bg-card text-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/30 font-medium h-14 rounded-xl transition"
                     onClick={logout}
                   >
                     <LogOut className="mr-3 w-5 h-5 text-red-500/80" strokeWidth={2} />

@@ -27,7 +27,7 @@ export function TermsPage() {
           className="max-w-3xl mx-auto"
         >
           <div className="flex items-center gap-4 mb-10">
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+            <div className="w-14 h-14 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
               <ShieldCheck className="w-7 h-7" />
             </div>
             <div>
