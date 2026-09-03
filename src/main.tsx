@@ -15,6 +15,7 @@ import { TermsPage } from './pages/TermsPage';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+import { MotionConfig } from 'motion/react';
 import './index.css';
 
 import { registerSW } from 'virtual:pwa-register';
@@ -132,26 +133,28 @@ const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <AuthProvider>
-        <GoogleReCaptchaProvider reCaptchaKey={siteKey}>
-          <RouterProvider router={router} />
-          <Toaster
-            toastOptions={{
-              classNames: {
-                toast: '!bg-card !text-foreground !border-border',
-                success: '!border-emerald-500/30',
-                error: '!border-red-500/30',
-                warning: '!border-amber-500/30',
-                info: '!border-primary/30',
-                icon: 'text-primary',
-                title: '!text-foreground',
-                description: '!text-muted-foreground',
-              },
-            }}
-          />
-        </GoogleReCaptchaProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <MotionConfig reducedMotion="user">
+      <ThemeProvider>
+        <AuthProvider>
+          <GoogleReCaptchaProvider reCaptchaKey={siteKey}>
+            <RouterProvider router={router} />
+            <Toaster
+              toastOptions={{
+                classNames: {
+                  toast: '!bg-card !text-foreground !border-border',
+                  success: '!border-emerald-500/30',
+                  error: '!border-red-500/30',
+                  warning: '!border-amber-500/30',
+                  info: '!border-primary/30',
+                  icon: 'text-primary',
+                  title: '!text-foreground',
+                  description: '!text-muted-foreground',
+                },
+              }}
+            />
+          </GoogleReCaptchaProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </MotionConfig>
   </StrictMode>,
 );

@@ -59,20 +59,20 @@ const CustomToolbar = (toolbar: any) => {
       <div className="flex items-center gap-2">
         <button
           onClick={goToCurrent}
-          className="px-4 py-2 text-sm font-medium rounded-md bg-muted hover:bg-accent text-foreground transition-colors focus-ring"
+          className="px-4 py-2 text-sm font-medium rounded-md bg-muted hover:bg-accent text-foreground transition-colors ease-snappy focus-ring"
         >
           Hoje
         </button>
         <div className="flex items-center bg-muted rounded-md overflow-hidden">
           <button
             onClick={goToBack}
-            className="p-2 hover:bg-accent text-foreground transition-colors focus-ring"
+            className="p-2 hover:bg-accent text-foreground transition-colors ease-snappy focus-ring"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={goToNext}
-            className="p-2 hover:bg-accent text-foreground transition-colors focus-ring"
+            className="p-2 hover:bg-accent text-foreground transition-colors ease-snappy focus-ring"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -86,7 +86,7 @@ const CustomToolbar = (toolbar: any) => {
           <button
             key={viewName}
             onClick={() => toolbar.onView(viewName)}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors focus-ring ${
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ease-snappy focus-ring ${
               toolbar.view === viewName
                 ? 'bg-primary text-primary-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground hover:bg-accent'

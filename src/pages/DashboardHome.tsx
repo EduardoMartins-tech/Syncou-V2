@@ -789,21 +789,21 @@ export function DashboardHome() {
       <div className="flex space-x-2 rounded-xl bg-muted p-1 border border-border w-full lg:w-fit mb-6 overflow-x-auto hide-scrollbar">
         <button
           onClick={() => setActiveTab('agendamentos')}
-          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap focus-ring ${activeTab === 'agendamentos' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors ease-snappy whitespace-nowrap focus-ring ${activeTab === 'agendamentos' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <CalendarIcon className="w-4 h-4 inline-block mr-2 mb-0.5" />
           Agendamentos
         </button>
         <button
           onClick={() => setActiveTab('servicos')}
-          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap focus-ring ${activeTab === 'servicos' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors ease-snappy whitespace-nowrap focus-ring ${activeTab === 'servicos' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <span className="w-4 h-4 inline-flex items-center justify-center rounded-sm bg-primary/20 text-primary text-[10px] font-bold mr-2 mb-0.5">S</span>
           Serviços
         </button>
         <button
           onClick={() => setActiveTab('analytics')}
-          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap focus-ring ${activeTab === 'analytics' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors ease-snappy whitespace-nowrap focus-ring ${activeTab === 'analytics' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <TrendingUp className="w-4 h-4 inline-block mr-2 mb-0.5" />
           Analytics
@@ -828,7 +828,7 @@ export function DashboardHome() {
                 <button
                   key={period.id}
                   onClick={() => setAnalyticsPeriod(period.id as any)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap flex-1 sm:flex-none focus-ring ${analyticsPeriod === period.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ease-snappy whitespace-nowrap flex-1 sm:flex-none focus-ring ${analyticsPeriod === period.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                 >
                   {period.label}
                 </button>
@@ -849,9 +849,9 @@ export function DashboardHome() {
             <>
               {/* Hero Card - Revenue */}
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
+                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                 className="bg-card border border-border rounded-xl p-6 relative overflow-hidden"
               >
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -880,15 +880,15 @@ export function DashboardHome() {
 
               {/* Secondary Metrics */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="bg-card p-5 rounded-xl border border-border">
+                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: 0.04, ease: [0.16, 1, 0.3, 1] }} className="bg-card p-5 rounded-xl border border-border">
                   <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Concluídos</h3>
                   <div className="text-3xl font-bold text-foreground">{analyticsMetrics.completed}</div>
                 </motion.div>
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }} className="bg-card p-5 rounded-xl border border-border border-l-2 border-l-amber-500/50">
+                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: 0.08, ease: [0.16, 1, 0.3, 1] }} className="bg-card p-5 rounded-xl border border-border border-l-2 border-l-amber-500/50">
                   <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Pendentes</h3>
                   <div className="text-3xl font-bold text-foreground">{analyticsMetrics.pending}</div>
                 </motion.div>
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }} className="bg-card p-5 rounded-xl border border-border">
+                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: 0.12, ease: [0.16, 1, 0.3, 1] }} className="bg-card p-5 rounded-xl border border-border">
                   <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Cancelados</h3>
                   <div className="text-3xl font-bold text-foreground">{analyticsMetrics.cancelled}</div>
                 </motion.div>
@@ -898,9 +898,9 @@ export function DashboardHome() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Chart */}
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.4 }}
+                  transition={{ duration: 0.2, delay: 0.16, ease: [0.16, 1, 0.3, 1] }}
                   className="bg-card border border-border rounded-xl p-6 lg:col-span-2"
                 >
                   <h3 className="text-sm font-semibold text-foreground mb-6">Volume de Agendamentos</h3>
@@ -934,9 +934,9 @@ export function DashboardHome() {
 
                 {/* Top Services */}
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.5 }}
+                  transition={{ duration: 0.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
                   className="bg-card border border-border rounded-xl p-6 flex flex-col"
                 >
                   <h3 className="text-sm font-semibold text-foreground mb-6">Top Serviços</h3>
@@ -1023,7 +1023,7 @@ export function DashboardHome() {
                  <button
                    key={status}
                    onClick={() => setFilterStatus(status)}
-                   className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 shrink-0 snap-start focus-ring ${
+                   className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ease-snappy flex items-center gap-1.5 shrink-0 snap-start focus-ring ${
                      filterStatus === status
                        ? 'bg-primary text-primary-foreground shadow-sm border border-primary'
                        : 'bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/40'

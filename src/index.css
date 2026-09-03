@@ -164,3 +164,15 @@
   }
 }
 .grecaptcha-badge { visibility: hidden !important; }
+
+/* Framer Motion respects MotionConfig reducedMotion="user" on its own
+   (drops transforms, keeps opacity fades). This catches everything else —
+   plain Tailwind `transition`/`animate-in` — for prefers-reduced-motion. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -560,7 +560,7 @@ export function DashboardSettings() {
                            }
                            setValue('workingDays', newDays, { shouldDirty: true, shouldValidate: true });
                          }}
-                         className={`flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md border cursor-pointer transition focus-ring ${
+                         className={`flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md border cursor-pointer transition ease-snappy focus-ring ${
                            isSelected 
                              ? 'bg-primary border-primary text-primary-foreground shadow-sm'
                              : 'bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
@@ -585,7 +585,7 @@ export function DashboardSettings() {
                    <button
                      type="button"
                      onClick={() => setValue('workOnHolidays', !watch('workOnHolidays'), { shouldDirty: true, shouldValidate: true })}
-                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-ring ${
+                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ease-snappy focus-ring ${
                        watch('workOnHolidays') ? 'bg-primary' : 'bg-muted'
                      }`}
                    >
