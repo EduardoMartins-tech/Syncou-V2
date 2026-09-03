@@ -10,7 +10,7 @@ export function TermsPage() {
       <header className="border-b border-[#2D214F] bg-[#0A0713]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="hover:opacity-80 transition-opacity">
-            <Logo />
+            <Logo className="w-8 h-8 text-primary" />
           </Link>
           <Link to="/" className="text-sm text-[#9B8FC0] hover:text-white flex items-center gap-2 transition-colors font-medium">
             <ArrowLeft className="w-4 h-4" />

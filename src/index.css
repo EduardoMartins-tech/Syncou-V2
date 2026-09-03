@@ -8,6 +8,18 @@
     --font-heading: var(--font-sans);
     --font-sans: 'Plus Jakarta Sans', sans-serif;
     --font-outfit: 'Outfit', sans-serif;
+    --font-ledger-display: 'Bitter', Georgia, serif;
+    --font-ledger-sans: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-ledger-mono: 'IBM Plex Mono', 'SFMono-Regular', monospace;
+    --color-ledger-ink: var(--ledger-ink);
+    --color-ledger-card: var(--ledger-card);
+    --color-ledger-parchment: var(--ledger-parchment);
+    --color-ledger-brass: var(--ledger-brass);
+    --color-ledger-brass-foreground: var(--ledger-brass-foreground);
+    --color-ledger-oxblood: var(--ledger-oxblood);
+    --color-ledger-sage: var(--ledger-sage);
+    --color-ledger-stone: var(--ledger-stone);
+    --color-ledger-line: var(--ledger-line);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -81,6 +93,18 @@
     --sidebar-accent-foreground: #FFFFFF;
     --sidebar-border: #2D214F;
     --sidebar-ring: #8B5CF6;
+
+    /* Ledger theme — Landing, 404, ProviderPage only. Independent of the
+       tokens above, which the Dashboard still uses. */
+    --ledger-ink: #17140F;
+    --ledger-card: #201B13;
+    --ledger-parchment: #EFE6D2;
+    --ledger-brass: #B08D57;
+    --ledger-brass-foreground: #17140F;
+    --ledger-oxblood: #7A2E2E;
+    --ledger-sage: #4B5D45;
+    --ledger-stone: #8A8371;
+    --ledger-line: #3A3327;
 }
 
 .dark {

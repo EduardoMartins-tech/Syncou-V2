@@ -109,8 +109,8 @@ export function ProviderPage() {
     if (slug) fetchProvider();
   }, [slug]);
 
-  if (loading) return <div className="min-h-screen bg-[#0B0914] flex items-center justify-center text-[#9B8FC0]">Localizando profissional...</div>;
-  if (!provider) return <div className="min-h-screen bg-[#0B0914] flex items-center justify-center text-white font-bold text-xl">Profissional não encontrado</div>;
+  if (loading) return <div className="min-h-screen bg-ledger-ink flex items-center justify-center text-ledger-stone font-ledger-sans">Localizando profissional...</div>;
+  if (!provider) return <div className="min-h-screen bg-ledger-ink flex items-center justify-center text-ledger-parchment font-ledger-sans font-bold text-xl">Profissional não encontrado</div>;
 
   const toggleService = (id: string) => {
     const next = new Set(selectedServices);
@@ -291,30 +291,55 @@ export function ProviderPage() {
 
   if (!provider) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0B0914]">
-        <div className="text-[#9B8FC0] font-medium">Provider não encontrado...</div>
+      <div className="min-h-screen flex items-center justify-center bg-ledger-ink">
+        <div className="text-ledger-stone font-ledger-sans font-medium">Provider não encontrado...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0914] text-[#E2D9F3] font-sans pb-24 selection:bg-primary/30">
+    <div
+      className="min-h-screen bg-background text-foreground font-ledger-sans pb-24 selection:bg-primary/30"
+      style={{
+        // Scoped ledger theme — overrides the shared shadcn tokens only within
+        // this page, so Card/Button/Badge/Calendar/Input pick up the new
+        // palette automatically without touching the global theme the
+        // Dashboard still relies on.
+        ['--background' as any]: 'var(--ledger-ink)',
+        ['--foreground' as any]: 'var(--ledger-parchment)',
+        ['--card' as any]: 'var(--ledger-card)',
+        ['--card-foreground' as any]: 'var(--ledger-parchment)',
+        ['--popover' as any]: 'var(--ledger-card)',
+        ['--popover-foreground' as any]: 'var(--ledger-parchment)',
+        ['--primary' as any]: 'var(--ledger-brass)',
+        ['--primary-foreground' as any]: 'var(--ledger-brass-foreground)',
+        ['--secondary' as any]: 'var(--ledger-card)',
+        ['--secondary-foreground' as any]: 'var(--ledger-parchment)',
+        ['--muted' as any]: 'var(--ledger-card)',
+        ['--muted-foreground' as any]: 'var(--ledger-stone)',
+        ['--accent' as any]: 'var(--ledger-card)',
+        ['--accent-foreground' as any]: 'var(--ledger-parchment)',
+        ['--border' as any]: 'var(--ledger-line)',
+        ['--input' as any]: 'var(--ledger-line)',
+        ['--ring' as any]: 'var(--ledger-brass)',
+      }}
+    >
       {/* Header Sticky */}
       {step < 4 && (
-        <header className="bg-[#0B0914]/80 backdrop-blur-md border-b border-[#2D214F] sticky top-0 z-10 px-4 py-3 flex items-center shadow-sm">
+        <header className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-10 px-4 py-3 flex items-center shadow-sm">
           {step > 1 && (
-             <Button variant="ghost" size="icon" className="mr-2 h-8 w-8 text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50" onClick={() => setStep(step - 1 as any)}>
+             <Button variant="ghost" size="icon" className="mr-2 h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/50" onClick={() => setStep(step - 1 as any)}>
                <ChevronLeft className="w-4 h-4" />
              </Button>
           )}
           <div className="flex items-center gap-3">
-             <Avatar className="w-8 h-8 ring-1 ring-[#2D214F]">
+             <Avatar className="w-8 h-8 ring-1 ring-border">
                <AvatarImage src={provider.avatarUrl} />
-               <AvatarFallback className="bg-[#1A1333] text-[#E2D9F3] text-xs">{provider.displayName.charAt(0)}</AvatarFallback>
+               <AvatarFallback className="bg-muted text-foreground text-xs">{provider.displayName.charAt(0)}</AvatarFallback>
              </Avatar>
              <div>
-               <p className="text-sm font-medium text-white leading-tight">{provider.displayName}</p>
-               <p className="text-[10px] text-[#9B8FC0] font-medium tracking-wide uppercase">Agendamento Online</p>
+               <p className="text-sm font-medium text-foreground leading-tight font-ledger-display">{provider.displayName}</p>
+               <p className="text-[10px] text-muted-foreground font-medium tracking-wide uppercase font-ledger-mono">Agendamento Online</p>
              </div>
           </div>
         </header>
@@ -331,37 +356,37 @@ export function ProviderPage() {
             className="max-w-xl mx-auto px-4 py-10"
           >
           <div className="text-center mb-10">
-             <Avatar className="w-24 h-24 mx-auto mb-5 border-4 border-[#0B0914] shadow-sm ring-1 ring-[#2D214F]">
+             <Avatar className="w-24 h-24 mx-auto mb-5 border-4 border-background shadow-sm ring-1 ring-border">
                <AvatarImage src={provider.avatarUrl} />
-               <AvatarFallback className="bg-[#1A1333] text-white text-3xl font-light">{provider.displayName.charAt(0)}</AvatarFallback>
+               <AvatarFallback className="bg-muted text-foreground text-3xl font-light">{provider.displayName.charAt(0)}</AvatarFallback>
              </Avatar>
-             <h1 className="text-2xl font-semibold text-white mb-2 tracking-tight">{provider.displayName}</h1>
-             <Badge className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/10 uppercase tracking-widest text-[10px] mb-4 border border-emerald-500/20 shadow-sm font-medium">Disponível</Badge>
-             {provider.bio && <p className="text-[#9B8FC0] text-sm max-w-md mx-auto leading-relaxed">{provider.bio}</p>}
+             <h1 className="font-ledger-display text-2xl font-bold text-foreground mb-2 tracking-tight">{provider.displayName}</h1>
+             <Badge className="bg-ledger-sage/10 text-ledger-sage hover:bg-ledger-sage/10 uppercase tracking-widest text-[10px] mb-4 border border-ledger-sage/20 shadow-sm font-medium font-ledger-mono">Disponível</Badge>
+             {provider.bio && <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">{provider.bio}</p>}
           </div>
 
-          <h2 className="font-medium text-lg mb-4 text-white tracking-tight">Selecione os Serviços</h2>
+          <h2 className="font-ledger-display font-bold text-lg mb-4 text-foreground tracking-tight">Selecione os Serviços</h2>
           <div className="space-y-3">
             {services.map(svc => {
               const isSelected = selectedServices.has(svc.id);
               return (
-                <Card 
-                  key={svc.id} 
-                  className={`cursor-pointer transition-all duration-200 border bg-[#130E20] ${isSelected ? 'border-primary shadow-[0_0_15px_rgba(139,92,246,0.15)] ring-1 ring-primary' : 'border-[#2D214F] shadow-sm hover:border-[#4B3B7A] hover:bg-[#1A1333]'}`}
+                <Card
+                  key={svc.id}
+                  className={`cursor-pointer transition-all duration-200 border bg-card rounded-sm ${isSelected ? 'border-primary ring-1 ring-primary' : 'border-border shadow-sm hover:border-primary/40 hover:bg-muted'}`}
                   onClick={() => toggleService(svc.id)}
                 >
                   <CardContent className="p-4 flex items-center justify-between">
                     <div>
-                      <h3 className={`font-medium ${isSelected ? 'text-white' : 'text-[#E2D9F3]'}`}>{svc.title || svc.name}</h3>
-                      {svc.description && <p className="text-sm text-[#9B8FC0] mt-1 leading-relaxed">{svc.description}</p>}
-                      <div className="flex items-center gap-3 text-xs font-medium text-[#9B8FC0] mt-3">
-                        <span className="flex items-center bg-[#1A1333] border border-[#2D214F] px-2.5 py-1 rounded-md text-[#E2D9F3]"><Clock className="w-3 h-3 mr-1.5"/> {svc.duration} min</span>
+                      <h3 className={`font-medium ${isSelected ? 'text-foreground' : 'text-foreground/90'}`}>{svc.title || svc.name}</h3>
+                      {svc.description && <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{svc.description}</p>}
+                      <div className="flex items-center gap-3 text-xs font-medium text-muted-foreground mt-3">
+                        <span className="flex items-center bg-muted border border-border px-2.5 py-1 rounded-sm text-foreground font-ledger-mono"><Clock className="w-3 h-3 mr-1.5"/> {svc.duration} min</span>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-3">
-                      <span className="font-medium text-white tracking-tight">R$ {svc.price.toFixed(2)}</span>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center border transition-colors ${isSelected ? 'bg-primary border-primary text-white' : 'bg-[#1A1333] border-[#2D214F] text-transparent'}`}>
-                        {isSelected ? <Check className="w-3.5 h-3.5"/> : <Plus className="w-3.5 h-3.5 text-[#5B4F81]"/>}
+                      <span className="font-ledger-mono font-medium text-foreground tracking-tight tabular-nums">R$ {svc.price.toFixed(2)}</span>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center border transition-colors ${isSelected ? 'bg-primary border-primary text-primary-foreground' : 'bg-muted border-border text-transparent'}`}>
+                        {isSelected ? <Check className="w-3.5 h-3.5"/> : <Plus className="w-3.5 h-3.5 text-muted-foreground"/>}
                       </div>
                     </div>
                   </CardContent>
@@ -371,13 +396,13 @@ export function ProviderPage() {
           </div>
 
           {selectedServices.size > 0 && (
-             <div className="fixed bottom-0 left-0 w-full bg-[#0B0914] border-t border-[#2D214F] p-4 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.5)] z-20 animate-in slide-in-from-bottom-full">
+             <div className="fixed bottom-0 left-0 w-full bg-background border-t border-border p-4 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.5)] z-20 animate-in slide-in-from-bottom-full">
                <div className="max-w-xl mx-auto flex items-center justify-between">
                  <div>
-                   <p className="text-xs text-[#9B8FC0] font-medium tracking-wide">{selectedServices.size} serviços • {totalDuration} min</p>
-                   <p className="text-lg font-semibold text-white tracking-tight">Total: R$ {totalPrice.toFixed(2)}</p>
+                   <p className="text-xs text-muted-foreground font-medium tracking-wide">{selectedServices.size} serviços • {totalDuration} min</p>
+                   <p className="font-ledger-mono text-lg font-semibold text-foreground tracking-tight tabular-nums">Total: R$ {totalPrice.toFixed(2)}</p>
                  </div>
-                 <Button className="px-8 h-12 rounded-lg font-medium shadow-[0_0_15px_rgba(139,92,246,0.2)] transition-all" onClick={() => setStep(2)}>
+                 <Button className="px-8 h-12 font-semibold transition-all" onClick={() => setStep(2)}>
                    Continuar <ArrowRight className="w-4 h-4 ml-2" />
                  </Button>
                </div>
@@ -395,9 +420,9 @@ export function ProviderPage() {
           transition={{ duration: 0.3 }}
           className="max-w-xl mx-auto px-4 py-8"
         >
-           <h2 className="font-medium text-xl mb-6 text-white tracking-tight">Escolha o horário</h2>
-           
-           <Card className="mb-8 border-[#2D214F] shadow-sm overflow-hidden bg-[#130E20]">
+           <h2 className="font-ledger-display font-bold text-xl mb-6 text-foreground tracking-tight">Escolha o horário</h2>
+
+           <Card className="mb-8 border-border shadow-sm overflow-hidden bg-card rounded-sm">
               <Calendar
                 mode="single"
                 selected={selectedDate}
@@ -437,29 +462,29 @@ export function ProviderPage() {
                   
                   return !safeWorkingDays.includes(date.getDay());
                 }}
-                className="mx-auto rounded-xl text-white pointer-events-auto p-4"
+                className="mx-auto text-foreground pointer-events-auto p-4"
                 locale={ptBR}
               />
            </Card>
 
            {selectedDate && (
              <div>
-               <h3 className="font-medium text-[#9B8FC0] mb-4 flex justify-between items-end text-sm">
-                 <span>Horários disponíveis em <br/><span className="text-white text-base">{format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}</span></span>
+               <h3 className="font-medium text-muted-foreground mb-4 flex justify-between items-end text-sm">
+                 <span>Horários disponíveis em <br/><span className="text-foreground text-base font-ledger-display font-bold">{format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}</span></span>
                </h3>
                {isFetchingAppointments ? (
                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                    {[...Array(8)].map((_, i) => (
-                     <div key={i} className="h-11 w-full rounded-lg bg-[#2D214F]/50 animate-pulse border border-[#2D214F]" />
+                     <div key={i} className="h-11 w-full rounded-sm bg-muted animate-pulse border border-border" />
                    ))}
                  </div>
                ) : slots.length > 0 ? (
                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                    {slots.map(time => (
-                      <Button 
-                        key={time} 
+                      <Button
+                        key={time}
                         variant={selectedTime === time ? 'default' : 'outline'}
-                        className={`h-11 rounded-lg font-medium transition-all ${selectedTime === time ? 'shadow-md ring-1 ring-primary' : 'bg-[#1A1333] border-[#2D214F] text-[#E2D9F3] hover:border-[#4B3B7A] hover:bg-[#2D214F]/50 shadow-sm'}`}
+                        className={`h-11 font-ledger-mono font-medium tabular-nums transition-all ${selectedTime === time ? 'shadow-md ring-1 ring-primary' : 'bg-card border-border text-foreground hover:border-primary/40 hover:bg-muted shadow-sm'}`}
                         onClick={() => setSelectedTime(time)}
                       >
                         {time}
@@ -467,17 +492,17 @@ export function ProviderPage() {
                    ))}
                  </div>
                ) : (
-                 <div className="text-center py-10 bg-[#130E20] rounded-xl border border-[#2D214F] border-dashed">
-                   <p className="text-[#5B4F81] text-sm">Nenhum horário disponível para este dia.</p>
+                 <div className="text-center py-10 bg-card rounded-sm border border-border border-dashed">
+                   <p className="text-muted-foreground/70 text-sm">Nenhum horário disponível para este dia.</p>
                  </div>
                )}
              </div>
            )}
 
-          <div className="fixed bottom-0 left-0 w-full bg-[#0B0914] border-t border-[#2D214F] p-4 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.5)] z-20">
+          <div className="fixed bottom-0 left-0 w-full bg-background border-t border-border p-4 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.5)] z-20">
             <div className="max-w-xl mx-auto flex justify-between">
-              <Button variant="ghost" onClick={() => setStep(1)} className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50 font-medium">Voltar</Button>
-              <Button disabled={!selectedTime} className="px-8 rounded-lg shadow-sm font-medium transition-all" onClick={() => setStep(3)}>
+              <Button variant="ghost" onClick={() => setStep(1)} className="text-muted-foreground hover:text-foreground hover:bg-muted/50 font-medium">Voltar</Button>
+              <Button disabled={!selectedTime} className="px-8 font-medium transition-all" onClick={() => setStep(3)}>
                 Avançar
               </Button>
             </div>
@@ -494,51 +519,51 @@ export function ProviderPage() {
           transition={{ duration: 0.3 }}
           className="max-w-xl mx-auto px-4 py-8"
         >
-           <h2 className="font-medium text-xl mb-6 text-white tracking-tight">Reserve seu horário</h2>
-           
-           <Card className="border-[#2D214F] shadow-sm mb-8 bg-[#130E20] overflow-hidden">
-             <div className="bg-[#1A1333]/80 border-b border-[#2D214F] px-5 py-3 flex items-center justify-between">
-               <span className="text-xs font-semibold uppercase tracking-wider text-[#9B8FC0]">Resumo</span>
-               <button className="text-sm font-medium text-white hover:underline decoration-[#5B4F81] underline-offset-4" onClick={() => setStep(1)}>Editar</button>
+           <h2 className="font-ledger-display font-bold text-xl mb-6 text-foreground tracking-tight">Reserve seu horário</h2>
+
+           <Card className="border-border shadow-sm mb-8 bg-card overflow-hidden rounded-sm">
+             <div className="bg-muted border-b border-border px-5 py-3 flex items-center justify-between">
+               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground font-ledger-mono">Resumo</span>
+               <button className="text-sm font-medium text-foreground hover:underline decoration-muted-foreground underline-offset-4" onClick={() => setStep(1)}>Editar</button>
              </div>
              <CardContent className="p-5 space-y-4 text-sm">
                <div className="flex justify-between items-start">
-                 <span className="text-[#9B8FC0] font-medium">Data e Hora</span>
-                 <span className="text-white font-medium text-right bg-[#2D214F]/50 px-2 py-1 rounded-md">{format(selectedDate!, "dd/MM/yyyy")} às {selectedTime}</span>
+                 <span className="text-muted-foreground font-medium">Data e Hora</span>
+                 <span className="font-ledger-mono text-foreground font-medium text-right bg-muted px-2 py-1 rounded-sm tabular-nums">{format(selectedDate!, "dd/MM/yyyy")} às {selectedTime}</span>
                </div>
                <div className="flex justify-between items-start">
-                 <span className="text-[#9B8FC0] font-medium pt-1">Serviços ({selectedServices.size})</span>
-                 <span className="text-[#E2D9F3] text-right leading-relaxed max-w-[200px]">{selectedServicesList.map(s => s.title || s.name).join(', ')}</span>
+                 <span className="text-muted-foreground font-medium pt-1">Serviços ({selectedServices.size})</span>
+                 <span className="text-foreground text-right leading-relaxed max-w-[200px]">{selectedServicesList.map(s => s.title || s.name).join(', ')}</span>
                </div>
-               <div className="flex justify-between pt-4 mt-2 border-t border-[#2D214F] items-center">
-                 <span className="text-white font-semibold text-base">Total</span>
-                 <span className="text-white font-semibold text-lg tracking-tight">R$ {totalPrice.toFixed(2)}</span>
+               <div className="flex justify-between pt-4 mt-2 border-t border-border items-center">
+                 <span className="text-foreground font-semibold text-base">Total</span>
+                 <span className="font-ledger-mono text-foreground font-semibold text-lg tracking-tight tabular-nums">R$ {totalPrice.toFixed(2)}</span>
                </div>
              </CardContent>
            </Card>
 
            <form id="booking-form" onSubmit={handleBooking} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-[#E2D9F3] font-medium">Seu nome completo</Label>
-                <Input id="name" required value={clientName} onChange={e => setClientName(e.target.value)} className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] text-base h-12 placeholder:text-[#5B4F81] focus-visible:ring-primary shadow-sm rounded-lg" placeholder="Ex: Maria Silva" />
+                <Label htmlFor="name" className="text-foreground font-medium">Seu nome completo</Label>
+                <Input id="name" required value={clientName} onChange={e => setClientName(e.target.value)} className="bg-background border-border text-foreground text-base h-12 placeholder:text-muted-foreground/60 focus-visible:ring-primary shadow-sm rounded-sm" placeholder="Ex: Maria Silva" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="whatsapp" className="text-[#E2D9F3] font-medium">WhatsApp</Label>
-                <Input id="whatsapp" required value={clientWhatsApp} onChange={e => setClientWhatsApp(maskWhatsApp(e.target.value))} placeholder="(00) 00000-0000" className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] text-base h-12 placeholder:text-[#5B4F81] focus-visible:ring-primary shadow-sm rounded-lg" />
+                <Label htmlFor="whatsapp" className="text-foreground font-medium">WhatsApp</Label>
+                <Input id="whatsapp" required value={clientWhatsApp} onChange={e => setClientWhatsApp(maskWhatsApp(e.target.value))} placeholder="(00) 00000-0000" className="bg-background border-border text-foreground text-base h-12 placeholder:text-muted-foreground/60 focus-visible:ring-primary shadow-sm rounded-sm" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[#E2D9F3] font-medium">E-mail <span className="text-[#5B4F81] font-normal">(opcional)</span></Label>
-                <Input id="email" type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] text-base h-12 placeholder:text-[#5B4F81] focus-visible:ring-primary shadow-sm rounded-lg" placeholder="seu@email.com" />
+                <Label htmlFor="email" className="text-foreground font-medium">E-mail <span className="text-muted-foreground/60 font-normal">(opcional)</span></Label>
+                <Input id="email" type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} className="bg-background border-border text-foreground text-base h-12 placeholder:text-muted-foreground/60 focus-visible:ring-primary shadow-sm rounded-sm" placeholder="seu@email.com" />
               </div>
            </form>
 
-          <div className="fixed bottom-0 left-0 w-full bg-[#0B0914] border-t border-[#2D214F] p-4 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.5)] z-20">
-            <div className="max-w-xl mx-auto mb-3 text-[11px] text-[#5B4F81] text-center px-2 leading-tight">
-              Este site é protegido por reCAPTCHA e a <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#9B8FC0]">Política de Privacidade</a> e os <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#9B8FC0]">Termos de Serviço</a> do Google se aplicam.
+          <div className="fixed bottom-0 left-0 w-full bg-background border-t border-border p-4 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.5)] z-20">
+            <div className="max-w-xl mx-auto mb-3 text-[11px] text-muted-foreground/70 text-center px-2 leading-tight">
+              Este site é protegido por reCAPTCHA e a <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted-foreground">Política de Privacidade</a> e os <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted-foreground">Termos de Serviço</a> do Google se aplicam.
             </div>
             <div className="max-w-xl mx-auto flex justify-between">
-              <Button variant="ghost" type="button" onClick={() => setStep(2)} className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50 font-medium">Voltar</Button>
-              <Button type="submit" form="booking-form" disabled={isSubmitting} className="px-8 rounded-lg shadow-[0_0_15px_rgba(139,92,246,0.2)] font-medium transition-all">
+              <Button variant="ghost" type="button" onClick={() => setStep(2)} className="text-muted-foreground hover:text-foreground hover:bg-muted/50 font-medium">Voltar</Button>
+              <Button type="submit" form="booking-form" disabled={isSubmitting} className="px-8 font-medium transition-all">
                 {isSubmitting ? 'Confirmando...' : 'Confirmar Reserva'}
               </Button>
             </div>
@@ -554,39 +579,39 @@ export function ProviderPage() {
           transition={{ duration: 0.4 }}
           className="max-w-md mx-auto px-4 py-20 text-center"
         >
-           <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-400 border border-emerald-500/20 shadow-[0_0_30px_rgba(52,211,153,0.15)] ring-4 ring-emerald-500/5">
+           <div className="w-20 h-20 bg-ledger-sage/10 rounded-full flex items-center justify-center mx-auto mb-6 text-ledger-sage border border-ledger-sage/20 ring-4 ring-ledger-sage/5">
              <Check className="w-8 h-8" strokeWidth={3} />
            </div>
-           <h2 className="text-3xl font-semibold tracking-tight text-white mb-3">Reserva Confirmada</h2>
-           <p className="text-[#9B8FC0] mb-8 leading-relaxed">
-             Sua solicitação foi enviada para <span className="font-medium text-white">{provider?.displayName}</span>.<br/>
-             Você receberá detalhes no WhatsApp <span className="font-medium text-white">{clientWhatsApp}</span>.
+           <h2 className="font-ledger-display text-3xl font-bold tracking-tight text-foreground mb-3">Reserva Confirmada</h2>
+           <p className="text-muted-foreground mb-8 leading-relaxed">
+             Sua solicitação foi enviada para <span className="font-medium text-foreground">{provider?.displayName}</span>.<br/>
+             Você receberá detalhes no WhatsApp <span className="font-medium text-foreground">{clientWhatsApp}</span>.
            </p>
-           
-           <Card className="bg-[#130E20] border border-[#2D214F] shadow-sm mb-8 text-left rounded-xl overflow-hidden">
+
+           <Card className="bg-card border border-border shadow-sm mb-8 text-left rounded-sm overflow-hidden">
              <CardContent className="p-6 text-sm space-y-4">
-               <div className="flex justify-between items-center border-b border-[#2D214F] pb-4">
-                 <span className="text-[#9B8FC0] font-medium">Data e Hora</span> 
-                 <span className="text-white font-semibold">{format(selectedDate!, "dd/MM/yyyy")} às {selectedTime}</span>
+               <div className="flex justify-between items-center border-b border-border pb-4">
+                 <span className="text-muted-foreground font-medium">Data e Hora</span>
+                 <span className="font-ledger-mono text-foreground font-semibold tabular-nums">{format(selectedDate!, "dd/MM/yyyy")} às {selectedTime}</span>
                </div>
-               <div className="flex justify-between items-center border-b border-[#2D214F] pb-4">
-                 <span className="text-[#9B8FC0] font-medium">Profissional</span> 
-                 <span className="text-white font-semibold">{provider?.displayName}</span>
+               <div className="flex justify-between items-center border-b border-border pb-4">
+                 <span className="text-muted-foreground font-medium">Profissional</span>
+                 <span className="text-foreground font-semibold">{provider?.displayName}</span>
                </div>
                <div className="flex justify-between items-center pt-2">
-                 <span className="text-[#9B8FC0] font-medium">Valor Total</span> 
-                 <span className="text-white font-bold text-lg">R$ {totalPrice.toFixed(2)}</span>
+                 <span className="text-muted-foreground font-medium">Valor Total</span>
+                 <span className="font-ledger-mono text-foreground font-bold text-lg tabular-nums">R$ {totalPrice.toFixed(2)}</span>
                </div>
              </CardContent>
            </Card>
 
            {provider?.whatsapp && (
-             <Button className="w-full rounded-lg h-12 mb-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-sm transition-all shadow-[0_0_15px_rgba(5,150,105,0.2)]" onClick={handleWhatsAppConfirm}>
+             <Button className="w-full h-12 mb-4 bg-ledger-sage hover:bg-ledger-sage/90 text-white font-medium shadow-sm transition-all" onClick={handleWhatsAppConfirm}>
                Acompanhar pelo WhatsApp
              </Button>
            )}
 
-           <Button variant="outline" className="w-full rounded-lg h-12 border-[#2D214F] bg-[#1A1333] text-[#E2D9F3] hover:bg-[#2D214F] hover:text-white font-medium shadow-sm transition-all" onClick={() => window.location.reload()}>
+           <Button variant="outline" className="w-full h-12 border-border bg-muted text-foreground hover:bg-border hover:text-foreground font-medium shadow-sm transition-all" onClick={() => window.location.reload()}>
              Fazer nova reserva
            </Button>
         </motion.main>

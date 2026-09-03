@@ -134,7 +134,7 @@ export function Onboarding() {
     return (
       <div className="min-h-screen bg-[#0B0914] flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center">
-          <Logo className="w-16 h-16 drop-shadow-[0_0_15px_rgba(139,92,246,0.5)] mb-4" />
+          <Logo className="w-16 h-16 text-primary drop-shadow-[0_0_15px_rgba(139,92,246,0.5)] mb-4" />
         </div>
       </div>
     );
@@ -155,7 +155,7 @@ export function Onboarding() {
         <Card className="border border-[#2D214F] bg-[#130E20]/80 backdrop-blur-md shadow-2xl">
           <CardHeader className="text-center pb-4">
             <div className="mx-auto flex items-center justify-center mb-4">
-              <Logo className="w-16 h-16 drop-shadow-[0_0_15px_rgba(139,92,246,0.5)]" />
+              <Logo className="w-16 h-16 text-primary drop-shadow-[0_0_15px_rgba(139,92,246,0.5)]" />
             </div>
             <CardTitle className="text-2xl md:text-3xl font-extrabold tracking-tight text-white mb-2">
               Seja bem-vindo ao Syncou!

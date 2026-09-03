@@ -1,23 +1,41 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Share2, CalendarDays, Settings, Mail, Lock, Loader2, XCircle, Check, Star } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Mail, Lock, Loader2, Check } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Logo } from '../components/Logo';
 import { useNotification } from '../hooks/useNotification';
 import { googleSignInBasic } from '../lib/firebase';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '../contexts/AuthContext';
+
+const FEATURES = [
+  {
+    label: 'Sincronia em tempo real',
+    body: 'Conectado ao Google Agenda. O que você marca lá bloqueia aqui — sem digitar de novo.',
+  },
+  {
+    label: 'Zero conflitos',
+    body: 'Horário preenchido nunca aparece livre pro cliente. Ponto final.',
+  },
+  {
+    label: 'Seu link, sua marca',
+    body: 'syncou.app/p/seu-nome. Cola na bio, manda no story, fixa na conversa do WhatsApp.',
+  },
+  {
+    label: 'Avisos sem barulho',
+    body: 'Você recebe um aviso discreto. Seu cliente recebe um lembrete pra não furar.',
+  },
+];
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -45,7 +63,7 @@ export function LandingPage() {
       notifyError('Você precisa aceitar os Termos de Serviço para criar uma conta.');
       return;
     }
-    
+
     setIsGoogleSubmitting(true);
     try {
       const result = await googleSignInBasic();
@@ -85,12 +103,12 @@ export function LandingPage() {
   const handleEmailAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanEmail = email.trim().toLowerCase();
-    
+
     if (!cleanEmail || !password) {
       notifyError('Preencha todos os campos.');
       return;
     }
-    
+
     if (authMode === 'register' && !isValidPassword) {
       notifyError('Por favor, atenda a todos os critérios da senha.');
       return;
@@ -152,281 +170,155 @@ export function LandingPage() {
     setIsAuthModalOpen(true);
   };
 
-
   return (
-    <div className="min-h-screen bg-[#0B0914] text-[#E2D9F3] font-sans selection:bg-primary/30">
-      <header className="fixed top-0 w-full bg-[#0B0914]/80 backdrop-blur-md border-b border-[#2D214F] z-50 animate-in fade-in slide-in-from-top-4 duration-500">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Logo className="w-8 h-8 text-primary drop-shadow-[0_0_12px_rgba(139,92,246,0.3)]" />
-            <span className="font-semibold text-xl tracking-tight text-white">Syncou</span>
+    <div className="min-h-screen bg-ledger-ink text-ledger-parchment font-ledger-sans selection:bg-ledger-brass/30">
+      <header className="fixed top-0 w-full bg-ledger-ink/90 backdrop-blur-sm border-b border-ledger-line z-50">
+        <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Logo className="w-7 h-7 text-ledger-brass" />
+            <span className="font-ledger-display font-bold text-lg tracking-tight text-ledger-parchment">Syncou</span>
           </div>
           <nav className="flex items-center gap-3">
-            <Button variant="ghost" className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50 font-medium" onClick={() => openAuthModal('login')}>Entrar</Button>
-            <Button className="font-semibold" onClick={() => openAuthModal('register')}>
+            <Button variant="ghost" className="text-ledger-stone hover:text-ledger-parchment hover:bg-white/5 font-medium" onClick={() => openAuthModal('login')}>Entrar</Button>
+            <Button className="bg-ledger-brass text-ledger-brass-foreground hover:bg-ledger-brass/90 font-semibold" onClick={() => openAuthModal('register')}>
               Criar minha conta
             </Button>
           </nav>
         </div>
       </header>
 
-      <main className="pt-32 pb-16 px-4 overflow-hidden relative">
-        {/* HERO SECTION */}
-        <motion.section 
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-5xl mx-auto mb-24 relative z-10 grid lg:grid-cols-2 gap-12 items-center"
-        >
-          {/* Text Left */}
-          <div className="text-left text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8">
-              <span className="flex h-2 w-2 rounded-full bg-primary relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              </span>
-              Acesso Antecipado
-            </div>
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-8 text-white leading-[1.1] font-outfit">
-              Clientes desistem enquanto você demora a responder.
-            </h1>
-            <p className="text-xl text-[#9B8FC0] mb-10 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
-              O fim da troca interminável de mensagens. Você envia um link, seu cliente escolhe o horário, e a sua agenda trabalha sozinha enquanto você atende quem já está no consultório.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-6">
-              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-8 font-semibold transition-all" onClick={() => openAuthModal('register')}>
-                Criar meu link grátis
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-              <div className="flex items-center gap-2 text-sm text-[#5B4F81] font-medium h-14">
-                <CheckCircle2 className="w-4 h-4 text-primary/70" />
-                <span>Configuração em 2 min</span>
-              </div>
-            </div>
-          </div>
-          
-          {/* Visual Right - Orbit Concept */}
-          <div className="relative h-[400px] w-full flex items-center justify-center hidden lg:flex">
-             <div className="absolute w-[350px] h-[350px] border border-[#2D214F] rounded-full opacity-50" />
-             <div className="absolute w-[250px] h-[250px] border border-primary/30 rounded-full opacity-70" />
-
-             {/* Center Logo */}
-             <div className="relative z-10 w-20 h-20 bg-[#130E20] border border-[#2D214F] rounded-2xl flex items-center justify-center shadow-2xl shadow-primary/20">
-               <Logo className="w-10 h-10 text-primary" />
-             </div>
-
-             {/* Elementos flutuantes */}
-             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-               <div className="bg-[#0B0914] border border-[#2D214F] rounded-lg px-3 py-1.5 flex items-center gap-2 shadow-lg text-xs text-[#E2D9F3] whitespace-nowrap">
-                  <div className="w-2 h-2 rounded-full bg-primary" />
-                  syncou.app/p/voce
-               </div>
-             </div>
-
-             <div className="absolute bottom-4 -right-4">
-               <div className="bg-[#130E20] border border-primary/30 rounded-lg p-3 flex items-start gap-3 shadow-[0_0_15px_rgba(139,92,246,0.15)]">
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                    <CheckCircle2 className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-white font-outfit">Novo Agendamento!</p>
-                    <p className="text-xs text-[#9B8FC0]">Hoje, às 14:30</p>
-                  </div>
-               </div>
-             </div>
-          </div>
-        </motion.section>
-
-        {/* BENTO GRID ASSIMÉTRICO */}
-        <section className="max-w-5xl mx-auto mb-32 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[220px]">
-            
-            {/* Bloco 1 (2 cols, 1 row): Sincronia em Tempo Real */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="md:col-span-2 row-span-1 bg-gradient-to-br from-[#130E20] to-[#0A0713] border border-[#2D214F] rounded-2xl p-8 relative overflow-hidden group"
-            >
-              <div className="relative z-10 w-full h-full flex flex-col justify-between">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-2 font-outfit">Sincronia em Tempo Real</h3>
-                  <p className="text-[#9B8FC0] max-w-[280px] leading-relaxed">Integração bidirecional com sua agenda atual. Sem delay, sem conflitos.</p>
-                </div>
-                <div className="absolute right-0 bottom-0 translate-y-1/4 translate-x-1/4 w-64 h-64 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-700" />
-              </div>
-              {/* O Pulso de Sincronia */}
-              <div className="absolute right-8 top-1/2 -translate-y-1/2 w-[220px] h-20 hidden sm:flex items-center justify-between">
-                
-                {/* Linha Curva Tracejada de Fundo */}
-                <svg className="absolute top-1/2 left-0 w-full h-10 -translate-y-1/2 overflow-visible" preserveAspectRatio="none">
-                   <path d="M 30,20 Q 110,-10 190,20" fill="transparent" stroke="#2D214F" strokeWidth="2" strokeDasharray="4 4" />
-                </svg>
-
-                {/* Nó Origem (Syncou) */}
-                <div className="relative z-10 w-12 h-12 bg-[#130E20] border border-primary/30 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.2)]">
-                  <Logo className="w-6 h-6 text-primary" />
-                </div>
-
-                {/* Ícone de Check Centralizado na linha */}
-                <motion.div 
-                  animate={{ opacity: [0, 0, 1, 1, 0, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, times: [0, 0.4, 0.42, 0.7, 0.8, 1], ease: "easeInOut" }}
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[18px] bg-[#130E20] border border-primary text-primary rounded-full p-1 z-20 shadow-[0_0_10px_rgba(139,92,246,0.3)]"
-                >
-                  <CheckCircle2 className="w-3 h-3" />
-                </motion.div>
-
-                {/* Cometa (Pulso) */}
-                <motion.div 
-                  animate={{ x: [0, 160, 160], y: [0, -25, 0], opacity: [0, 1, 0, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, times: [0, 0.2, 0.4, 1], ease: "easeInOut" }}
-                  className="absolute left-6 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full shadow-[0_0_10px_#fff,0_0_20px_#8B5CF6] z-10"
-                />
-
-                {/* Nó Destino (Google Calendar) */}
-                <div className="relative z-10 w-12 h-12 bg-[#130E20] border border-[#2D214F] rounded-xl flex items-center justify-center">
-                  <motion.div 
-                    animate={{ scale: [1, 1, 1.8, 1.8], opacity: [0, 0, 0.5, 0] }}
-                    transition={{ duration: 4, repeat: Infinity, times: [0, 0.38, 0.45, 1], ease: "easeOut" }}
-                    className="absolute inset-0 bg-primary rounded-xl z-0"
-                  />
-                  <CalendarDays className="w-6 h-6 text-[#9B8FC0] relative z-10" />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Bloco 2 (1 col, 2 rows): Zero Conflitos */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="md:col-span-1 row-span-2 bg-[#130E20] border border-[#2D214F] rounded-2xl p-8 relative overflow-hidden flex flex-col items-center text-center group"
-            >
-              <div className="flex-1 flex flex-col items-center justify-center w-full mt-8">
-                <div className="relative w-full h-32 flex items-center justify-center">
-                  <div className="absolute inset-0 border border-red-500/20 bg-red-500/5 rounded-xl flex items-center justify-center translate-y-4 group-hover:opacity-0 transition-opacity duration-300">
-                    <span className="text-red-400 font-medium line-through">14:00 Ocupado</span>
-                  </div>
-                  <div className="absolute inset-0 border border-emerald-500/20 bg-emerald-500/10 rounded-xl flex items-center justify-center -translate-y-4 shadow-[0_0_20px_rgba(52,211,153,0.1)] opacity-50 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500">
-                    <span className="text-emerald-400 font-medium">14:00 Livre!</span>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-8">
-                <h3 className="text-2xl font-bold text-white mb-2 font-outfit">Zero Conflitos</h3>
-                <p className="text-[#9B8FC0] text-sm leading-relaxed">Bloqueia automaticamente horários que você já preencheu. O fim do choque de agendas.</p>
-              </div>
-            </motion.div>
-
-            {/* Bloco 3 (1 col, 1 row): Seu Link Próprio */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="md:col-span-1 row-span-1 bg-[#130E20] border border-[#2D214F] rounded-2xl p-8 relative overflow-hidden flex flex-col justify-center"
-            >
-              <h3 className="text-xl font-bold text-white mb-4 font-outfit">Seu Link Próprio</h3>
-              <div className="bg-[#0B0914] border border-[#2D214F] rounded-lg p-3 font-mono text-sm text-[#E2D9F3] shadow-inner flex items-center break-all">
-                <span className="text-[#5B4F81] select-none">syncou.app/p/</span>
-                <span className="text-primary font-bold">voce</span>
-              </div>
-            </motion.div>
-
-            {/* Bloco 4 (1 col, 1 row): Notificações Silenciosas */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="md:col-span-1 row-span-1 bg-[#130E20] border border-[#2D214F] rounded-2xl p-8 relative overflow-hidden flex flex-col justify-center"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Mail className="w-5 h-5 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold text-white font-outfit">Notificações</h3>
-              </div>
-              <p className="text-[#9B8FC0] text-sm leading-relaxed">Avisos silenciosos e precisos para você e lembretes para seu cliente não faltar.</p>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* NOVO CTA SECTION */}
-        <section className="max-w-5xl mx-auto mb-16 mt-32">
+      <main className="pt-32 pb-20 px-5">
+        {/* HERO */}
+        <section className="max-w-5xl mx-auto mb-28 grid lg:grid-cols-2 gap-14 items-center">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
-            <Card className="border border-[#2D214F] bg-gradient-to-br from-[#130E20] to-[#0A0713] overflow-hidden relative">
-              <CardContent className="p-12 md:p-16 flex flex-col items-center text-center relative z-10">
-                <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white tracking-tight font-outfit leading-tight">
-                  Pare de perder clientes<br/>na DM.
-                </h2>
-                <p className="text-lg text-[#9B8FC0] leading-relaxed max-w-xl mb-10 font-sans">
-                  A configuração leva menos de 2 minutos. Resgate o controle do seu tempo e deixe sua agenda trabalhar para você.
-                </p>
-                <Button size="lg" className="w-full sm:w-auto h-14 px-10 font-bold text-lg transition-all" onClick={() => openAuthModal('register')}>
-                  Criar meu link grátis
-                </Button>
-              </CardContent>
-            </Card>
+            <h1 className="font-ledger-display text-5xl md:text-[3.4rem] font-bold tracking-tight mb-6 text-ledger-parchment leading-[1.08]">
+              Pare de fazer seu cliente tirar senha no WhatsApp.
+            </h1>
+            <p className="text-lg text-ledger-stone mb-9 max-w-lg leading-relaxed">
+              Envie um link. Ele escolhe o horário. Sua agenda se preenche sozinha, sem você largar o que está fazendo pra responder "oi, tem horário quinta?".
+            </p>
+            <div className="flex flex-col sm:flex-row items-start gap-5">
+              <Button size="lg" className="bg-ledger-brass text-ledger-brass-foreground hover:bg-ledger-brass/90 text-base h-13 px-7 font-semibold" onClick={() => openAuthModal('register')}>
+                Criar meu link grátis
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+              <div className="flex items-center gap-2 text-sm text-ledger-stone/80 h-13">
+                <CheckCircle2 className="w-4 h-4 text-ledger-sage" />
+                <span>Configuração em 2 minutos</span>
+              </div>
+            </div>
           </motion.div>
+
+          {/* Signature element: the queue ticket, torn in half on load */}
+          <div className="relative h-[220px] flex items-center justify-center" style={{ perspective: '800px' }}>
+            <motion.div
+              initial={{ x: 4, rotate: 0 }}
+              animate={{ x: -108, rotate: -4 }}
+              transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute w-[190px] bg-ledger-card border border-ledger-line rounded-sm p-5 shadow-[4px_4px_0_0_rgba(0,0,0,0.3)]"
+            >
+              <p className="font-ledger-mono text-[10px] tracking-widest text-ledger-stone/70 uppercase mb-3">Senha</p>
+              <p className="font-ledger-display text-4xl font-bold text-ledger-stone/50 line-through decoration-2 mb-3 tabular-nums">047</p>
+              <p className="text-xs text-ledger-stone/60 leading-relaxed">Aguardando resposta no WhatsApp desde 14:02.</p>
+            </motion.div>
+            <motion.div
+              initial={{ x: -4, rotate: 0 }}
+              animate={{ x: 108, rotate: 4 }}
+              transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute w-[190px] bg-ledger-card border border-ledger-brass/40 rounded-sm p-5 shadow-[4px_4px_0_0_rgba(0,0,0,0.3)]"
+            >
+              <div className="flex items-center gap-1.5 mb-3">
+                <Logo className="w-4 h-4 text-ledger-brass" />
+                <p className="font-ledger-mono text-[10px] tracking-widest text-ledger-stone/70 uppercase">syncou.app/p/voce</p>
+              </div>
+              <p className="font-ledger-display text-lg font-bold text-ledger-parchment mb-1">14:30 — Maria S.</p>
+              <p className="font-ledger-mono text-xs text-ledger-oxblood tracking-wide -rotate-3 inline-block border border-ledger-oxblood px-1.5 py-0.5 mt-1">CONFIRMADO</p>
+            </motion.div>
+          </div>
         </section>
 
+        {/* LEDGER — feature entries as ruled rows, not cards */}
+        <section className="max-w-3xl mx-auto mb-28">
+          <p className="font-ledger-mono text-xs tracking-widest text-ledger-stone/60 uppercase mb-3 pl-1">O que muda na sua semana</p>
+          <div className="border-t border-ledger-line">
+            {FEATURES.map((feature) => (
+              <div key={feature.label} className="grid sm:grid-cols-[220px_1fr] gap-2 sm:gap-8 py-6 border-b border-ledger-line">
+                <h3 className="font-ledger-display text-xl font-bold text-ledger-parchment">{feature.label}</h3>
+                <p className="text-ledger-stone leading-relaxed max-w-md">{feature.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* FINAL CTA — stamped confirmation */}
+        <section className="max-w-2xl mx-auto text-center">
+          <div className="border border-ledger-line rounded-sm p-12 md:p-14 bg-ledger-card relative">
+            <p className="font-ledger-mono text-xs tracking-widest text-ledger-oxblood uppercase mb-4 -rotate-1 inline-block border border-ledger-oxblood/60 px-2 py-1">Sem mais fila</p>
+            <h2 className="font-ledger-display text-3xl md:text-4xl font-bold mb-5 text-ledger-parchment leading-tight">
+              Pare de perder cliente pra fila do WhatsApp.
+            </h2>
+            <p className="text-ledger-stone leading-relaxed max-w-md mx-auto mb-9">
+              Leva 2 minutos pra configurar. O resto a sua agenda faz sozinha.
+            </p>
+            <Button size="lg" className="bg-ledger-brass text-ledger-brass-foreground hover:bg-ledger-brass/90 h-13 px-10 font-semibold" onClick={() => openAuthModal('register')}>
+              Criar meu link grátis
+            </Button>
+          </div>
+        </section>
       </main>
-      <footer className="border-t border-[#2D214F] py-12 bg-[#08060F] mt-20">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-4 text-center text-[#9B8FC0] text-sm">
+
+      <footer className="border-t border-ledger-line py-10">
+        <div className="max-w-6xl mx-auto px-5 flex flex-col items-center gap-4 text-center text-ledger-stone/70 text-sm">
           <div className="flex gap-4">
-            <Link to="/termos" className="hover:text-white transition-colors">Termos de Serviço e Privacidade</Link>
+            <Link to="/termos" className="hover:text-ledger-parchment transition-colors">Termos de Serviço e Privacidade</Link>
           </div>
           <p>&copy; {new Date().getFullYear()} Syncou. Todos os direitos reservados.</p>
         </div>
       </footer>
 
-      {/* Auth Modal with Email/Password */}
+      {/* Auth Modal */}
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
-        <DialogContent className="sm:max-w-[440px] bg-[#130E20] border-[#2D214F] text-[#E2D9F3] p-8 shadow-2xl rounded-2xl">
+        <DialogContent className="sm:max-w-[440px] bg-ledger-card border-ledger-line text-ledger-parchment p-8 shadow-2xl rounded-sm font-ledger-sans">
           <>
             <DialogHeader className="space-y-2">
               <div className="mx-auto flex items-center justify-center mb-4">
-                <Logo className="w-12 h-12 text-primary drop-shadow-[0_0_12px_rgba(139,92,246,0.3)]" />
+                <Logo className="w-11 h-11 text-ledger-brass" />
               </div>
-              <DialogTitle className="text-2xl font-semibold text-center text-white tracking-tight">
-                {authMode === 'login' 
-                  ? 'Entrar no Syncou' 
-                  : 'Crie sua conta' 
+              <DialogTitle className="font-ledger-display text-2xl font-bold text-center text-ledger-parchment tracking-tight">
+                {authMode === 'login'
+                  ? 'Entrar no Syncou'
+                  : 'Crie sua conta'
                 }
               </DialogTitle>
-              <DialogDescription className="text-center text-[#9B8FC0] text-sm">
-                {authMode === 'login' 
-                  ? 'Entre para gerenciar seus agendamentos' 
-                  : 'Comece a receber agendamentos de forma elegante' 
+              <DialogDescription className="text-center text-ledger-stone text-sm">
+                {authMode === 'login'
+                  ? 'Entre para gerenciar seus agendamentos'
+                  : 'Comece a receber agendamentos de forma elegante'
                 }
               </DialogDescription>
             </DialogHeader>
 
-            <div className="grid grid-cols-2 p-1 bg-[#0A0713] rounded-lg my-6 border border-[#2D214F]/50">
+            <div className="grid grid-cols-2 p-1 bg-ledger-ink rounded-sm my-6 border border-ledger-line">
               <button
                 onClick={() => setAuthMode('login')}
-                className={`py-2 text-sm font-medium rounded-md transition-all ${
+                className={`py-2 text-sm font-medium rounded-sm transition-all ${
                   authMode === 'login'
-                    ? 'bg-[#2D214F] text-white shadow-sm'
-                    : 'text-[#9B8FC0] hover:text-white'
+                    ? 'bg-ledger-line text-ledger-parchment shadow-sm'
+                    : 'text-ledger-stone hover:text-ledger-parchment'
                 }`}
               >
                 Entrar
               </button>
               <button
                 onClick={() => setAuthMode('register')}
-                className={`py-2 text-sm font-medium rounded-md transition-all ${
+                className={`py-2 text-sm font-medium rounded-sm transition-all ${
                   authMode === 'register'
-                    ? 'bg-[#2D214F] text-white shadow-sm'
-                    : 'text-[#9B8FC0] hover:text-white'
+                    ? 'bg-ledger-line text-ledger-parchment shadow-sm'
+                    : 'text-ledger-stone hover:text-ledger-parchment'
                 }`}
               >
                 Criar Conta
@@ -437,11 +329,11 @@ export function LandingPage() {
               <form onSubmit={handleEmailAuthSubmit} className="space-y-4">
                 {authMode === 'register' && authStep === 'otp' ? (
                   <div className="space-y-1.5 animate-in fade-in slide-in-from-right-4">
-                    <Label htmlFor="auth-otp" className="text-xs font-semibold uppercase tracking-wider text-[#9B8FC0]">
+                    <Label htmlFor="auth-otp" className="text-xs font-semibold uppercase tracking-wider text-ledger-stone">
                       Código de Verificação
                     </Label>
                     <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7C6FA4]" />
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ledger-stone/70" />
                       <Input
                         id="auth-otp"
                         type="text"
@@ -449,19 +341,19 @@ export function LandingPage() {
                         value={otpCode}
                         onChange={(e) => setOtpCode(e.target.value)}
                         placeholder="Ex: 123456"
-                        className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] placeholder:text-[#5B4F81] pl-10 focus-visible:ring-primary h-11 rounded-lg shadow-sm"
+                        className="bg-ledger-ink border-ledger-line text-ledger-parchment placeholder:text-ledger-stone/50 pl-10 focus-visible:ring-ledger-brass h-11 rounded-sm shadow-sm"
                       />
                     </div>
-                    <p className="text-xs text-[#9B8FC0] mt-2">Enviamos um código para {email}.</p>
+                    <p className="text-xs text-ledger-stone mt-2">Enviamos um código para {email}.</p>
                   </div>
                 ) : (
                   <>
                     <div className="space-y-1.5">
-                      <Label htmlFor="auth-email" className="text-xs font-semibold uppercase tracking-wider text-[#9B8FC0]">
+                      <Label htmlFor="auth-email" className="text-xs font-semibold uppercase tracking-wider text-ledger-stone">
                         E-mail
                       </Label>
                       <div className="relative">
-                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7C6FA4]" />
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ledger-stone/70" />
                         <Input
                           id="auth-email"
                           type="email"
@@ -469,17 +361,17 @@ export function LandingPage() {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="voce@exemplo.com"
-                          className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] placeholder:text-[#5B4F81] pl-10 focus-visible:ring-primary h-11 rounded-lg shadow-sm"
+                          className="bg-ledger-ink border-ledger-line text-ledger-parchment placeholder:text-ledger-stone/50 pl-10 focus-visible:ring-ledger-brass h-11 rounded-sm shadow-sm"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="auth-password" className="text-xs font-semibold uppercase tracking-wider text-[#9B8FC0]">
+                      <Label htmlFor="auth-password" className="text-xs font-semibold uppercase tracking-wider text-ledger-stone">
                         Senha
                       </Label>
                       <div className="relative">
-                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7C6FA4]" />
+                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ledger-stone/70" />
                         <Input
                           id="auth-password"
                           type="password"
@@ -487,27 +379,27 @@ export function LandingPage() {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder={authMode === 'register' ? "Mínimo 6 caracteres" : "Sua senha"}
-                          className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] placeholder:text-[#5B4F81] pl-10 focus-visible:ring-primary h-11 rounded-lg shadow-sm"
+                          className="bg-ledger-ink border-ledger-line text-ledger-parchment placeholder:text-ledger-stone/50 pl-10 focus-visible:ring-ledger-brass h-11 rounded-sm shadow-sm"
                         />
                       </div>
-                      
+
                       {authMode === 'register' && (
                         <div className="pt-2 space-y-1.5 flex flex-col gap-1 mt-1">
                           <div className="flex items-center gap-2 text-xs">
-                            {hasMinLength ? <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-[#5B4F81] shrink-0" />}
-                            <span className={hasMinLength ? "text-emerald-400" : "text-[#5B4F81]"}>Mínimo de 6 caracteres</span>
+                            {hasMinLength ? <Check className="w-3.5 h-3.5 text-ledger-sage shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-ledger-stone/50 shrink-0" />}
+                            <span className={hasMinLength ? "text-ledger-sage" : "text-ledger-stone/60"}>Mínimo de 6 caracteres</span>
                           </div>
                           <div className="flex items-center gap-2 text-xs">
-                            {hasUppercase ? <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-[#5B4F81] shrink-0" />}
-                            <span className={hasUppercase ? "text-emerald-400" : "text-[#5B4F81]"}>1 letra maiúscula</span>
+                            {hasUppercase ? <Check className="w-3.5 h-3.5 text-ledger-sage shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-ledger-stone/50 shrink-0" />}
+                            <span className={hasUppercase ? "text-ledger-sage" : "text-ledger-stone/60"}>1 letra maiúscula</span>
                           </div>
                           <div className="flex items-center gap-2 text-xs">
-                            {hasNumber ? <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-[#5B4F81] shrink-0" />}
-                            <span className={hasNumber ? "text-emerald-400" : "text-[#5B4F81]"}>1 número</span>
+                            {hasNumber ? <Check className="w-3.5 h-3.5 text-ledger-sage shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-ledger-stone/50 shrink-0" />}
+                            <span className={hasNumber ? "text-ledger-sage" : "text-ledger-stone/60"}>1 número</span>
                           </div>
                           <div className="flex items-center gap-2 text-xs">
-                            {hasSpecialChar ? <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-[#5B4F81] shrink-0" />}
-                            <span className={hasSpecialChar ? "text-emerald-400" : "text-[#5B4F81]"}>1 caractere especial</span>
+                            {hasSpecialChar ? <Check className="w-3.5 h-3.5 text-ledger-sage shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-ledger-stone/50 shrink-0" />}
+                            <span className={hasSpecialChar ? "text-ledger-sage" : "text-ledger-stone/60"}>1 caractere especial</span>
                           </div>
                         </div>
                       )}
@@ -522,14 +414,14 @@ export function LandingPage() {
                       id="terms"
                       checked={hasAcceptedTerms}
                       onChange={(e) => setHasAcceptedTerms(e.target.checked)}
-                      className="mt-1 w-4 h-4 rounded border-[#2D214F] bg-[#1A1333] text-primary focus:ring-primary focus:ring-offset-[#130E20] focus:ring-offset-2 shrink-0 accent-primary cursor-pointer"
+                      className="mt-1 w-4 h-4 rounded border-ledger-line bg-ledger-ink text-ledger-brass focus:ring-ledger-brass focus:ring-offset-ledger-card focus:ring-offset-2 shrink-0 accent-ledger-brass cursor-pointer"
                     />
                     <label
                       htmlFor="terms"
-                      className="text-xs font-medium leading-relaxed text-[#9B8FC0] cursor-pointer"
+                      className="text-xs font-medium leading-relaxed text-ledger-stone cursor-pointer"
                     >
                       Eu li e concordo com os{" "}
-                      <Link to="/termos" target="_blank" className="font-semibold text-primary hover:text-white transition-colors">
+                      <Link to="/termos" target="_blank" className="font-semibold text-ledger-brass hover:text-ledger-parchment transition-colors">
                         Termos de Serviço e Política de Privacidade
                       </Link>.
                     </label>
@@ -539,7 +431,7 @@ export function LandingPage() {
                 <Button
                   type="submit"
                   disabled={isSubmitting || (authMode === 'register' && authStep === 'form' && (!isValidPassword || !hasAcceptedTerms))}
-                  className="w-full font-medium h-11 shadow-[0_0_20px_rgba(139,92,246,0.25)] transition-all flex items-center justify-center gap-2 mt-4"
+                  className="w-full bg-ledger-brass text-ledger-brass-foreground hover:bg-ledger-brass/90 font-medium h-11 rounded-sm transition-all flex items-center justify-center gap-2 mt-4"
                 >
                   {isSubmitting ? (
                     <>
@@ -560,10 +452,10 @@ export function LandingPage() {
                 <>
                   <div className="relative my-6">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-[#2D214F]"></div>
+                      <div className="w-full border-t border-ledger-line"></div>
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="bg-[#130E20] px-3 text-[#5B4F81] uppercase tracking-widest font-medium">ou</span>
+                      <span className="bg-ledger-card px-3 text-ledger-stone/70 uppercase tracking-widest font-medium">ou</span>
                     </div>
                   </div>
 
@@ -572,7 +464,7 @@ export function LandingPage() {
                     variant="outline"
                     disabled={isGoogleSubmitting || (authMode === 'register' && !hasAcceptedTerms)}
                     onClick={handleGoogleSignIn}
-                    className="w-full border-[#2D214F] bg-[#1A1333] hover:bg-[#2D214F] text-[#E2D9F3] font-medium h-11 rounded-lg shadow-sm"
+                    className="w-full border-ledger-line bg-ledger-ink hover:bg-ledger-line text-ledger-parchment font-medium h-11 rounded-sm shadow-sm"
                   >
                     {isGoogleSubmitting ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin text-zinc-500" />
@@ -593,9 +485,9 @@ export function LandingPage() {
                 <button
                   type="button"
                   onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
-                  className="text-sm text-[#9B8FC0] hover:text-white hover:underline decoration-[#5B4F81] underline-offset-4 transition-all"
+                  className="text-sm text-ledger-stone hover:text-ledger-parchment hover:underline decoration-ledger-stone/50 underline-offset-4 transition-all"
                 >
-                  {authMode === 'login' 
+                  {authMode === 'login'
                     ? 'Não tem uma conta? Comece aqui'
                     : 'Já possui cadastro? Acesse sua conta'
                   }
