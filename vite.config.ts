@@ -22,8 +22,8 @@ export default defineConfig(({mode}) => {
           name: 'Syncou - Agendamentos',
           short_name: 'Syncou',
           description: 'Gestão inteligente de agendamentos',
-          theme_color: '#0f172a',
-          background_color: '#020617',
+          theme_color: '#F8FAFC',
+          background_color: '#F8FAFC',
           display: 'standalone',
           gcm_sender_id: '103953800507',
           icons: [

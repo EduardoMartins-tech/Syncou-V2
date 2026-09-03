@@ -51,7 +51,7 @@ const CustomToolbar = (toolbar: any) => {
 
   const label = () => {
     const date = format(toolbar.date, 'MMMM yyyy', { locale: ptBR });
-    return <span className="text-lg font-semibold text-white capitalize">{date}</span>;
+    return <span className="text-lg font-semibold text-foreground capitalize">{date}</span>;
   };
 
   return (
@@ -59,20 +59,20 @@ const CustomToolbar = (toolbar: any) => {
       <div className="flex items-center gap-2">
         <button
           onClick={goToCurrent}
-          className="px-4 py-2 text-sm font-medium rounded-md bg-[#1A1333] hover:bg-[#2D214F] text-[#E2D9F3] transition-colors"
+          className="px-4 py-2 text-sm font-medium rounded-md bg-muted hover:bg-accent text-foreground transition-colors"
         >
           Hoje
         </button>
-        <div className="flex items-center bg-[#1A1333] rounded-md overflow-hidden">
+        <div className="flex items-center bg-muted rounded-md overflow-hidden">
           <button
             onClick={goToBack}
-            className="p-2 hover:bg-[#2D214F] text-[#E2D9F3] transition-colors"
+            className="p-2 hover:bg-accent text-foreground transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={goToNext}
-            className="p-2 hover:bg-[#2D214F] text-[#E2D9F3] transition-colors"
+            className="p-2 hover:bg-accent text-foreground transition-colors"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -81,15 +81,15 @@ const CustomToolbar = (toolbar: any) => {
       <div>
         {label()}
       </div>
-      <div className="flex items-center gap-1 bg-[#1A1333] p-1 rounded-lg">
+      <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
         {['month', 'week', 'day', 'agenda'].map((viewName) => (
           <button
             key={viewName}
             onClick={() => toolbar.onView(viewName)}
             className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
               toolbar.view === viewName
-                ? 'bg-violet-600 text-white shadow-sm'
-                : 'text-[#9B8FC0] hover:text-[#E2D9F3] hover:bg-[#2D214F]'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground hover:bg-accent'
             }`}
           >
             {messagesConfig[viewName as keyof typeof messagesConfig] as string}
@@ -130,8 +130,8 @@ const CustomAgendaEvent = ({ event }: any) => {
   const isConfirmed = event.isConfirmed;
   return (
     <div className="flex items-center gap-2">
-      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isConfirmed ? 'bg-[#10B981]' : 'bg-[#F59E0B]'}`} />
-      <span className="font-medium text-[#e8eaed]">{event.title}</span>
+      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isConfirmed ? 'bg-primary' : 'bg-amber-500'}`} />
+      <span className="font-medium text-foreground">{event.title}</span>
     </div>
   );
 };
@@ -150,7 +150,7 @@ export function DashboardCalendar() {
           fetch('/api/appointments', { headers: getAuthHeaders() }),
           fetch('/api/services', { headers: getAuthHeaders() })
         ]);
-        
+
         if (aptRes.ok) setAppointments(await aptRes.json());
         if (srvRes.ok) setServices(await srvRes.json());
       } catch (err) {
@@ -185,11 +185,11 @@ export function DashboardCalendar() {
     });
 
   const eventStyleGetter = (event: any) => {
-    const backgroundColor = event.isConfirmed ? '#10B981' : '#F59E0B';
+    const backgroundColor = event.isConfirmed ? '#7C3AED' : '#F59E0B';
     const style = {
       backgroundColor: backgroundColor,
       borderRadius: '5px',
-      opacity: 0.9,
+      opacity: 0.95,
       color: 'white',
       border: '0px',
       display: 'block',
@@ -208,24 +208,24 @@ export function DashboardCalendar() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 overflow-hidden">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="flex justify-between items-end gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Calendário</h1>
-          <p className="text-[#9B8FC0]">Visualize e gerencie todos os seus agendamentos.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Calendário</h1>
+          <p className="text-muted-foreground">Visualize e gerencie todos os seus agendamentos.</p>
         </div>
       </motion.div>
 
-      <Card className="bg-[#130E20] border-[#2D214F] shadow-sm overflow-visible">
+      <Card className="bg-card border-border shadow-sm overflow-visible">
         <CardContent className="p-6">
           <style dangerouslySetInnerHTML={{__html: `
             .rbc-calendar {
               min-height: 700px;
-              color: #e8eaed;
+              color: var(--foreground);
               font-family: inherit;
               border: none;
             }
@@ -233,13 +233,13 @@ export function DashboardCalendar() {
               border: none;
               background: transparent;
             }
-            
+
             /* Headers */
             .rbc-header {
               padding: 12px 4px;
               border-bottom: none;
               background-color: transparent;
-              color: #9aa0a6;
+              color: var(--muted-foreground);
               font-weight: 500;
               font-size: 0.8rem;
               text-transform: uppercase;
@@ -248,13 +248,13 @@ export function DashboardCalendar() {
               border-left: none !important;
             }
             .rbc-header.rbc-today {
-              color: #E2D9F3;
+              color: var(--foreground);
               background: transparent;
             }
             .rbc-header.rbc-today > span {
               display: inline-block;
-              background: #8B5CF6;
-              color: white;
+              background: var(--primary);
+              color: var(--primary-foreground);
               border-radius: 50%;
               width: 32px;
               height: 32px;
@@ -265,10 +265,10 @@ export function DashboardCalendar() {
 
             /* Month Grid Lines & Borders */
             .rbc-month-row {
-              border-top: 1px solid rgba(255,255,255,0.08);
+              border-top: 1px solid var(--border);
             }
             .rbc-day-bg {
-              border-left: 1px solid rgba(255,255,255,0.08);
+              border-left: 1px solid var(--border);
             }
             .rbc-day-bg:first-child {
               border-left: none;
@@ -279,13 +279,13 @@ export function DashboardCalendar() {
               border-top: none;
             }
             .rbc-time-header-content {
-              border-left: 1px solid rgba(255,255,255,0.08);
+              border-left: 1px solid var(--border);
             }
             .rbc-time-content > * + * > * {
-              border-left: 1px solid rgba(255,255,255,0.08);
+              border-left: 1px solid var(--border);
             }
             .rbc-timeslot-group {
-              border-bottom: 1px solid rgba(255,255,255,0.08);
+              border-bottom: 1px solid var(--border);
               min-height: 60px;
             }
             .rbc-time-slot {
@@ -294,7 +294,7 @@ export function DashboardCalendar() {
 
             /* Today & Other states */
             .rbc-today {
-              background-color: transparent;
+              background-color: var(--accent);
             }
             .rbc-off-range-bg {
               background-color: transparent;
@@ -308,7 +308,7 @@ export function DashboardCalendar() {
               border-bottom: none;
             }
             .rbc-time-gutter .rbc-time-slot {
-              color: #9aa0a6;
+              color: var(--muted-foreground);
               font-size: 0.75rem;
               padding-right: 12px;
               display: flex;
@@ -331,11 +331,11 @@ export function DashboardCalendar() {
               margin-bottom: 2px;
             }
             .rbc-event:hover {
-              filter: brightness(1.2);
+              filter: brightness(1.1);
               z-index: 10 !important;
             }
             .rbc-event.rbc-selected {
-              filter: brightness(1.3);
+              filter: brightness(0.92);
             }
             .rbc-event-content {
               font-size: 0.8rem;
@@ -345,7 +345,7 @@ export function DashboardCalendar() {
               overflow: hidden;
               text-overflow: ellipsis;
             }
-            
+
             /* Month View Event Fix */
             .rbc-month-view .rbc-event {
               border-radius: 4px;
@@ -357,7 +357,7 @@ export function DashboardCalendar() {
               padding: 8px;
               text-align: center;
               font-size: 0.85rem;
-              color: #e8eaed;
+              color: var(--foreground);
               font-weight: 400;
             }
             .rbc-date-cell.rbc-now {
@@ -365,20 +365,21 @@ export function DashboardCalendar() {
             }
             .rbc-date-cell.rbc-now > a {
               display: inline-block;
-              background-color: #8B5CF6;
-              color: white;
+              background-color: var(--primary);
+              color: var(--primary-foreground);
               width: 28px;
               height: 28px;
               line-height: 28px;
               border-radius: 50%;
             }
             .rbc-date-cell.rbc-off-range {
-              color: #5f6368;
+              color: var(--muted-foreground);
+              opacity: 0.6;
             }
 
             /* Current Time Indicator */
             .rbc-current-time-indicator {
-              background-color: #ea4335;
+              background-color: var(--destructive);
               height: 2px;
               z-index: 3;
             }
@@ -388,7 +389,7 @@ export function DashboardCalendar() {
               width: 12px;
               height: 12px;
               border-radius: 50%;
-              background-color: #ea4335;
+              background-color: var(--destructive);
               position: absolute;
               left: -6px;
               top: -5px;
@@ -407,20 +408,20 @@ export function DashboardCalendar() {
               background-color: transparent !important;
             }
             .rbc-agenda-view table.rbc-agenda-table tbody > tr:hover {
-              background-color: rgba(255,255,255,0.03) !important;
+              background-color: var(--muted) !important;
             }
             .rbc-agenda-view table.rbc-agenda-table tbody > tr > td + td {
               border-left: none;
             }
             .rbc-agenda-view table.rbc-agenda-table tbody > tr + tr > td {
-              border-top: 1px solid rgba(255,255,255,0.08);
+              border-top: 1px solid var(--border);
             }
             .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
-              border-bottom: 2px solid rgba(255,255,255,0.08);
+              border-bottom: 2px solid var(--border);
               padding: 16px;
               text-align: left;
               font-weight: 500;
-              color: #9aa0a6;
+              color: var(--muted-foreground);
               background-color: transparent;
               text-transform: uppercase;
               font-size: 0.8rem;
@@ -428,16 +429,16 @@ export function DashboardCalendar() {
             }
             .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
               padding: 16px;
-              color: #e8eaed;
+              color: var(--foreground);
               background-color: transparent !important;
             }
             .rbc-agenda-date-cell {
               font-weight: 500;
-              color: #8B5CF6;
+              color: var(--primary);
             }
             .rbc-agenda-time-cell {
               font-size: 0.85rem;
-              color: #9aa0a6;
+              color: var(--muted-foreground);
               font-weight: 400;
             }
             .rbc-agenda-event-cell {
@@ -456,7 +457,7 @@ export function DashboardCalendar() {
           `}} />
           {isFetching ? (
             <div className="h-[700px] flex items-center justify-center">
-               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500"></div>
+               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -481,11 +482,11 @@ export function DashboardCalendar() {
                   }
                 }}
               />
-              <div className="flex justify-start sm:justify-end items-center gap-4 pt-4 border-t border-[#2D214F] text-sm font-medium">
-                <span className="text-[#5B4F81] mr-2">Legenda:</span>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-[#10B981]/10 border border-[#10B981]/20 rounded-md transition-all duration-300">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
-                  <span className="text-[#10B981] flex items-center">
+              <div className="flex justify-start sm:justify-end items-center gap-4 pt-4 border-t border-border text-sm font-medium">
+                <span className="text-muted-foreground/70 mr-2">Legenda:</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-md transition-all duration-300">
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                  <span className="text-primary flex items-center">
                     Confirmado (
                     <div className="relative inline-flex items-center justify-center min-w-[12px] h-[20px] mx-1">
                       <AnimatePresence mode="popLayout" initial={false}>
@@ -503,9 +504,9 @@ export function DashboardCalendar() {
                     )
                   </span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-[#F59E0B]/10 border border-[#F59E0B]/20 rounded-md transition-all duration-300">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]" />
-                  <span className="text-[#F59E0B] flex items-center">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-md transition-all duration-300">
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                  <span className="text-amber-700 dark:text-amber-400 flex items-center">
                     Pendente (
                     <div className="relative inline-flex items-center justify-center min-w-[12px] h-[20px] mx-1">
                       <AnimatePresence mode="popLayout" initial={false}>

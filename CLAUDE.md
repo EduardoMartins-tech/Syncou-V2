@@ -31,13 +31,26 @@ no Railway. Frontend React/Vite (PWA). Usado tanto em desktop quanto mobile
   ação em telas diferentes. Decisão: violeta é a única cor primária.
   Âmbar foi removido de todos os CTAs (Landing, Dashboard, Onboarding,
   ProviderPage) — ver commit `996eb6f`.
-- **Redesign visual "Ficha de Agendamento"** (em andamento, ver
-  `PROGRESS.md` no worktree ativo): identidade nova do zero pras páginas
-  públicas (Landing, 404, ProviderPage) — paleta tinta/pergaminho/latão,
-  tipografia Bitter + IBM Plex, conceito de ficha/senha de fila em vez de
-  "órbita". Dashboard segue com a identidade violeta atual por enquanto;
-  os dois sistemas visuais coexistem até decisão de estender o redesign
-  pro Dashboard ou não.
+- Redesign visual "Ficha de Agendamento" (histórico, ver `PROGRESS.md`):
+  identidade tinta/pergaminho/latão pras páginas públicas, tipografia
+  Bitter + IBM Plex. **Descartado antes de ir pra produção** — o usuário
+  achou o resultado "dourado demais", não o tom escuro/sóbrio que
+  esperava. Substituído pelo redesign abaixo.
+- **Redesign completo "Índigo & Laranja"** (concluído neste worktree, ver
+  `PROGRESS.md`): identidade nova do zero pra **plataforma inteira**
+  (páginas públicas + Dashboard, não só o público) — modo claro em vez do
+  escuro que a plataforma sempre teve. Roxo/índigo elétrico (`--primary`,
+  `#7C3AED`) carrega marca/estrutura/seleção; laranja (`--cta` /
+  `--cta-strong`) é reservado exclusivamente para o botão de conversão —
+  nunca decoração, nunca estrutura. Regra 60 (neutro) / 30 (identidade) /
+  10 (ação). Verde/âmbar seguem só como cor de status (livre/pendência),
+  nunca como cor de marca. Tipografia: Plus Jakarta Sans (já era a fonte
+  do Dashboard) + IBM Plex Mono pra dados tabulares (horário, preço,
+  duração). Decisão registrada: violeta e laranja são cores distintas de
+  propósito — a antiga regra "violeta é a única cor de ação" foi revista
+  porque o laranja agora está escopado estritamente ao componente
+  `Button variant="cta"`, sem repetir o problema do âmbar solto em hex
+  cru que motivou aquela regra originalmente.
 - Corrigidos bugs funcionais reais encontrados durante o redesign: botão 
   de editar serviço que não existia (faltava rota PUT no backend), switch 
   "Ativo" que ficou fora da tag <form> e sempre salvava inativo, WhatsApp 
@@ -50,11 +63,10 @@ no Railway. Frontend React/Vite (PWA). Usado tanto em desktop quanto mobile
 ## Pendências conhecidas
 - Rastreamento de "No-show" (cliente não compareceu, distinto de 
   cancelamento) — escopo futuro, não confundir com cancelamento comum.
-- Página "Conta" ainda não recebeu nenhum dos dois redesigns.
-- Cores do `DashboardCalendar.tsx` (eventos) ainda fora do tema — hardcoded
-  via CSS-in-JS, não pelos tokens.
 - Revisão fina de `motion`/animações genéricas repetidas — ainda não feita.
-- Redesign "Ficha de Agendamento" só cobre Landing/404/ProviderPage até
-  agora; decisão pendente sobre estender pro Dashboard.
 - Ambiente local não tem Postgres — fluxos que dependem de banco (cadastro,
   login, reserva) só podem ser testados de verdade após deploy no Railway.
+  O redesign "Índigo & Laranja" foi verificado localmente via Playwright
+  (Landing desktop/mobile, 404) sem erros de console; o Dashboard e o
+  fluxo de reserva completo do ProviderPage ainda precisam de validação
+  visual real pós-deploy.

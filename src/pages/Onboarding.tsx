@@ -48,14 +48,14 @@ export function Onboarding() {
   // Verify Auth State
   useEffect(() => {
     if (loading) return;
-    
+
     if (currentUser) {
       setValue('displayName', currentUser.displayName || '');
       if (currentUser.displayName && !slugValue) {
         const generatedSlug = currentUser.displayName
           .toLowerCase()
           .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
+          .replace(new RegExp("[\\u0300-\\u036f]", "g"), "")
           .replace(/[^a-z0-9\s-]/g, "")
           .replace(/\s+/g, "-")
           .slice(0, 30);
@@ -112,7 +112,7 @@ export function Onboarding() {
     setSaving(true);
     try {
       const cleanWhatsapp = data.whatsapp.replace(/\D/g, '');
-      
+
       const success = await updateUser({
         slug: data.slug,
         displayName: data.displayName,
@@ -132,9 +132,9 @@ export function Onboarding() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B0914] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center">
-          <Logo className="w-16 h-16 text-primary drop-shadow-[0_0_15px_rgba(139,92,246,0.5)] mb-4" />
+          <Logo className="w-16 h-16 text-primary drop-shadow-[0_0_15px_rgba(124,58,237,0.3)] mb-4" />
         </div>
       </div>
     );
@@ -145,39 +145,39 @@ export function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0914] text-white font-sans flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background text-foreground font-sans flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full max-w-xl relative z-10"
       >
-        <Card className="border border-[#2D214F] bg-[#130E20]/80 backdrop-blur-md shadow-2xl">
+        <Card className="border border-border bg-card shadow-xl">
           <CardHeader className="text-center pb-4">
             <div className="mx-auto flex items-center justify-center mb-4">
-              <Logo className="w-16 h-16 text-primary drop-shadow-[0_0_15px_rgba(139,92,246,0.5)]" />
+              <Logo className="w-16 h-16 text-primary drop-shadow-[0_0_15px_rgba(124,58,237,0.3)]" />
             </div>
-            <CardTitle className="text-2xl md:text-3xl font-extrabold tracking-tight text-white mb-2">
+            <CardTitle className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground mb-2">
               Seja bem-vindo ao Syncou!
             </CardTitle>
-            <CardDescription className="text-[#9B8FC0] max-w-sm mx-auto">
+            <CardDescription className="text-muted-foreground max-w-sm mx-auto">
               Complete seu perfil profissional para começar a receber agendamentos.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="displayName" className="text-[#E2D9F3] font-medium text-sm">
+                <Label htmlFor="displayName" className="text-foreground font-medium text-sm">
                   Nome do Profissional ou Negócio
                 </Label>
                 <Input
                   id="displayName"
                   {...register('displayName')}
                   placeholder="Seu Nome Completo"
-                  className="bg-[#0B0914] border-[#2D214F] text-white placeholder:text-[#5B4F81] focus-visible:ring-primary focus:border-primary h-11"
+                  className="bg-background border-border text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-primary focus:border-primary h-11"
                 />
                 {errors.displayName && (
-                  <p className="text-xs text-red-400 flex items-center gap-1">
+                  <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
                     <AlertCircle className="w-3.5 h-3.5" />
                     {errors.displayName.message}
                   </p>
@@ -185,20 +185,20 @@ export function Onboarding() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="whatsapp" className="text-[#E2D9F3] font-medium text-sm">
+                <Label htmlFor="whatsapp" className="text-foreground font-medium text-sm">
                   Seu WhatsApp
                 </Label>
                 <Input
                   id="whatsapp"
                   {...register('whatsapp')}
                   placeholder="Ex: 5511999999999"
-                  className="bg-[#0B0914] border-[#2D214F] text-white placeholder:text-[#5B4F81] focus-visible:ring-primary focus:border-primary h-11"
+                  className="bg-background border-border text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-primary focus:border-primary h-11"
                 />
-                <p className="text-[11px] text-[#5B4F81]">
+                <p className="text-[11px] text-muted-foreground">
                   DDI + DDD + Número (apenas dígitos). Exemplo: 5511999999999.
                 </p>
                 {errors.whatsapp && (
-                  <p className="text-xs text-red-400 flex items-center gap-1">
+                  <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
                     <AlertCircle className="w-3.5 h-3.5" />
                     {errors.whatsapp.message}
                   </p>
@@ -206,41 +206,41 @@ export function Onboarding() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="slug" className="text-[#E2D9F3] font-medium text-sm">
+                <Label htmlFor="slug" className="text-foreground font-medium text-sm">
                   Link Personalizado da sua Agenda
                 </Label>
                 <div className="relative flex items-center">
-                  <span className="absolute left-3 text-[#5B4F81] text-sm select-none font-medium">
+                  <span className="absolute left-3 text-muted-foreground text-sm select-none font-medium">
                     syncou.app/p/
                   </span>
                   <Input
                     id="slug"
                     {...register('slug')}
                     placeholder="seu-nome"
-                    className="bg-[#0B0914] border-[#2D214F] text-white placeholder:text-[#5B4F81] focus-visible:ring-primary focus:border-primary pl-[115px] h-11"
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-primary focus:border-primary pl-[115px] h-11"
                   />
                 </div>
 
                 {slugValue && slugValue.length >= 3 && (
                   <div className="flex items-center gap-2 mt-1.5 transition-all text-xs">
                     {checkingSlug ? (
-                      <span className="text-[#9B8FC0] flex items-center gap-1">
+                      <span className="text-muted-foreground flex items-center gap-1">
                         <Loader2 className="w-3 h-3 animate-spin text-primary" />
                         Verificando link...
                       </span>
                     ) : slugAvailable ? (
-                      <span className="text-emerald-400 flex items-center gap-1 font-medium bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Disponível!
+                      <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Disponível!
                       </span>
                     ) : (
-                      <span className="text-red-400 flex items-center gap-1 font-medium bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">
-                        <AlertCircle className="w-3.5 h-3.5 text-red-400" /> Em uso por outro profissional.
+                      <span className="text-red-600 dark:text-red-400 flex items-center gap-1 font-medium bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">
+                        <AlertCircle className="w-3.5 h-3.5 text-red-600 dark:text-red-400" /> Em uso por outro profissional.
                       </span>
                     )}
                   </div>
                 )}
                 {errors.slug && (
-                  <p className="text-xs text-red-400 flex items-center gap-1">
+                  <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
                     <AlertCircle className="w-3.5 h-3.5" />
                     {errors.slug.message}
                   </p>
@@ -249,8 +249,9 @@ export function Onboarding() {
 
               <Button
                 type="submit"
+                variant="cta"
                 disabled={saving || checkingSlug || slugAvailable === false}
-                className="w-full h-12 font-semibold transition-all shadow-md flex items-center justify-center gap-2"
+                className="w-full h-12 font-semibold transition-all flex items-center justify-center gap-2"
               >
                 {saving ? (
                   <>

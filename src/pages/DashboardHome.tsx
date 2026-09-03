@@ -726,23 +726,23 @@ export function DashboardHome() {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#130E20] border border-[#2D214F] rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-lg"
+          className="bg-card border border-border rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-lg"
         >
           <div className="flex items-start sm:items-center gap-3">
-            <div className="relative p-3 bg-[#0B0914] border border-[#2D214F] rounded-xl text-[#9B8FC0] flex-shrink-0">
+            <div className="relative p-3 bg-muted border border-border rounded-xl text-muted-foreground flex-shrink-0">
               <CalendarIcon className="w-6 h-6" />
               {/* Nó pulsante indicando desconexão/ação necessária */}
               <span className="absolute -top-1 -right-1 flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-primary border-2 border-[#130E20]"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-primary border-2 border-card"></span>
               </span>
             </div>
             <div>
-              <h3 className="text-white font-semibold font-outfit text-lg">Conecte sua Órbita</h3>
-              <p className="text-[#9B8FC0] text-sm mt-0.5">Vincule sua conta do Google Calendar para ativar a sincronização bidirecional automática.</p>
+              <h3 className="text-foreground font-semibold text-lg">Conecte sua agenda</h3>
+              <p className="text-muted-foreground text-sm mt-0.5">Vincule sua conta do Google Calendar para ativar a sincronização bidirecional automática.</p>
             </div>
           </div>
-          <Button onClick={() => navigate('/dashboard/settings#google-calendar')} className="w-full sm:w-auto font-semibold h-11 px-6 transition-all">
+          <Button variant="cta" onClick={() => navigate('/dashboard/settings#google-calendar')} className="w-full sm:w-auto font-semibold h-11 px-6 transition-all">
             Conectar Agenda
           </Button>
         </motion.div>
@@ -755,24 +755,24 @@ export function DashboardHome() {
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Visão Geral</h1>
-          <p className="text-[#9B8FC0]">Acompanhe seus agendamentos e gerencie seus serviços.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Visão Geral</h1>
+          <p className="text-muted-foreground">Acompanhe seus agendamentos e gerencie seus serviços.</p>
         </div>
         <div className="flex flex-row flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto justify-end">
           {currentSlug && (
-             <Button className="w-full sm:w-auto shadow-lg shadow-primary/20" onClick={() => window.open(`/p/${currentSlug}`, '_blank')}>
+             <Button variant="cta" className="w-full sm:w-auto shadow-sm" onClick={() => window.open(`/p/${currentSlug}`, '_blank')}>
                <Plus className="w-4 h-4 mr-2" />
                Agendar Agora
              </Button>
           )}
           <div className="flex flex-row gap-2 w-full sm:w-auto">
-            <Button variant="outline" className="flex-1 sm:flex-none w-full sm:w-auto bg-[#130E20] border-[#2D214F] text-[#E2D9F3] hover:bg-[#1A1333] hover:text-white px-2 sm:px-4" onClick={() => handleSyncCalendar(false)} title="Sincroniza seus agendamentos para o seu Google Calendar. Útil caso algum agendamento tenha falhado.">
+            <Button variant="outline" className="flex-1 sm:flex-none w-full sm:w-auto bg-card border-border text-foreground hover:bg-muted hover:text-foreground px-2 sm:px-4" onClick={() => handleSyncCalendar(false)} title="Sincroniza seus agendamentos para o seu Google Calendar. Útil caso algum agendamento tenha falhado.">
               <RefreshCcw className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Sincronizar</span>
               <span className="sm:hidden ml-1">Sincronizar</span>
             </Button>
             {currentSlug && (
-               <Button variant="outline" className="flex-1 sm:flex-none w-full sm:w-auto bg-[#130E20] border-[#2D214F] text-[#E2D9F3] hover:bg-[#1A1333] hover:text-white px-2 sm:px-4" onClick={() => {
+               <Button variant="outline" className="flex-1 sm:flex-none w-full sm:w-auto bg-card border-border text-foreground hover:bg-muted hover:text-foreground px-2 sm:px-4" onClick={() => {
                   navigator.clipboard.writeText(`${window.location.origin}/p/${currentSlug}`);
                   notifySuccess("Link copiado!");
                }}>
@@ -786,24 +786,24 @@ export function DashboardHome() {
       </motion.div>
 
       {/* Tabs Switcher */}
-      <div className="flex space-x-2 rounded-xl bg-[#130E20] p-1 border border-[#2D214F] w-full lg:w-fit mb-6 overflow-x-auto hide-scrollbar">
-        <button 
+      <div className="flex space-x-2 rounded-xl bg-muted p-1 border border-border w-full lg:w-fit mb-6 overflow-x-auto hide-scrollbar">
+        <button
           onClick={() => setActiveTab('agendamentos')}
-          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'agendamentos' ? 'bg-[#2D214F] text-white shadow' : 'text-[#9B8FC0] hover:bg-[#1A1333] hover:text-white'}`}
+          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'agendamentos' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <CalendarIcon className="w-4 h-4 inline-block mr-2 mb-0.5" />
           Agendamentos
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab('servicos')}
-          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'servicos' ? 'bg-[#2D214F] text-white shadow' : 'text-[#9B8FC0] hover:bg-[#1A1333] hover:text-white'}`}
+          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'servicos' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <span className="w-4 h-4 inline-flex items-center justify-center rounded-sm bg-primary/20 text-primary text-[10px] font-bold mr-2 mb-0.5">S</span>
           Serviços
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab('analytics')}
-          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'analytics' ? 'bg-[#2D214F] text-white shadow' : 'text-[#9B8FC0] hover:bg-[#1A1333] hover:text-white'}`}
+          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'analytics' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <TrendingUp className="w-4 h-4 inline-block mr-2 mb-0.5" />
           Analytics
@@ -814,11 +814,11 @@ export function DashboardHome() {
         <div className="space-y-6 animate-in fade-in duration-300 slide-in-from-bottom-2 w-full lg:max-w-5xl mx-auto">
           {/* Header & Filters */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
               Visão de Negócio
             </h2>
-            <div className="flex bg-[#1A1333] rounded-lg p-1 w-full sm:w-auto overflow-x-auto hide-scrollbar">
+            <div className="flex bg-muted rounded-lg p-1 w-full sm:w-auto overflow-x-auto hide-scrollbar">
               {[
                 { id: 'today', label: 'Hoje' },
                 { id: '7days', label: '7 Dias' },
@@ -828,7 +828,7 @@ export function DashboardHome() {
                 <button
                   key={period.id}
                   onClick={() => setAnalyticsPeriod(period.id as any)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap flex-1 sm:flex-none ${analyticsPeriod === period.id ? 'bg-[#2D214F] text-white shadow-sm' : 'text-[#9B8FC0] hover:text-white'}`}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap flex-1 sm:flex-none ${analyticsPeriod === period.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                 >
                   {period.label}
                 </button>
@@ -838,11 +838,11 @@ export function DashboardHome() {
 
           {isFetchingAppointments ? (
             <div className="space-y-6">
-              <div className="bg-[#130E20] rounded-2xl h-32 animate-pulse border border-[#2D214F]" />
+              <div className="bg-card rounded-2xl h-32 animate-pulse border border-border" />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                 <div className="bg-[#130E20] rounded-2xl h-24 animate-pulse border border-[#2D214F]" />
-                 <div className="bg-[#130E20] rounded-2xl h-24 animate-pulse border border-[#2D214F]" />
-                 <div className="bg-[#130E20] rounded-2xl h-24 animate-pulse border border-[#2D214F]" />
+                 <div className="bg-card rounded-2xl h-24 animate-pulse border border-border" />
+                 <div className="bg-card rounded-2xl h-24 animate-pulse border border-border" />
+                 <div className="bg-card rounded-2xl h-24 animate-pulse border border-border" />
               </div>
             </div>
           ) : (
@@ -852,26 +852,26 @@ export function DashboardHome() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className="bg-[#130E20] border border-[#2D214F] rounded-2xl p-6 relative overflow-hidden"
+                className="bg-card border border-border rounded-2xl p-6 relative overflow-hidden"
               >
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                   <div>
-                    <h3 className="text-sm font-medium text-[#9B8FC0] mb-2 flex items-center gap-2">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
                       Faturamento Realizado
                     </h3>
-                    <div className="text-4xl sm:text-5xl font-bold text-white tracking-tight flex items-baseline gap-1">
-                      <span className="text-xl sm:text-2xl text-[#9B8FC0] font-medium">R$</span>
+                    <div className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight flex items-baseline gap-1">
+                      <span className="text-xl sm:text-2xl text-muted-foreground font-medium">R$</span>
                       {analyticsMetrics.realizedRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                     {analyticsMetrics.projectedRevenue > 0 && (
-                      <p className="mt-2 text-sm text-[#9B8FC0]">
-                        <span className="text-emerald-400 font-medium">+ R$ {analyticsMetrics.projectedRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> adicionais previstos
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">+ R$ {analyticsMetrics.projectedRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> adicionais previstos
                       </p>
                     )}
                   </div>
-                  <div className="bg-[#1A1333] border border-[#2D214F] rounded-xl px-4 py-3 text-center min-w-[120px]">
-                    <span className="block text-xs font-medium text-[#9B8FC0] mb-1">Taxa Cancelamento</span>
-                    <span className={`text-xl font-bold ${analyticsMetrics.cancellationRate > 20 ? 'text-rose-400' : 'text-white'}`}>
+                  <div className="bg-muted border border-border rounded-xl px-4 py-3 text-center min-w-[120px]">
+                    <span className="block text-xs font-medium text-muted-foreground mb-1">Taxa Cancelamento</span>
+                    <span className={`text-xl font-bold ${analyticsMetrics.cancellationRate > 20 ? 'text-rose-600 dark:text-rose-400' : 'text-foreground'}`}>
                       {analyticsMetrics.cancellationRate}%
                     </span>
                   </div>
@@ -880,17 +880,17 @@ export function DashboardHome() {
 
               {/* Secondary Metrics */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="bg-[#130E20] p-5 rounded-2xl border border-[#2D214F]">
-                  <h3 className="text-xs font-medium text-[#9B8FC0] uppercase tracking-wider mb-2">Concluídos</h3>
-                  <div className="text-3xl font-bold text-white">{analyticsMetrics.completed}</div>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="bg-card p-5 rounded-2xl border border-border">
+                  <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Concluídos</h3>
+                  <div className="text-3xl font-bold text-foreground">{analyticsMetrics.completed}</div>
                 </motion.div>
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }} className="bg-[#130E20] p-5 rounded-2xl border border-[#2D214F] border-l-2 border-l-amber-500/50">
-                  <h3 className="text-xs font-medium text-[#9B8FC0] uppercase tracking-wider mb-2">Pendentes</h3>
-                  <div className="text-3xl font-bold text-white">{analyticsMetrics.pending}</div>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }} className="bg-card p-5 rounded-2xl border border-border border-l-2 border-l-amber-500/50">
+                  <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Pendentes</h3>
+                  <div className="text-3xl font-bold text-foreground">{analyticsMetrics.pending}</div>
                 </motion.div>
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }} className="bg-[#130E20] p-5 rounded-2xl border border-[#2D214F]">
-                  <h3 className="text-xs font-medium text-[#9B8FC0] uppercase tracking-wider mb-2">Cancelados</h3>
-                  <div className="text-3xl font-bold text-white">{analyticsMetrics.cancelled}</div>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }} className="bg-card p-5 rounded-2xl border border-border">
+                  <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Cancelados</h3>
+                  <div className="text-3xl font-bold text-foreground">{analyticsMetrics.cancelled}</div>
                 </motion.div>
               </div>
 
@@ -901,23 +901,23 @@ export function DashboardHome() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.4 }}
-                  className="bg-[#130E20] border border-[#2D214F] rounded-2xl p-6 lg:col-span-2"
+                  className="bg-card border border-border rounded-2xl p-6 lg:col-span-2"
                 >
-                  <h3 className="text-sm font-semibold text-white mb-6">Volume de Agendamentos</h3>
+                  <h3 className="text-sm font-semibold text-foreground mb-6">Volume de Agendamentos</h3>
                   <div className="h-[220px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={getChartData()} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                        <XAxis 
-                          dataKey="name" 
-                          stroke="#5B4F81" 
-                          fontSize={11} 
-                          tickLine={false} 
-                          axisLine={false} 
+                        <XAxis
+                          dataKey="name"
+                          stroke="#94A3B8"
+                          fontSize={11}
+                          tickLine={false}
+                          axisLine={false}
                           dy={10}
                         />
-                        <Tooltip 
-                          cursor={{ fill: '#2D214F', opacity: 0.4 }}
-                          contentStyle={{ backgroundColor: '#1A1333', border: '1px solid #2D214F', borderRadius: '8px', color: '#fff' }}
+                        <Tooltip
+                          cursor={{ fill: 'var(--muted)', opacity: 0.6 }}
+                          contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--foreground)' }}
                           itemStyle={{ color: 'var(--primary)', fontWeight: 'bold' }}
                         />
                         <Bar 
@@ -937,11 +937,11 @@ export function DashboardHome() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.5 }}
-                  className="bg-[#130E20] border border-[#2D214F] rounded-2xl p-6 flex flex-col"
+                  className="bg-card border border-border rounded-2xl p-6 flex flex-col"
                 >
-                  <h3 className="text-sm font-semibold text-white mb-6">Top Serviços</h3>
+                  <h3 className="text-sm font-semibold text-foreground mb-6">Top Serviços</h3>
                   {analyticsMetrics.topServices.length === 0 ? (
-                    <div className="flex-1 flex items-center justify-center text-sm text-[#5B4F81] text-center">
+                    <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground/70 text-center">
                       Nenhum serviço agendado no período.
                     </div>
                   ) : (
@@ -949,12 +949,12 @@ export function DashboardHome() {
                       {analyticsMetrics.topServices.map((service, idx) => (
                         <div key={idx} className="flex items-center justify-between group">
                           <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="w-6 h-6 rounded bg-[#2D214F] text-[#9B8FC0] flex items-center justify-center text-xs font-bold shrink-0">
+                            <div className="w-6 h-6 rounded bg-muted text-muted-foreground flex items-center justify-center text-xs font-bold shrink-0">
                               {idx + 1}
                             </div>
-                            <span className="text-sm text-[#E2D9F3] font-medium truncate">{service.name}</span>
+                            <span className="text-sm text-foreground font-medium truncate">{service.name}</span>
                           </div>
-                          <span className="text-sm text-white font-bold ml-2 shrink-0">
+                          <span className="text-sm text-foreground font-bold ml-2 shrink-0">
                             R$ {service.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
                           </span>
                         </div>
@@ -973,10 +973,10 @@ export function DashboardHome() {
         {/* Appointments Section */}
            <div className="flex flex-col gap-4">
              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-               <h2 className="text-xl font-bold text-white flex items-center gap-2">
+               <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                  <CalendarIcon className="w-5 h-5 text-primary" />
                  Agendamentos
-                 <span className="bg-[#1A1333] text-[#E2D9F3] text-xs px-2 py-1 rounded-full">{filteredAppointments.length}</span>
+                 <span className="bg-muted text-foreground text-xs px-2 py-1 rounded-full">{filteredAppointments.length}</span>
                </h2>
                
                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
@@ -998,7 +998,7 @@ export function DashboardHome() {
                        if (p === 'granted') notifySuccess('Notificações ativadas! (Nota: isso apenas mostra que a permissão foi dada no browser)');
                      }} 
                      variant="outline" 
-                     className="border-amber-500/50 text-amber-500 hover:text-amber-400 hover:bg-amber-500/10 h-9 px-3 shrink-0"
+                     className="border-amber-500/50 text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 dark:text-amber-400 dark:hover:text-amber-300 h-9 px-3 shrink-0"
                    >
                      <Bell className="w-4 h-4 mr-2" />
                      <span>Ativar Notificações</span>
@@ -1008,9 +1008,9 @@ export function DashboardHome() {
                    placeholder="Filtrar por nome..." 
                    value={filterName}
                    onChange={e => setFilterName(e.target.value)}
-                   className="bg-[#130E20] border-[#2D214F] text-white h-9 placeholder:text-[#5B4F81] focus-visible:ring-primary w-[150px] sm:w-[200px]"
+                   className="bg-card border-border text-foreground h-9 placeholder:text-muted-foreground/70 focus-visible:ring-primary w-[150px] sm:w-[200px]"
                  />
-                 <Button onClick={exportToCSV} variant="outline" className="border-[#2D214F] text-[#E2D9F3] hover:text-white hover:bg-[#2D214F]/50 h-9 px-3 shrink-0">
+                 <Button onClick={exportToCSV} variant="outline" className="border-border text-foreground hover:text-foreground hover:bg-muted/50 h-9 px-3 shrink-0">
                    <Download className="w-4 h-4 sm:mr-2" />
                    <span className="hidden sm:inline">Exportar CSV</span>
                  </Button>
@@ -1024,16 +1024,16 @@ export function DashboardHome() {
                    key={status}
                    onClick={() => setFilterStatus(status)}
                    className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 shrink-0 snap-start ${
-                     filterStatus === status 
-                       ? 'bg-[#2D214F] text-white shadow-sm border border-[#4B3B7A]' 
-                       : 'bg-[#130E20] border border-[#2D214F] text-[#9B8FC0] hover:text-white hover:border-[#4B3B7A]'
+                     filterStatus === status
+                       ? 'bg-primary text-primary-foreground shadow-sm border border-primary'
+                       : 'bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
                    }`}
                  >
                    {status === 'Pendente' ? 'Pendentes' : status === 'Confirmado' ? 'Confirmados' : status === 'Cancelado' ? 'Cancelados' : status === 'Concluído' ? 'Concluídos' : 'Todos'}
                    <span className={`text-xs px-1.5 py-0.5 rounded-full ${
                      filterStatus === status
-                       ? 'bg-white/20 text-white'
-                       : 'bg-[#2D214F] text-[#E2D9F3]'
+                       ? 'bg-white/20 text-primary-foreground'
+                       : 'bg-muted text-foreground'
                    }`}>
                      {statusCounts[status] || 0}
                    </span>
@@ -1046,24 +1046,24 @@ export function DashboardHome() {
               {isFetchingAppointments ? (
                 <>
                   {[...Array(3)].map((_, i) => (
-                    <Card key={i} className="bg-[#130E20] border-[#2D214F] shadow-sm">
+                    <Card key={i} className="bg-card border-border shadow-sm">
                       <CardContent className="p-5">
                         <div className="flex justify-between items-start mb-4">
                           <div className="space-y-2">
-                             <div className="h-6 w-32 bg-[#1A1333] rounded animate-pulse" />
-                             <div className="h-4 w-24 bg-[#1A1333] rounded animate-pulse" />
+                             <div className="h-6 w-32 bg-muted rounded animate-pulse" />
+                             <div className="h-4 w-24 bg-muted rounded animate-pulse" />
                           </div>
-                          <div className="h-6 w-20 bg-[#1A1333] rounded-full animate-pulse" />
+                          <div className="h-6 w-20 bg-muted rounded-full animate-pulse" />
                         </div>
-                        <div className="bg-[#0B0914] rounded-lg p-3 flex justify-between items-center mb-4 border border-[#2D214F]">
-                           <div className="h-4 w-32 bg-[#1A1333] rounded animate-pulse" />
-                           <div className="h-4 w-16 bg-[#1A1333] rounded animate-pulse" />
+                        <div className="bg-muted rounded-lg p-3 flex justify-between items-center mb-4 border border-border">
+                           <div className="h-4 w-32 bg-muted rounded animate-pulse" />
+                           <div className="h-4 w-16 bg-muted rounded animate-pulse" />
                         </div>
                         <div className="flex flex-col gap-2 mt-4">
-                          <div className="h-9 w-full bg-[#1A1333] rounded animate-pulse" />
+                          <div className="h-9 w-full bg-muted rounded animate-pulse" />
                           <div className="flex gap-2">
-                            <div className="h-9 flex-1 bg-[#1A1333] rounded animate-pulse" />
-                            <div className="h-9 flex-1 bg-[#1A1333] rounded animate-pulse" />
+                            <div className="h-9 flex-1 bg-muted rounded animate-pulse" />
+                            <div className="h-9 flex-1 bg-muted rounded animate-pulse" />
                           </div>
                         </div>
                       </CardContent>
@@ -1071,14 +1071,14 @@ export function DashboardHome() {
                   ))}
                 </>
               ) : filteredAppointments.length === 0 ? (
-                <div className="text-center p-8 border border-dashed border-[#2D214F] rounded-xl bg-[#130E20]">
-                   <p className="text-[#9B8FC0]">Nenhum agendamento encontrado.</p>
+                <div className="text-center p-8 border border-dashed border-border rounded-xl bg-card">
+                   <p className="text-muted-foreground">Nenhum agendamento encontrado.</p>
                    {filterName || filterStatus !== 'Todos' ? (
                      <Button variant="link" onClick={() => { setFilterName(''); setFilterStatus('Todos'); }} className="text-primary mt-2">
                        Limpar filtros
                      </Button>
                    ) : (
-                     <p className="text-sm text-[#5B4F81] mt-2">Compartilhe seu link para receber clientes.</p>
+                     <p className="text-sm text-muted-foreground/70 mt-2">Compartilhe seu link para receber clientes.</p>
                    )}
                 </div>
               ) : (
@@ -1093,16 +1093,16 @@ export function DashboardHome() {
                     transition={{ duration: 0.4, delay: 0.1 + (index * 0.05), ease: [0.16, 1, 0.3, 1] }}
                     layout
                   >
-                    <Card className="bg-[#130E20] border-[#2D214F] shadow-sm hover:border-primary/30 transition-all overflow-hidden group">
+                    <Card className="bg-card border-border shadow-sm hover:border-primary/30 transition-all overflow-hidden group">
                     <CardContent className="p-0">
                       <div className="flex flex-col md:flex-row p-4 gap-4 items-start md:items-stretch">
                         
                         {/* Coluna 1: Data e Hora */}
-                        <div className="flex-shrink-0 md:w-32 md:border-r border-[#2D214F] md:pr-4 flex flex-row md:flex-col items-center md:items-start md:justify-center gap-3 md:gap-0">
-                          <div className="font-outfit font-bold text-2xl text-white">
+                        <div className="flex-shrink-0 md:w-32 md:border-r border-border md:pr-4 flex flex-row md:flex-col items-center md:items-start md:justify-center gap-3 md:gap-0">
+                          <div className="font-bold text-2xl text-foreground">
                              {new Date(apt.startAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                           </div>
-                          <div className="text-xs text-[#9B8FC0] mt-0.5 font-medium">
+                          <div className="text-xs text-muted-foreground mt-0.5 font-medium">
                              {new Date(apt.startAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                           </div>
                         </div>
@@ -1110,12 +1110,12 @@ export function DashboardHome() {
                         {/* Coluna 2: Informações do Cliente */}
                         <div className="flex-1 min-w-0 md:py-1">
                            <div className="flex items-center gap-2">
-                             <h3 className="font-bold text-white text-lg truncate">{apt.clientName}</h3>
+                             <h3 className="font-bold text-foreground text-lg truncate">{apt.clientName}</h3>
                              {apt.bookingSource === 'public_link' && (
                                <span className="text-[10px] uppercase font-bold tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">via syncou</span>
                              )}
                            </div>
-                           <div className="flex items-center gap-3 text-sm text-[#9B8FC0] mt-2">
+                           <div className="flex items-center gap-3 text-sm text-muted-foreground mt-2">
                              <button onClick={() => openWhatsApp(apt)} className="text-[#25D366] hover:text-[#128C7E] bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/20 px-2 py-1 rounded transition-colors inline-flex items-center gap-1.5 focus:outline-none font-medium">
                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
                                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
@@ -1129,12 +1129,12 @@ export function DashboardHome() {
                         </div>
 
                         {/* Coluna 3: Status e Ações */}
-                        <div className="flex flex-col items-end gap-3 flex-shrink-0 w-full md:w-auto mt-4 md:mt-0 border-t border-[#2D214F] pt-4 md:border-t-0 md:pt-0">
+                        <div className="flex flex-col items-end gap-3 flex-shrink-0 w-full md:w-auto mt-4 md:mt-0 border-t border-border pt-4 md:border-t-0 md:pt-0">
                           <div className={`text-xs px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1.5 w-fit
-                            ${(apt.status === 'scheduled' || apt.status === 'Pendente' || !apt.status) ? 'bg-amber-400/10 text-amber-400 border border-amber-400/20' : 
-                              (apt.status === 'confirmed' || apt.status === 'Confirmado') ? 'bg-primary/15 text-primary border border-primary/20' : 
-                              (apt.status === 'completed' || apt.status === 'Concluído') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 
-                              'bg-slate-500/10 text-slate-400 border border-slate-500/20'}
+                            ${(apt.status === 'scheduled' || apt.status === 'Pendente' || !apt.status) ? 'bg-amber-400/10 text-amber-600 dark:text-amber-400 border border-amber-400/20' :
+                              (apt.status === 'confirmed' || apt.status === 'Confirmado') ? 'bg-primary/15 text-primary border border-primary/20' :
+                              (apt.status === 'completed' || apt.status === 'Concluído') ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' :
+                              'bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20'}
                           `}>
                             {(apt.status === 'scheduled' || apt.status === 'Pendente' || !apt.status) && <><Clock className="w-3.5 h-3.5" /> Pendente</>}
                             {(apt.status === 'confirmed' || apt.status === 'Confirmado') && <><CheckCircle2 className="w-3.5 h-3.5" /> Confirmado</>}
@@ -1154,7 +1154,7 @@ export function DashboardHome() {
                                   setRescheduleTime(currentStart.toTimeString().slice(0, 5));
                                   setIsRescheduleModalOpen(true);
                                 }} 
-                                className="h-8 px-2 text-[#9B8FC0] hover:text-white hover:bg-white/5"
+                                className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted"
                               >
                                 <RefreshCcw className="w-3.5 h-3.5 mr-1.5" /> Remarcar
                               </Button>
@@ -1173,7 +1173,7 @@ export function DashboardHome() {
                                      setIsCancelModalOpen(true);
                                    }} 
                                    variant="ghost" 
-                                   className="h-8 px-2 text-red-400/80 hover:text-red-400 hover:bg-red-500/10"
+                                   className="h-8 px-2 text-red-600/80 hover:text-red-600 hover:bg-red-500/10 dark:text-red-400/80 dark:hover:text-red-400"
                                  >
                                    Cancelar
                                  </Button>
@@ -1193,7 +1193,7 @@ export function DashboardHome() {
                                        onConfirm: () => handleUpdateAppointmentStatus(apt.id, 'Concluído')
                                      });
                                    }}
-                                   className="h-8 px-3 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-300 border-none font-medium"
+                                   className="h-8 px-3 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/25 border-none font-medium"
                                  >
                                    <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
                                    Concluir
@@ -1206,7 +1206,7 @@ export function DashboardHome() {
                                      setIsCancelModalOpen(true);
                                    }}
                                    variant="ghost" 
-                                   className="h-8 px-2 text-red-400/80 hover:text-red-400 hover:bg-red-500/10"
+                                   className="h-8 px-2 text-red-600/80 hover:text-red-600 hover:bg-red-500/10 dark:text-red-400/80 dark:hover:text-red-400"
                                  >
                                    Cancelar
                                  </Button>
@@ -1222,7 +1222,7 @@ export function DashboardHome() {
                                      });
                                    }}
                                    variant="ghost" 
-                                   className="h-8 w-8 p-0 text-[#9B8FC0] hover:text-white hover:bg-white/5"
+                                   className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
                                    title="Voltar para Pendente"
                                  >
                                    <RefreshCcw className="w-3.5 h-3.5" />
@@ -1231,18 +1231,18 @@ export function DashboardHome() {
                             )}
 
                             {(apt.status === 'completed' || apt.status === 'Concluído') && (
-                               <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-500">
+                               <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-600 dark:text-emerald-400">
                                  Serviço Concluído
                                </span>
                             )}
 
                             {(apt.status === 'cancelled' || apt.status === 'Cancelado') && (
                               <div className="flex flex-col items-end gap-1">
-                                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">
+                                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">
                                   Cancelado
                                 </span>
                                 {apt.cancelReason && (
-                                  <p className="text-[10px] text-slate-400 italic bg-[#0A0713] px-2 py-1 rounded border border-[#2D214F]">
+                                  <p className="text-[10px] text-muted-foreground italic bg-muted px-2 py-1 rounded border border-border">
                                     Motivo: {apt.cancelReason}
                                   </p>
                                 )}
@@ -1265,7 +1265,7 @@ export function DashboardHome() {
         <div className="space-y-6 animate-in fade-in duration-300 slide-in-from-bottom-2 w-full lg:max-w-4xl">
         {/* Services Section */}
            <div className="flex items-center justify-between">
-             <h2 className="text-xl font-bold text-white flex items-center gap-2">
+             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                <span className="w-6 h-6 rounded-md bg-primary/20 text-primary flex items-center justify-center text-xs font-semibold ring-1 ring-primary/30">S</span>
                Meus Serviços
              </h2>
@@ -1275,40 +1275,40 @@ export function DashboardHome() {
                    <Plus className="w-4 h-4 mr-1" /> Novo
                  </Button>
                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px] bg-[#130E20] border-[#2D214F] text-[#E2D9F3] shadow-2xl">
+                <DialogContent className="sm:max-w-[425px] bg-card border-border text-foreground shadow-2xl">
                 <form onSubmit={handleSaveService} className="flex flex-col">
                   <DialogHeader className="flex flex-row items-center justify-between pr-8 pb-4">
-                    <DialogTitle className="text-white text-xl">{editingService ? "Editar Serviço" : "Novo Serviço"}</DialogTitle>
+                    <DialogTitle className="text-foreground text-xl">{editingService ? "Editar Serviço" : "Novo Serviço"}</DialogTitle>
                     <div className="flex items-center gap-2 mt-0">
-                      <Label htmlFor="active" className="text-sm font-medium text-white cursor-pointer">Ativo</Label>
+                      <Label htmlFor="active" className="text-sm font-medium text-foreground cursor-pointer">Ativo</Label>
                       <Switch id="active" name="active" defaultChecked={editingService ? editingService.active !== false : true} />
                     </div>
                   </DialogHeader>
                   <div className="space-y-4 pt-2">
                     <div className="space-y-2">
-                      <Label htmlFor="name" className="text-[#9B8FC0]">Nome do Serviço</Label>
-                      <Input id="name" name="name" defaultValue={editingService?.title || editingService?.name} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary h-11" placeholder="Ex: Corte de Cabelo" />
+                      <Label htmlFor="name" className="text-muted-foreground">Nome do Serviço</Label>
+                      <Input id="name" name="name" defaultValue={editingService?.title || editingService?.name} required className="bg-muted border-border text-foreground focus-visible:ring-primary h-11" placeholder="Ex: Corte de Cabelo" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2 sm:col-span-2">
-                        <Label htmlFor="price" className="text-[#9B8FC0]">Preço (R$)</Label>
-                        <Input id="price" name="price" type="number" min="0" step="0.01" defaultValue={editingService?.price} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary h-11 text-lg font-medium" />
+                        <Label htmlFor="price" className="text-muted-foreground">Preço (R$)</Label>
+                        <Input id="price" name="price" type="number" min="0" step="0.01" defaultValue={editingService?.price} required className="bg-muted border-border text-foreground focus-visible:ring-primary h-11 text-lg font-medium" />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="duration" className="text-[#9B8FC0]">Duração (min)</Label>
-                        <Input id="duration" name="duration" type="number" min="1" defaultValue={editingService?.duration} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary h-11" />
+                        <Label htmlFor="duration" className="text-muted-foreground">Duração (min)</Label>
+                        <Input id="duration" name="duration" type="number" min="1" defaultValue={editingService?.duration} required className="bg-muted border-border text-foreground focus-visible:ring-primary h-11" />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="bufferTime" className="text-[#9B8FC0]">Respiro (min)</Label>
-                        <Input id="bufferTime" name="bufferTime" type="number" min="0" defaultValue={editingService?.bufferTime || 0} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary h-11" />
+                        <Label htmlFor="bufferTime" className="text-muted-foreground">Respiro (min)</Label>
+                        <Input id="bufferTime" name="bufferTime" type="number" min="0" defaultValue={editingService?.bufferTime || 0} required className="bg-muted border-border text-foreground focus-visible:ring-primary h-11" />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="description" className="text-[#9B8FC0]">Descrição (Opcional)</Label>
-                      <textarea id="description" name="description" defaultValue={editingService?.description} className="flex min-h-[80px] w-full rounded-md bg-[#0B0914] border border-[#2D214F] px-3 py-2 text-sm text-white placeholder:text-[#9B8FC0]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 resize-none" placeholder="Ex: Lavagem e finalização inclusos" />
+                      <Label htmlFor="description" className="text-muted-foreground">Descrição (Opcional)</Label>
+                      <textarea id="description" name="description" defaultValue={editingService?.description} className="flex min-h-[80px] w-full rounded-md bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 resize-none" placeholder="Ex: Lavagem e finalização inclusos" />
                     </div>
-                    <DialogFooter className="pt-4 border-t border-[#2D214F] mt-2">
-                      <Button type="button" variant="ghost" onClick={() => setIsServiceModalOpen(false)} className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50">Cancelar</Button>
+                    <DialogFooter className="pt-4 border-t border-border mt-2">
+                      <Button type="button" variant="ghost" onClick={() => setIsServiceModalOpen(false)} className="text-muted-foreground hover:text-foreground hover:bg-muted/50">Cancelar</Button>
                       <Button type="submit">Salvar Serviço</Button>
                     </DialogFooter>
                   </div>
@@ -1319,12 +1319,12 @@ export function DashboardHome() {
 
            <div className="grid gap-4">
              {services.length === 0 ? (
-                <div className="text-center p-8 border border-dashed border-[#2D214F] rounded-xl bg-[#130E20]">
-                   <p className="text-[#9B8FC0]">Nenhum serviço cadastrado.</p>
+                <div className="text-center p-8 border border-dashed border-border rounded-xl bg-card">
+                   <p className="text-muted-foreground">Nenhum serviço cadastrado.</p>
                 </div>
              ) : (
                 services.map(service => (
-                  <Card key={service.id} className={`transition-all shadow-sm overflow-hidden group ${service.active !== false ? 'bg-[#130E20] border-[#2D214F] hover:border-primary/30' : 'bg-[#0B0914] border-[#1A1333] opacity-75 grayscale-[30%]'}`}>
+                  <Card key={service.id} className={`transition-all shadow-sm overflow-hidden group ${service.active !== false ? 'bg-card border-border hover:border-primary/30' : 'bg-muted border-border opacity-75 grayscale-[30%]'}`}>
                     <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2.5 mb-2">
@@ -1336,29 +1336,29 @@ export function DashboardHome() {
                           ) : (
                             <span className="h-2 w-2 flex-shrink-0 rounded-full bg-slate-600"></span>
                           )}
-                          <h4 className={`font-bold text-lg truncate ${service.active !== false ? 'text-white' : 'text-slate-400'}`}>{service.title || service.name}</h4>
-                          {service.active === false && <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 bg-slate-800/50 px-1.5 py-0.5 rounded">Inativo</span>}
+                          <h4 className={`font-bold text-lg truncate ${service.active !== false ? 'text-foreground' : 'text-muted-foreground'}`}>{service.title || service.name}</h4>
+                          {service.active === false && <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Inativo</span>}
                         </div>
-                        
+
                         <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono">
-                           <span className={`flex items-center px-2 py-1 rounded ${service.active !== false ? 'bg-[#2D214F]/40 text-[#9B8FC0]' : 'bg-white/5 text-slate-500'}`}>
+                           <span className={`flex items-center px-2 py-1 rounded ${service.active !== false ? 'bg-muted/40 text-muted-foreground' : 'bg-black/5 text-muted-foreground'}`}>
                              <Clock className="w-3 h-3 mr-1" /> {service.duration}m
                            </span>
                            {(service.bufferTime && service.bufferTime > 0) ? (
-                             <span className={`flex items-center px-2 py-1 rounded ${service.active !== false ? 'bg-amber-500/10 text-amber-500/80' : 'bg-white/5 text-slate-500'}`}>
+                             <span className={`flex items-center px-2 py-1 rounded ${service.active !== false ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400' : 'bg-black/5 text-muted-foreground'}`}>
                                + {service.bufferTime}m respiro
                              </span>
                            ) : null}
-                           <span className={`flex items-center font-medium px-2 py-1 rounded ${service.active !== false ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/5 text-slate-500'}`}>
+                           <span className={`flex items-center font-medium px-2 py-1 rounded ${service.active !== false ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-black/5 text-muted-foreground'}`}>
                              R$ {service.price?.toFixed(2)}
                            </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t border-[#2D214F] sm:border-0 pt-3 sm:pt-0">
-                        <Button variant="ghost" size="icon" className="h-9 w-9 text-[#9B8FC0] hover:text-white hover:bg-white/5" onClick={() => { setEditingService(service); setIsServiceModalOpen(true); }}>
+                      <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t border-border sm:border-0 pt-3 sm:pt-0">
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => { setEditingService(service); setIsServiceModalOpen(true); }}>
                           <Edit2 className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-9 w-9 text-red-400/80 hover:text-red-400 hover:bg-red-500/10" onClick={() => handleDeleteService(service.id)}>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-red-600/80 hover:text-red-600 hover:bg-red-500/10 dark:text-red-400/80 dark:hover:text-red-400" onClick={() => handleDeleteService(service.id)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1372,15 +1372,15 @@ export function DashboardHome() {
 
       {/* Generic Confirm Modal */}
       <Dialog open={confirmModal.isOpen} onOpenChange={(open) => !open && setConfirmModal(prev => ({ ...prev, isOpen: false }))}>
-        <DialogContent className="sm:max-w-[425px] bg-[#130E20] border-[#2D214F] text-white">
+        <DialogContent className="sm:max-w-[425px] bg-card border-border text-foreground">
           <DialogHeader>
-            <DialogTitle className="text-white">{confirmModal.title}</DialogTitle>
-            <CardDescription className="text-[#9B8FC0]">
+            <DialogTitle className="text-foreground">{confirmModal.title}</DialogTitle>
+            <CardDescription className="text-muted-foreground">
               {confirmModal.description}
             </CardDescription>
           </DialogHeader>
           <DialogFooter className="pt-4 flex sm:justify-end gap-2">
-            <Button type="button" variant="ghost" onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))} className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]">
+            <Button type="button" variant="ghost" onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))} className="text-muted-foreground hover:text-foreground hover:bg-muted">
               Cancelar
             </Button>
             <Button 
@@ -1398,33 +1398,33 @@ export function DashboardHome() {
 
       {/* Cancellation Reason Modal */}
       <Dialog open={isCancelModalOpen} onOpenChange={setIsCancelModalOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-[#130E20] border-[#2D214F] text-[#E2D9F3]">
+        <DialogContent className="sm:max-w-[425px] bg-card border-border text-foreground">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
+            <DialogTitle className="text-foreground flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse ring-4 ring-red-500/20" />
               Cancelar Agendamento
             </DialogTitle>
-            <CardDescription className="text-[#9B8FC0]">
-              Por favor, informe a justificativa do cancelamento de {cancelingApt ? <b className="text-white">{cancelingApt.clientName}</b> : 'agendamento'}.
+            <CardDescription className="text-muted-foreground">
+              Por favor, informe a justificativa do cancelamento de {cancelingApt ? <b className="text-foreground">{cancelingApt.clientName}</b> : 'agendamento'}.
             </CardDescription>
           </DialogHeader>
           <form onSubmit={handleConfirmCancel} className="space-y-4 pt-4">
             <div className="space-y-2">
-              <Label htmlFor="cancelReason" className="text-[#9B8FC0]">Justificativa / Motivo</Label>
+              <Label htmlFor="cancelReason" className="text-muted-foreground">Justificativa / Motivo</Label>
               <textarea
                 id="cancelReason"
                 required
                 value={cancelReason}
                 onChange={e => setCancelReason(e.target.value)}
                 placeholder="Exemplo: Fora do horário de disponibilidade, imprevisto de força maior, etc."
-                className="w-full h-24 bg-[#0B0914] border border-[#2D214F] rounded-lg p-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-[#5B4F81]"
+                className="w-full h-24 bg-muted border border-border rounded-lg p-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/70"
               />
             </div>
             <DialogFooter className="pt-2 flex sm:justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => setIsCancelModalOpen(false)} className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]">
+              <Button type="button" variant="ghost" onClick={() => setIsCancelModalOpen(false)} className="text-muted-foreground hover:text-foreground hover:bg-muted">
                 Voltar
               </Button>
-              <Button type="submit" variant="destructive" className="bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold border-none">
+              <Button type="submit" variant="destructive" className="bg-red-500/15 hover:bg-red-500/25 text-red-700 dark:text-red-400 font-semibold border-none">
                 Confirmar Cancelamento
               </Button>
             </DialogFooter>
@@ -1434,44 +1434,44 @@ export function DashboardHome() {
 
       {/* Reschedule Modal */}
       <Dialog open={isRescheduleModalOpen} onOpenChange={setIsRescheduleModalOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-[#130E20] border-[#2D214F] text-white">
+        <DialogContent className="sm:max-w-[425px] bg-card border-border text-foreground">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
+            <DialogTitle className="text-foreground flex items-center gap-2">
               <RefreshCcw className="w-5 h-5 text-primary" />
               Remarcar Agendamento
             </DialogTitle>
-            <CardDescription className="text-[#9B8FC0]">
-              Escolha a nova data e horário para o agendamento de {reschedulingApt ? <b className="text-white">{reschedulingApt.clientName}</b> : 'agendamento'}.
+            <CardDescription className="text-muted-foreground">
+              Escolha a nova data e horário para o agendamento de {reschedulingApt ? <b className="text-foreground">{reschedulingApt.clientName}</b> : 'agendamento'}.
             </CardDescription>
           </DialogHeader>
           <form onSubmit={handleConfirmReschedule} className="space-y-4 pt-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="rescheduleDate" className="text-[#9B8FC0]">Nova Data</Label>
+                <Label htmlFor="rescheduleDate" className="text-muted-foreground">Nova Data</Label>
                 <Input
                   id="rescheduleDate"
                   type="date"
                   required
                   value={rescheduleDate}
                   onChange={(e) => setRescheduleDate(e.target.value)}
-                  className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert h-11"
+                  className="bg-muted border-border text-foreground focus-visible:ring-primary block h-11"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="rescheduleTime" className="text-[#9B8FC0]">Novo Horário</Label>
+                <Label htmlFor="rescheduleTime" className="text-muted-foreground">Novo Horário</Label>
                 <Input
                   id="rescheduleTime"
                   type="time"
                   required
                   value={rescheduleTime}
                   onChange={(e) => setRescheduleTime(e.target.value)}
-                  className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert h-11"
+                  className="bg-muted border-border text-foreground focus-visible:ring-primary block h-11"
                 />
               </div>
             </div>
             
             <DialogFooter className="pt-4 flex sm:justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => setIsRescheduleModalOpen(false)} className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]">
+              <Button type="button" variant="ghost" onClick={() => setIsRescheduleModalOpen(false)} className="text-muted-foreground hover:text-foreground hover:bg-muted">
                 Cancelar
               </Button>
               <Button type="submit" className="font-semibold">

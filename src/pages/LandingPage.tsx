@@ -171,16 +171,16 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-ledger-ink text-ledger-parchment font-ledger-sans selection:bg-ledger-brass/30">
-      <header className="fixed top-0 w-full bg-ledger-ink/90 backdrop-blur-sm border-b border-ledger-line z-50">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/20">
+      <header className="fixed top-0 w-full bg-background/90 backdrop-blur-sm border-b border-border z-50">
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <Logo className="w-7 h-7 text-ledger-brass" />
-            <span className="font-ledger-display font-bold text-lg tracking-tight text-ledger-parchment">Syncou</span>
+            <Logo className="w-7 h-7 text-primary" />
+            <span className="font-extrabold text-lg tracking-tight text-foreground">Syncou</span>
           </div>
           <nav className="flex items-center gap-3">
-            <Button variant="ghost" className="text-ledger-stone hover:text-ledger-parchment hover:bg-white/5 font-medium" onClick={() => openAuthModal('login')}>Entrar</Button>
-            <Button className="bg-ledger-brass text-ledger-brass-foreground hover:bg-ledger-brass/90 font-semibold" onClick={() => openAuthModal('register')}>
+            <Button variant="ghost" className="text-muted-foreground hover:text-foreground font-medium" onClick={() => openAuthModal('login')}>Entrar</Button>
+            <Button variant="cta" className="font-semibold" onClick={() => openAuthModal('register')}>
               Criar minha conta
             </Button>
           </nav>
@@ -195,86 +195,109 @@ export function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h1 className="font-ledger-display text-5xl md:text-[3.4rem] font-bold tracking-tight mb-6 text-ledger-parchment leading-[1.08]">
+            <h1 className="text-5xl md:text-[3.4rem] font-extrabold tracking-tight mb-6 text-foreground leading-[1.08]">
               Pare de fazer seu cliente tirar senha no WhatsApp.
             </h1>
-            <p className="text-lg text-ledger-stone mb-9 max-w-lg leading-relaxed">
+            <p className="text-lg text-muted-foreground mb-9 max-w-lg leading-relaxed">
               Envie um link. Ele escolhe o horário. Sua agenda se preenche sozinha, sem você largar o que está fazendo pra responder "oi, tem horário quinta?".
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-5">
-              <Button size="lg" className="bg-ledger-brass text-ledger-brass-foreground hover:bg-ledger-brass/90 text-base h-13 px-7 font-semibold" onClick={() => openAuthModal('register')}>
+              <Button size="lg" variant="cta" className="text-base h-13 px-7 font-semibold" onClick={() => openAuthModal('register')}>
                 Criar meu link grátis
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
-              <div className="flex items-center gap-2 text-sm text-ledger-stone/80 h-13">
-                <CheckCircle2 className="w-4 h-4 text-ledger-sage" />
+              <div className="flex items-center gap-2 text-sm text-muted-foreground h-13">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>Configuração em 2 minutos</span>
               </div>
             </div>
           </motion.div>
 
-          {/* Signature element: the queue ticket, torn in half on load */}
-          <div className="relative h-[220px] flex items-center justify-center" style={{ perspective: '800px' }}>
-            <motion.div
-              initial={{ x: 4, rotate: 0 }}
-              animate={{ x: -108, rotate: -4 }}
-              transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute w-[190px] bg-ledger-card border border-ledger-line rounded-sm p-5 shadow-[4px_4px_0_0_rgba(0,0,0,0.3)]"
-            >
-              <p className="font-ledger-mono text-[10px] tracking-widest text-ledger-stone/70 uppercase mb-3">Senha</p>
-              <p className="font-ledger-display text-4xl font-bold text-ledger-stone/50 line-through decoration-2 mb-3 tabular-nums">047</p>
-              <p className="text-xs text-ledger-stone/60 leading-relaxed">Aguardando resposta no WhatsApp desde 14:02.</p>
-            </motion.div>
-            <motion.div
-              initial={{ x: -4, rotate: 0 }}
-              animate={{ x: 108, rotate: 4 }}
-              transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute w-[190px] bg-ledger-card border border-ledger-brass/40 rounded-sm p-5 shadow-[4px_4px_0_0_rgba(0,0,0,0.3)]"
-            >
-              <div className="flex items-center gap-1.5 mb-3">
-                <Logo className="w-4 h-4 text-ledger-brass" />
-                <p className="font-ledger-mono text-[10px] tracking-widest text-ledger-stone/70 uppercase">syncou.app/p/voce</p>
+          {/* Signature element: a live preview of the booking widget itself */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            className="relative"
+          >
+            <div className="bg-card border border-border rounded-2xl shadow-xl shadow-primary/5 overflow-hidden max-w-[340px] mx-auto">
+              <div className="p-5 pb-4 flex items-center gap-3 border-b border-border">
+                <div className="w-10 h-10 rounded-full bg-accent text-primary flex items-center justify-center font-extrabold text-sm shrink-0">MS</div>
+                <div>
+                  <p className="font-bold text-sm text-foreground leading-tight">Marina Souza</p>
+                  <p className="text-xs text-muted-foreground">Manicure &amp; Nail Design</p>
+                </div>
               </div>
-              <p className="font-ledger-display text-lg font-bold text-ledger-parchment mb-1">14:30 — Maria S.</p>
-              <p className="font-ledger-mono text-xs text-ledger-oxblood tracking-wide -rotate-3 inline-block border border-ledger-oxblood px-1.5 py-0.5 mt-1">CONFIRMADO</p>
-            </motion.div>
-          </div>
+              <div className="p-5 space-y-4">
+                <div className="flex items-center justify-between bg-accent/60 border border-primary/20 rounded-xl px-4 py-3">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Alongamento em gel</p>
+                    <p className="font-mono text-xs text-muted-foreground mt-0.5">60 min</p>
+                  </div>
+                  <span className="font-mono font-semibold text-sm text-foreground">R$ 90</span>
+                </div>
+                <div className="flex gap-2">
+                  {['Qui 04', 'Sex 05', 'Sáb 06'].map((d, i) => (
+                    <div key={d} className={`flex-1 text-center rounded-lg py-2 text-xs font-mono font-medium border ${i === 1 ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border text-muted-foreground'}`}>
+                      {d}
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {['13:00', '14:30', '16:00'].map((t, i) => (
+                    <div key={t} className={`text-center rounded-lg py-2 text-xs font-mono font-medium border ${i === 1 ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border text-foreground'}`}>
+                      {t}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="p-4 border-t border-border bg-background flex items-center justify-between">
+                <div className="text-xs">
+                  <p className="text-muted-foreground">Sex 05 · 14:30</p>
+                  <p className="font-mono font-semibold text-foreground">R$ 90</p>
+                </div>
+                <div className="bg-cta-strong text-cta-foreground text-sm font-bold px-4 py-2.5 rounded-lg">
+                  Confirmar
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </section>
 
-        {/* LEDGER — feature entries as ruled rows, not cards */}
+        {/* FEATURES — ruled rows, not decorative cards */}
         <section className="max-w-3xl mx-auto mb-28">
-          <p className="font-ledger-mono text-xs tracking-widest text-ledger-stone/60 uppercase mb-3 pl-1">O que muda na sua semana</p>
-          <div className="border-t border-ledger-line">
+          <p className="font-mono text-xs tracking-widest text-primary uppercase mb-3 pl-1 font-semibold">O que muda na sua semana</p>
+          <div className="border-t border-border">
             {FEATURES.map((feature) => (
-              <div key={feature.label} className="grid sm:grid-cols-[220px_1fr] gap-2 sm:gap-8 py-6 border-b border-ledger-line">
-                <h3 className="font-ledger-display text-xl font-bold text-ledger-parchment">{feature.label}</h3>
-                <p className="text-ledger-stone leading-relaxed max-w-md">{feature.body}</p>
+              <div key={feature.label} className="grid sm:grid-cols-[220px_1fr] gap-2 sm:gap-8 py-6 border-b border-border">
+                <h3 className="text-xl font-bold text-foreground">{feature.label}</h3>
+                <p className="text-muted-foreground leading-relaxed max-w-md">{feature.body}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* FINAL CTA — stamped confirmation */}
+        {/* FINAL CTA */}
         <section className="max-w-2xl mx-auto text-center">
-          <div className="border border-ledger-line rounded-sm p-12 md:p-14 bg-ledger-card relative">
-            <p className="font-ledger-mono text-xs tracking-widest text-ledger-oxblood uppercase mb-4 -rotate-1 inline-block border border-ledger-oxblood/60 px-2 py-1">Sem mais fila</p>
-            <h2 className="font-ledger-display text-3xl md:text-4xl font-bold mb-5 text-ledger-parchment leading-tight">
+          <div className="border border-border rounded-2xl p-12 md:p-14 bg-card shadow-sm">
+            <p className="font-mono text-xs tracking-widest text-primary uppercase mb-4 bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full inline-block">Sem mais fila</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-5 text-foreground leading-tight">
               Pare de perder cliente pra fila do WhatsApp.
             </h2>
-            <p className="text-ledger-stone leading-relaxed max-w-md mx-auto mb-9">
+            <p className="text-muted-foreground leading-relaxed max-w-md mx-auto mb-9">
               Leva 2 minutos pra configurar. O resto a sua agenda faz sozinha.
             </p>
-            <Button size="lg" className="bg-ledger-brass text-ledger-brass-foreground hover:bg-ledger-brass/90 h-13 px-10 font-semibold" onClick={() => openAuthModal('register')}>
+            <Button size="lg" variant="cta" className="h-13 px-10 font-semibold" onClick={() => openAuthModal('register')}>
               Criar meu link grátis
             </Button>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-ledger-line py-10">
-        <div className="max-w-6xl mx-auto px-5 flex flex-col items-center gap-4 text-center text-ledger-stone/70 text-sm">
+      <footer className="border-t border-border py-10">
+        <div className="max-w-6xl mx-auto px-5 flex flex-col items-center gap-4 text-center text-muted-foreground text-sm">
           <div className="flex gap-4">
-            <Link to="/termos" className="hover:text-ledger-parchment transition-colors">Termos de Serviço e Privacidade</Link>
+            <Link to="/termos" className="hover:text-foreground transition-colors">Termos de Serviço e Privacidade</Link>
           </div>
           <p>&copy; {new Date().getFullYear()} Syncou. Todos os direitos reservados.</p>
         </div>
@@ -282,19 +305,19 @@ export function LandingPage() {
 
       {/* Auth Modal */}
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
-        <DialogContent className="sm:max-w-[440px] bg-ledger-card border-ledger-line text-ledger-parchment p-8 shadow-2xl rounded-sm font-ledger-sans">
+        <DialogContent className="sm:max-w-[440px] bg-card border-border text-foreground p-8 shadow-2xl">
           <>
             <DialogHeader className="space-y-2">
               <div className="mx-auto flex items-center justify-center mb-4">
-                <Logo className="w-11 h-11 text-ledger-brass" />
+                <Logo className="w-11 h-11 text-primary" />
               </div>
-              <DialogTitle className="font-ledger-display text-2xl font-bold text-center text-ledger-parchment tracking-tight">
+              <DialogTitle className="text-2xl font-bold text-center text-foreground tracking-tight">
                 {authMode === 'login'
                   ? 'Entrar no Syncou'
                   : 'Crie sua conta'
                 }
               </DialogTitle>
-              <DialogDescription className="text-center text-ledger-stone text-sm">
+              <DialogDescription className="text-center text-muted-foreground text-sm">
                 {authMode === 'login'
                   ? 'Entre para gerenciar seus agendamentos'
                   : 'Comece a receber agendamentos de forma elegante'
@@ -302,23 +325,23 @@ export function LandingPage() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="grid grid-cols-2 p-1 bg-ledger-ink rounded-sm my-6 border border-ledger-line">
+            <div className="grid grid-cols-2 p-1 bg-muted rounded-lg my-6 border border-border">
               <button
                 onClick={() => setAuthMode('login')}
-                className={`py-2 text-sm font-medium rounded-sm transition-all ${
+                className={`py-2 text-sm font-medium rounded-md transition-all ${
                   authMode === 'login'
-                    ? 'bg-ledger-line text-ledger-parchment shadow-sm'
-                    : 'text-ledger-stone hover:text-ledger-parchment'
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Entrar
               </button>
               <button
                 onClick={() => setAuthMode('register')}
-                className={`py-2 text-sm font-medium rounded-sm transition-all ${
+                className={`py-2 text-sm font-medium rounded-md transition-all ${
                   authMode === 'register'
-                    ? 'bg-ledger-line text-ledger-parchment shadow-sm'
-                    : 'text-ledger-stone hover:text-ledger-parchment'
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Criar Conta
@@ -329,11 +352,11 @@ export function LandingPage() {
               <form onSubmit={handleEmailAuthSubmit} className="space-y-4">
                 {authMode === 'register' && authStep === 'otp' ? (
                   <div className="space-y-1.5 animate-in fade-in slide-in-from-right-4">
-                    <Label htmlFor="auth-otp" className="text-xs font-semibold uppercase tracking-wider text-ledger-stone">
+                    <Label htmlFor="auth-otp" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Código de Verificação
                     </Label>
                     <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ledger-stone/70" />
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
                       <Input
                         id="auth-otp"
                         type="text"
@@ -341,19 +364,19 @@ export function LandingPage() {
                         value={otpCode}
                         onChange={(e) => setOtpCode(e.target.value)}
                         placeholder="Ex: 123456"
-                        className="bg-ledger-ink border-ledger-line text-ledger-parchment placeholder:text-ledger-stone/50 pl-10 focus-visible:ring-ledger-brass h-11 rounded-sm shadow-sm"
+                        className="bg-background border-border text-foreground placeholder:text-muted-foreground/50 pl-10 focus-visible:ring-primary h-11 shadow-sm"
                       />
                     </div>
-                    <p className="text-xs text-ledger-stone mt-2">Enviamos um código para {email}.</p>
+                    <p className="text-xs text-muted-foreground mt-2">Enviamos um código para {email}.</p>
                   </div>
                 ) : (
                   <>
                     <div className="space-y-1.5">
-                      <Label htmlFor="auth-email" className="text-xs font-semibold uppercase tracking-wider text-ledger-stone">
+                      <Label htmlFor="auth-email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         E-mail
                       </Label>
                       <div className="relative">
-                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ledger-stone/70" />
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
                         <Input
                           id="auth-email"
                           type="email"
@@ -361,17 +384,17 @@ export function LandingPage() {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="voce@exemplo.com"
-                          className="bg-ledger-ink border-ledger-line text-ledger-parchment placeholder:text-ledger-stone/50 pl-10 focus-visible:ring-ledger-brass h-11 rounded-sm shadow-sm"
+                          className="bg-background border-border text-foreground placeholder:text-muted-foreground/50 pl-10 focus-visible:ring-primary h-11 shadow-sm"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="auth-password" className="text-xs font-semibold uppercase tracking-wider text-ledger-stone">
+                      <Label htmlFor="auth-password" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         Senha
                       </Label>
                       <div className="relative">
-                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ledger-stone/70" />
+                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
                         <Input
                           id="auth-password"
                           type="password"
@@ -379,27 +402,27 @@ export function LandingPage() {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder={authMode === 'register' ? "Mínimo 6 caracteres" : "Sua senha"}
-                          className="bg-ledger-ink border-ledger-line text-ledger-parchment placeholder:text-ledger-stone/50 pl-10 focus-visible:ring-ledger-brass h-11 rounded-sm shadow-sm"
+                          className="bg-background border-border text-foreground placeholder:text-muted-foreground/50 pl-10 focus-visible:ring-primary h-11 shadow-sm"
                         />
                       </div>
 
                       {authMode === 'register' && (
                         <div className="pt-2 space-y-1.5 flex flex-col gap-1 mt-1">
                           <div className="flex items-center gap-2 text-xs">
-                            {hasMinLength ? <Check className="w-3.5 h-3.5 text-ledger-sage shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-ledger-stone/50 shrink-0" />}
-                            <span className={hasMinLength ? "text-ledger-sage" : "text-ledger-stone/60"}>Mínimo de 6 caracteres</span>
+                            {hasMinLength ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-muted-foreground/40 shrink-0" />}
+                            <span className={hasMinLength ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}>Mínimo de 6 caracteres</span>
                           </div>
                           <div className="flex items-center gap-2 text-xs">
-                            {hasUppercase ? <Check className="w-3.5 h-3.5 text-ledger-sage shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-ledger-stone/50 shrink-0" />}
-                            <span className={hasUppercase ? "text-ledger-sage" : "text-ledger-stone/60"}>1 letra maiúscula</span>
+                            {hasUppercase ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-muted-foreground/40 shrink-0" />}
+                            <span className={hasUppercase ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}>1 letra maiúscula</span>
                           </div>
                           <div className="flex items-center gap-2 text-xs">
-                            {hasNumber ? <Check className="w-3.5 h-3.5 text-ledger-sage shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-ledger-stone/50 shrink-0" />}
-                            <span className={hasNumber ? "text-ledger-sage" : "text-ledger-stone/60"}>1 número</span>
+                            {hasNumber ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-muted-foreground/40 shrink-0" />}
+                            <span className={hasNumber ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}>1 número</span>
                           </div>
                           <div className="flex items-center gap-2 text-xs">
-                            {hasSpecialChar ? <Check className="w-3.5 h-3.5 text-ledger-sage shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-ledger-stone/50 shrink-0" />}
-                            <span className={hasSpecialChar ? "text-ledger-sage" : "text-ledger-stone/60"}>1 caractere especial</span>
+                            {hasSpecialChar ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-muted-foreground/40 shrink-0" />}
+                            <span className={hasSpecialChar ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}>1 caractere especial</span>
                           </div>
                         </div>
                       )}
@@ -414,14 +437,14 @@ export function LandingPage() {
                       id="terms"
                       checked={hasAcceptedTerms}
                       onChange={(e) => setHasAcceptedTerms(e.target.checked)}
-                      className="mt-1 w-4 h-4 rounded border-ledger-line bg-ledger-ink text-ledger-brass focus:ring-ledger-brass focus:ring-offset-ledger-card focus:ring-offset-2 shrink-0 accent-ledger-brass cursor-pointer"
+                      className="mt-1 w-4 h-4 rounded border-border bg-background text-primary focus:ring-primary focus:ring-offset-card focus:ring-offset-2 shrink-0 accent-primary cursor-pointer"
                     />
                     <label
                       htmlFor="terms"
-                      className="text-xs font-medium leading-relaxed text-ledger-stone cursor-pointer"
+                      className="text-xs font-medium leading-relaxed text-muted-foreground cursor-pointer"
                     >
                       Eu li e concordo com os{" "}
-                      <Link to="/termos" target="_blank" className="font-semibold text-ledger-brass hover:text-ledger-parchment transition-colors">
+                      <Link to="/termos" target="_blank" className="font-semibold text-primary hover:text-primary/80 transition-colors">
                         Termos de Serviço e Política de Privacidade
                       </Link>.
                     </label>
@@ -430,8 +453,9 @@ export function LandingPage() {
 
                 <Button
                   type="submit"
+                  variant="cta"
                   disabled={isSubmitting || (authMode === 'register' && authStep === 'form' && (!isValidPassword || !hasAcceptedTerms))}
-                  className="w-full bg-ledger-brass text-ledger-brass-foreground hover:bg-ledger-brass/90 font-medium h-11 rounded-sm transition-all flex items-center justify-center gap-2 mt-4"
+                  className="w-full font-medium h-11 transition-all flex items-center justify-center gap-2 mt-4"
                 >
                   {isSubmitting ? (
                     <>
@@ -452,10 +476,10 @@ export function LandingPage() {
                 <>
                   <div className="relative my-6">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-ledger-line"></div>
+                      <div className="w-full border-t border-border"></div>
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="bg-ledger-card px-3 text-ledger-stone/70 uppercase tracking-widest font-medium">ou</span>
+                      <span className="bg-card px-3 text-muted-foreground/80 uppercase tracking-widest font-medium">ou</span>
                     </div>
                   </div>
 
@@ -464,10 +488,10 @@ export function LandingPage() {
                     variant="outline"
                     disabled={isGoogleSubmitting || (authMode === 'register' && !hasAcceptedTerms)}
                     onClick={handleGoogleSignIn}
-                    className="w-full border-ledger-line bg-ledger-ink hover:bg-ledger-line text-ledger-parchment font-medium h-11 rounded-sm shadow-sm"
+                    className="w-full border-border bg-background hover:bg-muted text-foreground font-medium h-11 shadow-sm"
                   >
                     {isGoogleSubmitting ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin text-zinc-500" />
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin text-muted-foreground" />
                     ) : (
                       <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -485,7 +509,7 @@ export function LandingPage() {
                 <button
                   type="button"
                   onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
-                  className="text-sm text-ledger-stone hover:text-ledger-parchment hover:underline decoration-ledger-stone/50 underline-offset-4 transition-all"
+                  className="text-sm text-muted-foreground hover:text-foreground hover:underline decoration-muted-foreground/50 underline-offset-4 transition-all"
                 >
                   {authMode === 'login'
                     ? 'Não tem uma conta? Comece aqui'

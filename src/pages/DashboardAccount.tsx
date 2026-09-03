@@ -185,26 +185,26 @@ export function DashboardAccount() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
-        <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Conta</h1>
-        <p className="text-[#9B8FC0]">Gerencie suas informações de acesso e configurações da conta.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Conta</h1>
+        <p className="text-muted-foreground">Gerencie suas informações de acesso e configurações da conta.</p>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card className="bg-[#130E20] border-[#2D214F] shadow-sm md:col-span-2">
+        <Card className="bg-card border-border shadow-sm md:col-span-2">
           <CardHeader>
-            <CardTitle className="text-xl text-white flex items-center gap-2">
-               <User className="w-5 h-5 text-violet-400" /> Detalhes Pessoais
+            <CardTitle className="text-xl text-foreground flex items-center gap-2">
+               <User className="w-5 h-5 text-primary" /> Detalhes Pessoais
             </CardTitle>
-            <CardDescription className="text-[#9B8FC0]">
+            <CardDescription className="text-muted-foreground">
               Sua foto de perfil e informações principais.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmitAccount(onSubmitAccount)} className="space-y-6">
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-                <Avatar className="w-24 h-24 border-2 border-[#2D214F]">
+                <Avatar className="w-24 h-24 border-2 border-border">
                   <AvatarImage src={avatarUrl} className="object-cover" />
-                  <AvatarFallback className="bg-[#1A1333] text-[#9B8FC0] text-xl font-bold">
+                  <AvatarFallback className="bg-muted text-muted-foreground text-xl font-bold">
                     {currentUser?.displayName?.charAt(0) || <User className="w-10 h-10" />}
                   </AvatarFallback>
                 </Avatar>
@@ -213,7 +213,7 @@ export function DashboardAccount() {
                     <Button 
                       type="button" 
                       variant="outline" 
-                      className="bg-[#1A1333] border-[#2D214F] text-[#E2D9F3] hover:text-white hover:border-[#4B3B7A] hover:bg-[#2D214F]"
+                      className="bg-muted border-border text-foreground hover:text-foreground hover:border-primary/40 hover:bg-muted/70"
                       onClick={() => document.getElementById('avatar-upload')?.click()}
                       disabled={uploading || loading}
                     >
@@ -225,14 +225,14 @@ export function DashboardAccount() {
                         type="button" 
                         variant="ghost" 
                         onClick={() => setValue('avatarUrl', '', { shouldDirty: true, shouldValidate: true })}
-                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-500/10 dark:text-red-400 dark:hover:text-red-300"
                         disabled={loading}
                       >
                         Remover
                       </Button>
                     )}
                   </div>
-                  <p className="text-xs text-[#9B8FC0]">JPG ou PNG. Tamanho máximo 2MB.</p>
+                  <p className="text-xs text-muted-foreground">JPG ou PNG. Tamanho máximo 2MB.</p>
                   <input 
                     type="file" 
                     id="avatar-upload" 
@@ -246,19 +246,19 @@ export function DashboardAccount() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                  <div className="space-y-2">
-                    <Label className="text-[#9B8FC0]">Nome</Label>
+                    <Label className="text-muted-foreground">Nome</Label>
                     <Input 
                       {...registerAccount('displayName')} 
-                      className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-[#8B5CF6]" 
+                      className="bg-muted border-border text-foreground focus-visible:ring-primary" 
                       placeholder="Seu nome"
                     />
                     {accountErrors.displayName && (
-                      <p className="text-sm text-red-400 mt-1">{accountErrors.displayName.message as string}</p>
+                      <p className="text-sm text-red-600 dark:text-red-400 mt-1">{accountErrors.displayName.message as string}</p>
                     )}
                  </div>
                  <div className="space-y-2">
-                    <Label className="text-[#9B8FC0]">E-mail</Label>
-                    <Input disabled value={currentUser?.email || ''} className="bg-[#0B0914]/50 border-[#2D214F]/50 text-white opacity-70" />
+                    <Label className="text-muted-foreground">E-mail</Label>
+                    <Input disabled value={currentUser?.email || ''} className="bg-muted/50 border-border/50 text-foreground opacity-70" />
                  </div>
               </div>
 
@@ -266,7 +266,7 @@ export function DashboardAccount() {
                 <Button 
                   type="submit" 
                   disabled={loading} 
-                  className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   {loading ? 'Salvando...' : 'Salvar Alterações'}
                 </Button>
@@ -275,12 +275,12 @@ export function DashboardAccount() {
           </CardContent>
         </Card>
 
-        <Card className="bg-[#130E20] border-[#2D214F] shadow-sm">
+        <Card className="bg-card border-border shadow-sm">
           <CardHeader>
-            <CardTitle className="text-xl text-white flex items-center gap-2">
-               <Key className="w-5 h-5 text-violet-400" /> {isGoogleUser ? 'Criar Senha de Acesso' : 'Alterar Senha'}
+            <CardTitle className="text-xl text-foreground flex items-center gap-2">
+               <Key className="w-5 h-5 text-primary" /> {isGoogleUser ? 'Criar Senha de Acesso' : 'Alterar Senha'}
             </CardTitle>
-            <CardDescription className="text-[#9B8FC0]">
+            <CardDescription className="text-muted-foreground">
               {isGoogleUser ? 'Defina uma senha para poder acessar sua conta também via e-mail.' : 'Atualize sua senha de acesso ao painel.'}
             </CardDescription>
           </CardHeader>
@@ -288,26 +288,26 @@ export function DashboardAccount() {
             <form onSubmit={handleSubmitPassword(onSubmitPassword)} className="space-y-4">
               {!isGoogleUser && (
                 <div className="space-y-2">
-                  <Label className="text-[#9B8FC0]">Senha Atual</Label>
-                  <Input type="password" {...registerPassword('currentPassword')} className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500" />
-                  {passwordErrors.currentPassword && <p className="text-red-400 text-sm">{passwordErrors.currentPassword.message as string}</p>}
+                  <Label className="text-muted-foreground">Senha Atual</Label>
+                  <Input type="password" {...registerPassword('currentPassword')} className="bg-muted border-border text-foreground focus-visible:ring-primary" />
+                  {passwordErrors.currentPassword && <p className="text-red-600 dark:text-red-400 text-sm">{passwordErrors.currentPassword.message as string}</p>}
                 </div>
               )}
               <div className="space-y-2">
-                <Label className="text-[#9B8FC0]">Nova Senha</Label>
-                <Input type="password" {...registerPassword('newPassword')} className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500" />
-                {passwordErrors.newPassword && <p className="text-red-400 text-sm">{passwordErrors.newPassword.message as string}</p>}
+                <Label className="text-muted-foreground">Nova Senha</Label>
+                <Input type="password" {...registerPassword('newPassword')} className="bg-muted border-border text-foreground focus-visible:ring-primary" />
+                {passwordErrors.newPassword && <p className="text-red-600 dark:text-red-400 text-sm">{passwordErrors.newPassword.message as string}</p>}
               </div>
               <div className="space-y-2">
-                <Label className="text-[#9B8FC0]">Confirmar Nova Senha</Label>
-                <Input type="password" {...registerPassword('confirmPassword')} className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500" />
-                {passwordErrors.confirmPassword && <p className="text-red-400 text-sm">{passwordErrors.confirmPassword.message as string}</p>}
+                <Label className="text-muted-foreground">Confirmar Nova Senha</Label>
+                <Input type="password" {...registerPassword('confirmPassword')} className="bg-muted border-border text-foreground focus-visible:ring-primary" />
+                {passwordErrors.confirmPassword && <p className="text-red-600 dark:text-red-400 text-sm">{passwordErrors.confirmPassword.message as string}</p>}
               </div>
               <div className="pt-2">
                  <Button 
                    type="submit" 
                    disabled={passwordLoading}
-                   className="w-full bg-[#1A1333] border border-[#2D214F] text-[#E2D9F3] hover:text-white hover:bg-[#2D214F]"
+                   className="w-full bg-muted border border-border text-foreground hover:text-foreground hover:bg-muted/70"
                  >
                    {passwordLoading ? 'Atualizando...' : (isGoogleUser ? 'Salvar Senha' : 'Atualizar Senha')}
                  </Button>
@@ -316,29 +316,29 @@ export function DashboardAccount() {
           </CardContent>
         </Card>
 
-        <Card className="bg-[#130E20] border-[#2D214F] shadow-sm">
+        <Card className="bg-card border-border shadow-sm">
           <CardHeader>
-            <CardTitle className="text-xl text-white flex items-center gap-2">
-               <CreditCard className="w-5 h-5 text-violet-400" /> Assinatura
+            <CardTitle className="text-xl text-foreground flex items-center gap-2">
+               <CreditCard className="w-5 h-5 text-primary" /> Assinatura
             </CardTitle>
-            <CardDescription className="text-[#9B8FC0]">
+            <CardDescription className="text-muted-foreground">
               Detalhes do seu plano atual.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-             <div className="p-4 rounded-lg bg-[#0B0914] border border-[#2D214F] flex items-center justify-between">
+             <div className="p-4 rounded-lg bg-muted border border-border flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold text-white mb-1">Plano Teste (Beta)</h3>
-                  <p className="text-sm text-[#9B8FC0]">Acesso total liberado</p>
+                  <h3 className="font-semibold text-foreground mb-1">Plano Teste (Beta)</h3>
+                  <p className="text-sm text-muted-foreground">Acesso total liberado</p>
                 </div>
-                <div className="px-3 py-1 rounded-full bg-violet-500/20 text-violet-400 text-xs font-bold uppercase tracking-wider border border-violet-500/30">
+                <div className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider border border-primary/20">
                   Ativo
                 </div>
              </div>
-             <p className="text-sm text-[#9B8FC0]">
+             <p className="text-sm text-muted-foreground">
                Em breve você poderá gerenciar sua assinatura, métodos de pagamento e faturas por aqui.
              </p>
-             <Button disabled className="w-full bg-[#1A1333] border border-[#2D214F] text-[#9B8FC0]">
+             <Button disabled className="w-full bg-muted border border-border text-muted-foreground">
                Gerenciar Assinatura (Em breve)
              </Button>
           </CardContent>

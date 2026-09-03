@@ -3,103 +3,154 @@
 ## Onde este trabalho está
 
 Worktree isolado: `E:\Syncou\Syncou-V2\.claude\worktrees\syncou-redesign-ficha`,
-branch `worktree-syncou-redesign-ficha`, criada a partir de `origin/main`
-(commit `996eb6f`). **Nada desta leva foi commitado ainda.**
+branch `worktree-syncou-redesign-ficha`. **Nada desta leva foi commitado
+ainda** — mudanças estão no working tree, aguardando revisão do usuário.
 
-## O que foi feito
+## Histórico da direção visual (3 tentativas)
 
-### 1. Auditoria visual completa (Landing, Dashboard, ProviderPage, etc.)
+1. **"Órbita Âmbar"** (descontinuada) — roxo + âmbar como cor de
+   assinatura. Âmbar nunca virou token, ficou como hex cru espalhado e
+   competia com o roxo como cor de ação. Ver `996eb6f`.
+2. **"Ficha de Agendamento"** (descartada antes de produção) — identidade
+   tinta/pergaminho/latão, tipografia Bitter + IBM Plex, só nas páginas
+   públicas (commit `8980df2`, já em `main`). O usuário viu o resultado
+   rodando e achou "dourado demais" — o fundo era escuro, mas o latão
+   (única cor de destaque, usada em botões/ícones/bordas/links/foco)
+   dominava a leitura da página inteira. Não reverte o commit já mergeado
+   em `main`; a direção seguinte substitui esse trabalho neste worktree.
+3. **"Índigo & Laranja"** (atual, ver abaixo) — especificação vinda
+   diretamente do usuário, agindo como product/UI designer sênior:
+   paleta vibrante, regra 60/30/10, roxo como identidade e laranja
+   reservado só pra ação de conversão.
 
-Identificado o problema central: violeta (`#8B5CF6`, token real `--primary`)
-e âmbar (`#F5A623`, citado no CLAUDE.md como cor de assinatura mas nunca
-virou token) competiam como cor de ação principal em telas diferentes — às
-vezes na mesma tela. Catalogados também os clichês visuais recorrentes: orbs
-de blur ambiente, hero com giro infinito, bento grid decorativo, badges com
-dot pulsante, glow-shadow em excesso. Relatório completo publicado como
-artifact (screenshots reais incluídos para Landing e 404; Dashboard/Onboarding
-só por leitura de código — sem Postgres local pra testar login).
+## O que foi feito nesta leva (Índigo & Laranja)
 
-### 2. Correções já commitadas em `origin/main`
+### 1. Proposta visual (artifact, aprovada antes de mexer em código)
 
-- `d30f286` — `fix: remove duplicate global rate limiter registration`.
-  `server.ts` registrava o `globalLimiter` duas vezes (uma escopada a
-  `/api/`, outra global), contando cada requisição de API em dobro contra o
-  limite de 180/min — o que travava até carregamento normal de página.
-- `342ac88` — `chore: sync package-lock.json with package.json`.
-- `996eb6f` — `fix(design): consolidate violet as the single primary color
-  and cut unmotivated decoration`. Resolveu o conflito violeta/âmbar em 7
-  arquivos (LandingPage, NotFound, Onboarding, DashboardLayout,
-  DashboardHome, DashboardSettings, ProviderPage) — violeta venceu por
-  decisão do usuário. Removidos: orbs de blur, giro infinito do hero,
-  gradiente de texto no "404". Âmbar não é mais usado em nenhum CTA.
+Publicado um mockup do sistema de design (paleta, tipografia, tela de
+agendamento mobile) pra validação antes da implementação real. Decisões
+tomadas como lead: primária `#7C3AED` (mais contraste que `#6366F1`
+sugerido), laranja em vez de coral pro CTA (coral colide com o vermelho
+de erro), `#EA580C` nos botões sólidos pra fechar contraste AA com texto
+branco (`#F97316` puro não fecha).
 
-### 3. Redesign completo das páginas públicas (neste worktree, não commitado)
+### 2. Fundação de tokens
 
-Por pedido do usuário: identidade visual nova do zero (não evolução da
-"Órbita"), escopo limitado a Landing Page + páginas públicas primeiro
-(Dashboard fica pra depois), efeito visual restrito a um único momento de
-assinatura.
+- `src/index.css`: tokens do tema inteiro trocados de escuro pra claro
+  (`--background: #F8FAFC`, `--card: #FFFFFF`, `--primary: #7C3AED`).
+  Tokens `ledger-*` da Ficha removidos por completo. Novos tokens
+  `--cta` / `--cta-strong` / `--cta-foreground` adicionados — **cor de
+  ação separada da cor primária**, ao contrário do sistema antigo onde
+  violeta fazia os dois papéis.
+- `index.html`: fontes trocadas pra só Plus Jakarta Sans + IBM Plex Mono
+  (removidas Outfit, Bitter, IBM Plex Sans — não usadas mais).
+- `vite.config.ts`: `theme_color`/`background_color` do manifest PWA
+  atualizados de navy escuro pra `#F8FAFC` (status bar mobile combinando
+  com o novo app claro).
+- `components/ui/button.tsx`: nova variante `variant="cta"` no Button
+  compartilhado — usada em todo botão de conversão real (criar conta,
+  confirmar reserva, agendar agora), reutilizável em vez de hardcodar
+  classe por classe.
 
-**Conceito: "Ficha de Agendamento"** — a interface se comporta como um
-ficha/livro de horários físico com uma senha de fila, em vez da metáfora
-abstrata de órbita.
+### 3. Escopo: a plataforma inteira, não só o público
 
-- **Paleta nova** (tokens `ledger-*` adicionados em `src/index.css`, sem
-  remover os tokens antigos que o Dashboard ainda usa): tinta `#17140F`,
-  pergaminho `#EFE6D2`, latão `#B08D57` (cor de ação), vinho `#7A2E2E`
-  (só o carimbo de confirmação), musgo `#4B5D45`, pedra `#8A8371`.
-- **Tipografia nova**: Bitter (display/headlines), IBM Plex Sans (corpo),
-  IBM Plex Mono (horários, preços, dados tabulares) — carregadas via Google
-  Fonts em `index.html`.
-- **Elemento de assinatura**: uma senha de fila rasgando ao meio na hero —
-  um lado "aguardando resposta no WhatsApp", o outro vira o link de
-  agendamento confirmado. Animação única no carregamento, sem repetir.
-- **Escopo**: `LandingPage.tsx`, `NotFound.tsx`, `ProviderPage.tsx`. Ajustes
-  mínimos em `Onboarding.tsx`/`TermsPage.tsx` só pra não quebrar o logo (ver
-  bug abaixo). Dashboard continua na identidade violeta atual — dois
-  sistemas visuais coexistem por enquanto (público vs. logado).
-- **`ProviderPage.tsx`** foi re-vestida sem tocar na lógica de reserva:
-  técnica de escopo via CSS custom properties (sobrescreve `--primary`,
-  `--card`, `--border` etc. só dentro da página via `style` inline no
-  container raiz), então Button/Card/Calendar/Badge herdam a paleta nova
-  automaticamente sem precisar trocar classe por classe.
-- **Bug corrigido**: `src/components/Logo.tsx` tinha `text-purple-500`
-  hardcoded no próprio componente, ignorando qualquer cor passada via
-  `className` — por isso o logo continuava roxo mesmo depois de passar
-  `text-ledger-brass`. Removido o hardcode; os 3 call-sites que dependiam do
-  default (`Onboarding.tsx` x2, `TermsPage.tsx`) receberam `text-primary`
-  explícito pra não perder a cor atual.
+Diferente da Ficha, esta leva **inverte o Dashboard inteiro de escuro
+pra claro** — ele nunca tinha recebido nenhum redesign antes e estava
+inteiro hardcoded em hex cru (não em tokens), então não era só trocar
+valor de token: cada classe `bg-[#...]`/`text-[#...]`/`border-[#...]`
+precisou ser reescrita.
 
-**Verificado visualmente**: Landing (desktop + mobile), 404, estado "não
-encontrado" do ProviderPage. **Não verificado**: fluxo completo de reserva do
-ProviderPage (precisa de Postgres acessível — sem instância local; usuário
-não roda Postgres na própria máquina, só no Railway).
+Arquivos alterados: `LandingPage.tsx`, `NotFound.tsx`, `ProviderPage.tsx`
+(removido o scoping de CSS vars que a Ficha usava — não precisa mais,
+todo o app compartilha os mesmos tokens agora), `Onboarding.tsx`,
+`TermsPage.tsx`, `ResetPassword.tsx`, `DashboardLayout.tsx`,
+`DashboardHome.tsx`, `DashboardSettings.tsx`, `DashboardAccount.tsx`
+(primeira vez recebendo qualquer redesign), `DashboardCalendar.tsx`.
 
-`tsc --noEmit` limpo em todas as etapas.
+### 4. Correção de convenção de cor no Dashboard
+
+`DashboardCalendar.tsx` usava verde/âmbar pros eventos "Confirmado" /
+"Pendente", enquanto `DashboardHome.tsx` já usava violeta (primary) /
+âmbar pro mesmo par de status em outro lugar da mesma tela — duas
+convenções diferentes pro mesmo dado. Unificado: Confirmado = primary
+(violeta), Pendente = âmbar, em toda a Dashboard.
+
+### 5. Bugs reais corrigidos durante a conversão (não cosméticos)
+
+- Inputs de horário/data com `[&::-webkit-calendar-picker-indicator]:invert`
+  — truque que invertia o ícone do calendário nativo pra ficar visível
+  em fundo escuro. Em fundo claro isso o deixava branco-sobre-branco
+  (invisível). Removido em 3 arquivos (`DashboardSettings.tsx`,
+  `DashboardHome.tsx`).
+- Vários textos de status/erro em `red-400`/`emerald-400`/`amber-500`
+  (tom claro, pensado pra contraste sobre fundo escuro) não fechavam
+  contraste AA sobre branco — ajustados pra `-600`/`-700`.
+- Um botão em `DashboardAccount.tsx` ficou com `bg-primary` + texto
+  escuro depois de uma troca em lote — corrigido pra `text-primary-foreground`.
+
+### 6. Verificação
+
+- `tsc --noEmit` limpo em cada fase.
+- Servidor local rodado com Playwright: Landing (desktop 1280px e mobile
+  390px) e 404 (mobile) — sem erros de console, paleta e responsividade
+  conferidas visualmente.
+- **Não verificado**: Dashboard logado e fluxo de reserva completo do
+  ProviderPage — dependem de Postgres, que não existe no ambiente local
+  (só testável de verdade após deploy no Railway, conforme já registrado
+  no `CLAUDE.md`).
+
+### 7. Dark mode
+
+Adicionado depois do redesign inicial, a pedido do usuário ("botão de
+dark mode na sidebar"):
+
+- `src/index.css`: bloco `.dark` deixou de duplicar os valores claros e
+  ganhou uma paleta escura de verdade (fundo `#0B0A12`, cards `#15131F`,
+  primária `#8B5CF6`). CTA fica mais claro no escuro (`#FB923C`/`#F97316`)
+  e o texto do botão de ação vira quase-preto em vez de branco — laranja
+  claro com texto branco não fecha contraste AA.
+- `src/contexts/ThemeContext.tsx` (novo): provider com `theme`/`toggleTheme`,
+  persiste em `localStorage` (`syncou-theme`), aplica a classe `.dark` no
+  `<html>` — **global**, não só no Dashboard, porque os modais (Dialog)
+  usam portal pra `document.body`, fora de qualquer wrapper local; alterar
+  a classe num elemento dentro da árvore deixaria os modais presos no
+  tema errado.
+- `index.html`: script inline síncrono antes do React montar, pra não ter
+  flash de tema claro em quem já escolheu escuro.
+- `src/components/DashboardLayout.tsx`: botão de alternância (ícone
+  Sol/Lua) na sidebar desktop e no menu mobile — é o único lugar com o
+  controle, mas a preferência vale pro app inteiro.
+- Auditoria de cores literais do Tailwind (não-token) que eu tinha usado
+  pra status/erro durante a conversão pro claro (`emerald-600`,
+  `amber-600/700`, `red-600/700`, `rose-600`, `slate-500/600`) — todas
+  ganharam par `dark:*-400` pra manter contraste no escuro. Também achei
+  e corrigi 2 bugs de contraste que tinham passado batido no modo claro
+  (`text-red-400` sobre fundo branco em `DashboardAccount.tsx`, e
+  `hover:text-red-300` sobre fundo rosa claro em `DashboardSettings.tsx`).
+
+**Verificado**: `tsc --noEmit` limpo; Landing renderizada em dark mode via
+Playwright (forçando `localStorage.syncou-theme=dark`) — re-tematizou
+sozinha, sem precisar tocar em nenhum componente, porque tudo já usa os
+tokens. **Não verificado**: o botão em si dentro do Dashboard logado
+(depende de Postgres/login, só no Railway).
 
 ## Próximos passos
 
-1. Revisar o redesign neste worktree e decidir: commitar + push/merge pra
+1. Revisão do usuário no worktree — decidir commitar + push/merge pra
    `main`, ou ajustar algo antes.
-2. Itens da auditoria original ainda não atacados (fora do escopo desta
-   leva): cores do calendário (`DashboardCalendar.tsx`) fora do tema, revisão
-   fina de `motion`/animações genéricas repetidas.
-3. Se o redesign for aprovado: decidir se o conceito "Ficha" se estende pro
-   Dashboard também, ou se os dois sistemas visuais (público novo / logado
-   antigo) convivem por mais tempo.
-4. Testar o fluxo de reserva do ProviderPage de verdade — depende de
-   Postgres acessível (local, se o usuário decidir configurar, ou direto
-   depois do próximo deploy no Railway).
+2. Validar Dashboard logado e fluxo de reserva real após deploy.
+3. Itens fora do escopo desta leva: rastreamento de "No-show", revisão
+   fina de `motion`/animações repetidas.
 
 ## Arquivos relevantes
 
 | Arquivo | O que tem |
 |---|---|
-| `src/index.css` | Tokens de tema — os antigos (Dashboard) e os novos `ledger-*` |
-| `index.html` | Fontes Google (Outfit/Plus Jakarta Sans antigas + Bitter/IBM Plex novas) |
-| `src/pages/LandingPage.tsx` | Redesign completo — hero, ficha pautada, CTA final, modal de auth |
-| `src/pages/NotFound.tsx` | Redesign completo |
-| `src/pages/ProviderPage.tsx` | Re-vestida via escopo de CSS vars, lógica de reserva intacta |
-| `src/components/Logo.tsx` | Bug de cor hardcoded corrigido |
-| `server.ts` | Rate limiter corrigido (~linha 183-213) |
+| `src/index.css` | Tokens de tema únicos pra toda a plataforma (claro) + `--cta`/`--cta-strong` |
+| `index.html` | Fontes Google — só Plus Jakarta Sans + IBM Plex Mono |
+| `vite.config.ts` | Cores do manifest PWA atualizadas |
+| `components/ui/button.tsx` | Variante `cta` nova, reutilizável |
+| `src/pages/LandingPage.tsx` | Hero com preview real do widget de agendamento como elemento de assinatura |
+| `src/pages/ProviderPage.tsx` | Fluxo de reserva na paleta nova, sem scoping de CSS vars |
+| `src/pages/Dashboard*.tsx` | Dashboard inteiro invertido de escuro pra claro |
 | `.claude/worktrees/syncou-redesign-ficha/` | Worktree onde este trabalho vive |
