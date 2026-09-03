@@ -731,10 +731,10 @@ export function DashboardHome() {
           <div className="flex items-start sm:items-center gap-3">
             <div className="relative p-3 bg-[#0B0914] border border-[#2D214F] rounded-xl text-[#9B8FC0] flex-shrink-0">
               <CalendarIcon className="w-6 h-6" />
-              {/* Nó pulsante âmbar indicando desconexão/ação necessária */}
+              {/* Nó pulsante indicando desconexão/ação necessária */}
               <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F5A623] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#F5A623] border-2 border-[#130E20]"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-primary border-2 border-[#130E20]"></span>
               </span>
             </div>
             <div>
@@ -742,7 +742,7 @@ export function DashboardHome() {
               <p className="text-[#9B8FC0] text-sm mt-0.5">Vincule sua conta do Google Calendar para ativar a sincronização bidirecional automática.</p>
             </div>
           </div>
-          <Button onClick={() => navigate('/dashboard/settings#google-calendar')} className="w-full sm:w-auto bg-[#F5A623] hover:bg-[#E09612] text-[#0A0713] font-semibold h-11 px-6 rounded-lg transition-all shadow-[0_0_15px_rgba(245,166,35,0.15)]">
+          <Button onClick={() => navigate('/dashboard/settings#google-calendar')} className="w-full sm:w-auto font-semibold h-11 px-6 transition-all">
             Conectar Agenda
           </Button>
         </motion.div>
@@ -760,7 +760,7 @@ export function DashboardHome() {
         </div>
         <div className="flex flex-row flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto justify-end">
           {currentSlug && (
-             <Button className="w-full sm:w-auto bg-[#8B5CF6] hover:bg-[#7C3AED] text-white shadow-lg shadow-violet-500/20" onClick={() => window.open(`/p/${currentSlug}`, '_blank')}>
+             <Button className="w-full sm:w-auto shadow-lg shadow-primary/20" onClick={() => window.open(`/p/${currentSlug}`, '_blank')}>
                <Plus className="w-4 h-4 mr-2" />
                Agendar Agora
              </Button>
@@ -798,7 +798,7 @@ export function DashboardHome() {
           onClick={() => setActiveTab('servicos')}
           className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'servicos' ? 'bg-[#2D214F] text-white shadow' : 'text-[#9B8FC0] hover:bg-[#1A1333] hover:text-white'}`}
         >
-          <span className="w-4 h-4 inline-flex items-center justify-center rounded-sm bg-[#8B5CF6]/20 text-violet-400 text-[10px] font-bold mr-2 mb-0.5">S</span>
+          <span className="w-4 h-4 inline-flex items-center justify-center rounded-sm bg-primary/20 text-primary text-[10px] font-bold mr-2 mb-0.5">S</span>
           Serviços
         </button>
         <button 
@@ -815,7 +815,7 @@ export function DashboardHome() {
           {/* Header & Filters */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-[#8B5CF6]" />
+              <TrendingUp className="w-5 h-5 text-primary" />
               Visão de Negócio
             </h2>
             <div className="flex bg-[#1A1333] rounded-lg p-1 w-full sm:w-auto overflow-x-auto hide-scrollbar">
@@ -854,7 +854,6 @@ export function DashboardHome() {
                 transition={{ duration: 0.4 }}
                 className="bg-[#130E20] border border-[#2D214F] rounded-2xl p-6 relative overflow-hidden"
               >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#8B5CF6]/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                   <div>
                     <h3 className="text-sm font-medium text-[#9B8FC0] mb-2 flex items-center gap-2">
@@ -919,12 +918,12 @@ export function DashboardHome() {
                         <Tooltip 
                           cursor={{ fill: '#2D214F', opacity: 0.4 }}
                           contentStyle={{ backgroundColor: '#1A1333', border: '1px solid #2D214F', borderRadius: '8px', color: '#fff' }}
-                          itemStyle={{ color: '#8B5CF6', fontWeight: 'bold' }}
+                          itemStyle={{ color: 'var(--primary)', fontWeight: 'bold' }}
                         />
                         <Bar 
                           dataKey="appointments" 
                           name="Agendamentos"
-                          fill="#8B5CF6" 
+                          fill="var(--primary)"
                           radius={[4, 4, 0, 0]} 
                           maxBarSize={40}
                         />
@@ -975,7 +974,7 @@ export function DashboardHome() {
            <div className="flex flex-col gap-4">
              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                 <CalendarIcon className="w-5 h-5 text-violet-400" />
+                 <CalendarIcon className="w-5 h-5 text-primary" />
                  Agendamentos
                  <span className="bg-[#1A1333] text-[#E2D9F3] text-xs px-2 py-1 rounded-full">{filteredAppointments.length}</span>
                </h2>
@@ -1009,7 +1008,7 @@ export function DashboardHome() {
                    placeholder="Filtrar por nome..." 
                    value={filterName}
                    onChange={e => setFilterName(e.target.value)}
-                   className="bg-[#130E20] border-[#2D214F] text-white h-9 placeholder:text-[#5B4F81] focus-visible:ring-violet-500 w-[150px] sm:w-[200px]"
+                   className="bg-[#130E20] border-[#2D214F] text-white h-9 placeholder:text-[#5B4F81] focus-visible:ring-primary w-[150px] sm:w-[200px]"
                  />
                  <Button onClick={exportToCSV} variant="outline" className="border-[#2D214F] text-[#E2D9F3] hover:text-white hover:bg-[#2D214F]/50 h-9 px-3 shrink-0">
                    <Download className="w-4 h-4 sm:mr-2" />
@@ -1075,7 +1074,7 @@ export function DashboardHome() {
                 <div className="text-center p-8 border border-dashed border-[#2D214F] rounded-xl bg-[#130E20]">
                    <p className="text-[#9B8FC0]">Nenhum agendamento encontrado.</p>
                    {filterName || filterStatus !== 'Todos' ? (
-                     <Button variant="link" onClick={() => { setFilterName(''); setFilterStatus('Todos'); }} className="text-violet-400 mt-2">
+                     <Button variant="link" onClick={() => { setFilterName(''); setFilterStatus('Todos'); }} className="text-primary mt-2">
                        Limpar filtros
                      </Button>
                    ) : (
@@ -1094,7 +1093,7 @@ export function DashboardHome() {
                     transition={{ duration: 0.4, delay: 0.1 + (index * 0.05), ease: [0.16, 1, 0.3, 1] }}
                     layout
                   >
-                    <Card className="bg-[#130E20] border-[#2D214F] shadow-sm hover:border-violet-500/30 transition-all overflow-hidden group">
+                    <Card className="bg-[#130E20] border-[#2D214F] shadow-sm hover:border-primary/30 transition-all overflow-hidden group">
                     <CardContent className="p-0">
                       <div className="flex flex-col md:flex-row p-4 gap-4 items-start md:items-stretch">
                         
@@ -1113,7 +1112,7 @@ export function DashboardHome() {
                            <div className="flex items-center gap-2">
                              <h3 className="font-bold text-white text-lg truncate">{apt.clientName}</h3>
                              {apt.bookingSource === 'public_link' && (
-                               <span className="text-[10px] uppercase font-bold tracking-wider text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded">via syncou</span>
+                               <span className="text-[10px] uppercase font-bold tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">via syncou</span>
                              )}
                            </div>
                            <div className="flex items-center gap-3 text-sm text-[#9B8FC0] mt-2">
@@ -1123,7 +1122,7 @@ export function DashboardHome() {
                                </svg>
                                {apt.clientWhatsApp || apt.clientPhone || 'Sem número'}
                              </button>
-                             <span className="font-mono text-violet-300 bg-violet-500/5 px-2 py-1 rounded">
+                             <span className="font-mono text-primary bg-primary/5 px-2 py-1 rounded">
                                R$ {apt.totalPrice?.toFixed(2) || '0.00'}
                              </span>
                            </div>
@@ -1133,7 +1132,7 @@ export function DashboardHome() {
                         <div className="flex flex-col items-end gap-3 flex-shrink-0 w-full md:w-auto mt-4 md:mt-0 border-t border-[#2D214F] pt-4 md:border-t-0 md:pt-0">
                           <div className={`text-xs px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1.5 w-fit
                             ${(apt.status === 'scheduled' || apt.status === 'Pendente' || !apt.status) ? 'bg-amber-400/10 text-amber-400 border border-amber-400/20' : 
-                              (apt.status === 'confirmed' || apt.status === 'Confirmado') ? 'bg-violet-500/15 text-violet-300 border border-violet-500/20' : 
+                              (apt.status === 'confirmed' || apt.status === 'Confirmado') ? 'bg-primary/15 text-primary border border-primary/20' : 
                               (apt.status === 'completed' || apt.status === 'Concluído') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 
                               'bg-slate-500/10 text-slate-400 border border-slate-500/20'}
                           `}>
@@ -1163,7 +1162,7 @@ export function DashboardHome() {
 
                             {(apt.status === 'scheduled' || apt.status === 'Pendente' || !apt.status) && (
                                <>
-                                 <Button size="sm" onClick={() => handleUpdateAppointmentStatus(apt.id, 'Confirmado')} className="h-8 px-3 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-medium rounded-md">
+                                 <Button size="sm" onClick={() => handleUpdateAppointmentStatus(apt.id, 'Confirmado')} className="h-8 px-3 font-medium rounded-md">
                                    Confirmar
                                  </Button>
                                  <Button 
@@ -1267,12 +1266,12 @@ export function DashboardHome() {
         {/* Services Section */}
            <div className="flex items-center justify-between">
              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-               <span className="w-6 h-6 rounded-md bg-[#8B5CF6]/20 text-violet-400 flex items-center justify-center text-xs font-semibold ring-1 ring-violet-500/30">S</span>
+               <span className="w-6 h-6 rounded-md bg-primary/20 text-primary flex items-center justify-center text-xs font-semibold ring-1 ring-primary/30">S</span>
                Meus Serviços
              </h2>
              <Dialog open={isServiceModalOpen} onOpenChange={setIsServiceModalOpen}>
                <DialogTrigger asChild>
-                 <Button onClick={() => setEditingService(null)} size="sm" className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white">
+                 <Button onClick={() => setEditingService(null)} size="sm">
                    <Plus className="w-4 h-4 mr-1" /> Novo
                  </Button>
                </DialogTrigger>
@@ -1288,29 +1287,29 @@ export function DashboardHome() {
                   <div className="space-y-4 pt-2">
                     <div className="space-y-2">
                       <Label htmlFor="name" className="text-[#9B8FC0]">Nome do Serviço</Label>
-                      <Input id="name" name="name" defaultValue={editingService?.title || editingService?.name} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11" placeholder="Ex: Corte de Cabelo" />
+                      <Input id="name" name="name" defaultValue={editingService?.title || editingService?.name} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary h-11" placeholder="Ex: Corte de Cabelo" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2 sm:col-span-2">
                         <Label htmlFor="price" className="text-[#9B8FC0]">Preço (R$)</Label>
-                        <Input id="price" name="price" type="number" min="0" step="0.01" defaultValue={editingService?.price} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11 text-lg font-medium" />
+                        <Input id="price" name="price" type="number" min="0" step="0.01" defaultValue={editingService?.price} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary h-11 text-lg font-medium" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="duration" className="text-[#9B8FC0]">Duração (min)</Label>
-                        <Input id="duration" name="duration" type="number" min="1" defaultValue={editingService?.duration} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11" />
+                        <Input id="duration" name="duration" type="number" min="1" defaultValue={editingService?.duration} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary h-11" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="bufferTime" className="text-[#9B8FC0]">Respiro (min)</Label>
-                        <Input id="bufferTime" name="bufferTime" type="number" min="0" defaultValue={editingService?.bufferTime || 0} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11" />
+                        <Input id="bufferTime" name="bufferTime" type="number" min="0" defaultValue={editingService?.bufferTime || 0} required className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary h-11" />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="description" className="text-[#9B8FC0]">Descrição (Opcional)</Label>
-                      <textarea id="description" name="description" defaultValue={editingService?.description} className="flex min-h-[80px] w-full rounded-md bg-[#0B0914] border border-[#2D214F] px-3 py-2 text-sm text-white placeholder:text-[#9B8FC0]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 resize-none" placeholder="Ex: Lavagem e finalização inclusos" />
+                      <textarea id="description" name="description" defaultValue={editingService?.description} className="flex min-h-[80px] w-full rounded-md bg-[#0B0914] border border-[#2D214F] px-3 py-2 text-sm text-white placeholder:text-[#9B8FC0]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 resize-none" placeholder="Ex: Lavagem e finalização inclusos" />
                     </div>
                     <DialogFooter className="pt-4 border-t border-[#2D214F] mt-2">
                       <Button type="button" variant="ghost" onClick={() => setIsServiceModalOpen(false)} className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50">Cancelar</Button>
-                      <Button type="submit" className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white">Salvar Serviço</Button>
+                      <Button type="submit">Salvar Serviço</Button>
                     </DialogFooter>
                   </div>
                 </form>
@@ -1325,7 +1324,7 @@ export function DashboardHome() {
                 </div>
              ) : (
                 services.map(service => (
-                  <Card key={service.id} className={`transition-all shadow-sm overflow-hidden group ${service.active !== false ? 'bg-[#130E20] border-[#2D214F] hover:border-violet-500/30' : 'bg-[#0B0914] border-[#1A1333] opacity-75 grayscale-[30%]'}`}>
+                  <Card key={service.id} className={`transition-all shadow-sm overflow-hidden group ${service.active !== false ? 'bg-[#130E20] border-[#2D214F] hover:border-primary/30' : 'bg-[#0B0914] border-[#1A1333] opacity-75 grayscale-[30%]'}`}>
                     <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2.5 mb-2">
@@ -1389,8 +1388,7 @@ export function DashboardHome() {
               onClick={() => {
                 confirmModal.onConfirm();
                 setConfirmModal(prev => ({ ...prev, isOpen: false }));
-              }} 
-              className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white"
+              }}
             >
               {confirmModal.confirmText || 'Confirmar'}
             </Button>
@@ -1419,7 +1417,7 @@ export function DashboardHome() {
                 value={cancelReason}
                 onChange={e => setCancelReason(e.target.value)}
                 placeholder="Exemplo: Fora do horário de disponibilidade, imprevisto de força maior, etc."
-                className="w-full h-24 bg-[#0B0914] border border-[#2D214F] rounded-lg p-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-violet-500 placeholder:text-[#5B4F81]"
+                className="w-full h-24 bg-[#0B0914] border border-[#2D214F] rounded-lg p-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-[#5B4F81]"
               />
             </div>
             <DialogFooter className="pt-2 flex sm:justify-end gap-2">
@@ -1439,7 +1437,7 @@ export function DashboardHome() {
         <DialogContent className="sm:max-w-[425px] bg-[#130E20] border-[#2D214F] text-white">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <RefreshCcw className="w-5 h-5 text-violet-400" />
+              <RefreshCcw className="w-5 h-5 text-primary" />
               Remarcar Agendamento
             </DialogTitle>
             <CardDescription className="text-[#9B8FC0]">
@@ -1456,7 +1454,7 @@ export function DashboardHome() {
                   required
                   value={rescheduleDate}
                   onChange={(e) => setRescheduleDate(e.target.value)}
-                  className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert h-11"
+                  className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert h-11"
                 />
               </div>
               <div className="space-y-2">
@@ -1467,7 +1465,7 @@ export function DashboardHome() {
                   required
                   value={rescheduleTime}
                   onChange={(e) => setRescheduleTime(e.target.value)}
-                  className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert h-11"
+                  className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert h-11"
                 />
               </div>
             </div>
@@ -1476,7 +1474,7 @@ export function DashboardHome() {
               <Button type="button" variant="ghost" onClick={() => setIsRescheduleModalOpen(false)} className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]">
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-semibold">
+              <Button type="submit" className="font-semibold">
                 Confirmar Remarcação
               </Button>
             </DialogFooter>

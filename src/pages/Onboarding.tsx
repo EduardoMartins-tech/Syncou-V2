@@ -146,9 +146,6 @@ export function Onboarding() {
 
   return (
     <div className="min-h-screen bg-[#0B0914] text-white font-sans flex items-center justify-center p-4">
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#8B5CF6]/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] bg-[#8B5CF6]/5 rounded-full blur-[100px] pointer-events-none" />
-
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -177,7 +174,7 @@ export function Onboarding() {
                   id="displayName"
                   {...register('displayName')}
                   placeholder="Seu Nome Completo"
-                  className="bg-[#0B0914] border-[#2D214F] text-white placeholder:text-[#5B4F81] focus-visible:ring-violet-500 focus:border-violet-500 h-11"
+                  className="bg-[#0B0914] border-[#2D214F] text-white placeholder:text-[#5B4F81] focus-visible:ring-primary focus:border-primary h-11"
                 />
                 {errors.displayName && (
                   <p className="text-xs text-red-400 flex items-center gap-1">
@@ -195,7 +192,7 @@ export function Onboarding() {
                   id="whatsapp"
                   {...register('whatsapp')}
                   placeholder="Ex: 5511999999999"
-                  className="bg-[#0B0914] border-[#2D214F] text-white placeholder:text-[#5B4F81] focus-visible:ring-violet-500 focus:border-violet-500 h-11"
+                  className="bg-[#0B0914] border-[#2D214F] text-white placeholder:text-[#5B4F81] focus-visible:ring-primary focus:border-primary h-11"
                 />
                 <p className="text-[11px] text-[#5B4F81]">
                   DDI + DDD + Número (apenas dígitos). Exemplo: 5511999999999.
@@ -220,7 +217,7 @@ export function Onboarding() {
                     id="slug"
                     {...register('slug')}
                     placeholder="seu-nome"
-                    className="bg-[#0B0914] border-[#2D214F] text-white placeholder:text-[#5B4F81] focus-visible:ring-violet-500 focus:border-violet-500 pl-[115px] h-11"
+                    className="bg-[#0B0914] border-[#2D214F] text-white placeholder:text-[#5B4F81] focus-visible:ring-primary focus:border-primary pl-[115px] h-11"
                   />
                 </div>
 
@@ -228,7 +225,7 @@ export function Onboarding() {
                   <div className="flex items-center gap-2 mt-1.5 transition-all text-xs">
                     {checkingSlug ? (
                       <span className="text-[#9B8FC0] flex items-center gap-1">
-                        <Loader2 className="w-3 h-3 animate-spin text-violet-500" />
+                        <Loader2 className="w-3 h-3 animate-spin text-primary" />
                         Verificando link...
                       </span>
                     ) : slugAvailable ? (
@@ -253,7 +250,7 @@ export function Onboarding() {
               <Button
                 type="submit"
                 disabled={saving || checkingSlug || slugAvailable === false}
-                className="w-full h-12 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-semibold transition-all shadow-md rounded-lg flex items-center justify-center gap-2"
+                className="w-full h-12 font-semibold transition-all shadow-md flex items-center justify-center gap-2"
               >
                 {saving ? (
                   <>

@@ -154,16 +154,16 @@ export function LandingPage() {
 
 
   return (
-    <div className="min-h-screen bg-[#0B0914] text-[#E2D9F3] font-sans selection:bg-[#F5A623]/30">
+    <div className="min-h-screen bg-[#0B0914] text-[#E2D9F3] font-sans selection:bg-primary/30">
       <header className="fixed top-0 w-full bg-[#0B0914]/80 backdrop-blur-md border-b border-[#2D214F] z-50 animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Logo className="w-8 h-8 text-violet-400 drop-shadow-[0_0_12px_rgba(139,92,246,0.3)]" />
+            <Logo className="w-8 h-8 text-primary drop-shadow-[0_0_12px_rgba(139,92,246,0.3)]" />
             <span className="font-semibold text-xl tracking-tight text-white">Syncou</span>
           </div>
           <nav className="flex items-center gap-3">
-            <Button variant="ghost" className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50 font-medium" onClick={() => openAuthModal('login')}>Log in</Button>
-            <Button className="bg-[#F5A623] hover:bg-[#E09612] text-[#0A0713] shadow-[0_0_20px_rgba(245,166,35,0.2)] font-semibold rounded-lg" onClick={() => openAuthModal('register')}>
+            <Button variant="ghost" className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50 font-medium" onClick={() => openAuthModal('login')}>Entrar</Button>
+            <Button className="font-semibold" onClick={() => openAuthModal('register')}>
               Criar minha conta
             </Button>
           </nav>
@@ -171,9 +171,6 @@ export function LandingPage() {
       </header>
 
       <main className="pt-32 pb-16 px-4 overflow-hidden relative">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-violet-600/10 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-[#F5A623]/5 blur-[100px] rounded-full pointer-events-none" />
-
         {/* HERO SECTION */}
         <motion.section 
           initial={{ opacity: 0, y: 40 }}
@@ -183,9 +180,9 @@ export function LandingPage() {
         >
           {/* Text Left */}
           <div className="text-left text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-sm font-medium mb-8">
-              <span className="flex h-2 w-2 rounded-full bg-violet-500 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8">
+              <span className="flex h-2 w-2 rounded-full bg-primary relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
               </span>
               Acesso Antecipado
             </div>
@@ -196,12 +193,12 @@ export function LandingPage() {
               O fim da troca interminável de mensagens. Você envia um link, seu cliente escolhe o horário, e a sua agenda trabalha sozinha enquanto você atende quem já está no consultório.
             </p>
             <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-6">
-              <Button size="lg" className="bg-[#F5A623] hover:bg-[#E09612] text-[#0A0713] w-full sm:w-auto text-lg h-14 px-8 rounded-lg shadow-[0_0_30px_rgba(245,166,35,0.2)] font-semibold transition-all" onClick={() => openAuthModal('register')}>
+              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-8 font-semibold transition-all" onClick={() => openAuthModal('register')}>
                 Criar meu link grátis
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               <div className="flex items-center gap-2 text-sm text-[#5B4F81] font-medium h-14">
-                <CheckCircle2 className="w-4 h-4 text-[#F5A623]/80" />
+                <CheckCircle2 className="w-4 h-4 text-primary/70" />
                 <span>Configuração em 2 min</span>
               </div>
             </div>
@@ -209,35 +206,31 @@ export function LandingPage() {
           
           {/* Visual Right - Orbit Concept */}
           <div className="relative h-[400px] w-full flex items-center justify-center hidden lg:flex">
-             <div className="absolute w-[350px] h-[350px] border border-[#2D214F] rounded-full animate-[spin_60s_linear_infinite] opacity-50" />
-             <div className="absolute w-[250px] h-[250px] border border-violet-500/30 rounded-full animate-[spin_40s_linear_infinite_reverse] opacity-70" />
-             
+             <div className="absolute w-[350px] h-[350px] border border-[#2D214F] rounded-full opacity-50" />
+             <div className="absolute w-[250px] h-[250px] border border-primary/30 rounded-full opacity-70" />
+
              {/* Center Logo */}
-             <div className="relative z-10 w-20 h-20 bg-[#130E20] border border-[#2D214F] rounded-2xl flex items-center justify-center shadow-2xl shadow-violet-900/20">
-               <Logo className="w-10 h-10 text-violet-400" />
+             <div className="relative z-10 w-20 h-20 bg-[#130E20] border border-[#2D214F] rounded-2xl flex items-center justify-center shadow-2xl shadow-primary/20">
+               <Logo className="w-10 h-10 text-primary" />
              </div>
-             
-             {/* Orbiting Elements */}
-             <div className="absolute w-[350px] h-[350px] animate-[spin_60s_linear_infinite]">
-               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                 <div className="animate-[spin_60s_linear_infinite_reverse] bg-[#0B0914] border border-[#2D214F] rounded-lg px-3 py-1.5 flex items-center gap-2 shadow-lg text-xs text-[#E2D9F3] whitespace-nowrap">
-                    <div className="w-2 h-2 rounded-full bg-violet-400" />
-                    syncou.app/p/voce
-                 </div>
+
+             {/* Elementos flutuantes */}
+             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+               <div className="bg-[#0B0914] border border-[#2D214F] rounded-lg px-3 py-1.5 flex items-center gap-2 shadow-lg text-xs text-[#E2D9F3] whitespace-nowrap">
+                  <div className="w-2 h-2 rounded-full bg-primary" />
+                  syncou.app/p/voce
                </div>
              </div>
-             
-             <div className="absolute w-[250px] h-[250px] animate-[spin_40s_linear_infinite_reverse]">
-               <div className="absolute bottom-4 -right-4">
-                 <div className="animate-[spin_40s_linear_infinite] bg-[#130E20] border border-[#F5A623]/30 rounded-lg p-3 flex items-start gap-3 shadow-[0_0_15px_rgba(245,166,35,0.15)]">
-                    <div className="w-8 h-8 rounded-full bg-[#F5A623]/20 flex items-center justify-center shrink-0">
-                      <CheckCircle2 className="w-4 h-4 text-[#F5A623]" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-white font-outfit">Novo Agendamento!</p>
-                      <p className="text-xs text-[#9B8FC0]">Hoje, às 14:30</p>
-                    </div>
-                 </div>
+
+             <div className="absolute bottom-4 -right-4">
+               <div className="bg-[#130E20] border border-primary/30 rounded-lg p-3 flex items-start gap-3 shadow-[0_0_15px_rgba(139,92,246,0.15)]">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white font-outfit">Novo Agendamento!</p>
+                    <p className="text-xs text-[#9B8FC0]">Hoje, às 14:30</p>
+                  </div>
                </div>
              </div>
           </div>
@@ -260,7 +253,7 @@ export function LandingPage() {
                   <h3 className="text-2xl font-bold text-white mb-2 font-outfit">Sincronia em Tempo Real</h3>
                   <p className="text-[#9B8FC0] max-w-[280px] leading-relaxed">Integração bidirecional com sua agenda atual. Sem delay, sem conflitos.</p>
                 </div>
-                <div className="absolute right-0 bottom-0 translate-y-1/4 translate-x-1/4 w-64 h-64 bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/20 transition-all duration-700" />
+                <div className="absolute right-0 bottom-0 translate-y-1/4 translate-x-1/4 w-64 h-64 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-700" />
               </div>
               {/* O Pulso de Sincronia */}
               <div className="absolute right-8 top-1/2 -translate-y-1/2 w-[220px] h-20 hidden sm:flex items-center justify-between">
@@ -271,15 +264,15 @@ export function LandingPage() {
                 </svg>
 
                 {/* Nó Origem (Syncou) */}
-                <div className="relative z-10 w-12 h-12 bg-[#130E20] border border-violet-500/30 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.2)]">
-                  <Logo className="w-6 h-6 text-violet-400" />
+                <div className="relative z-10 w-12 h-12 bg-[#130E20] border border-primary/30 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.2)]">
+                  <Logo className="w-6 h-6 text-primary" />
                 </div>
 
                 {/* Ícone de Check Centralizado na linha */}
                 <motion.div 
                   animate={{ opacity: [0, 0, 1, 1, 0, 0] }}
                   transition={{ duration: 4, repeat: Infinity, times: [0, 0.4, 0.42, 0.7, 0.8, 1], ease: "easeInOut" }}
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[18px] bg-[#130E20] border border-[#F5A623] text-[#F5A623] rounded-full p-1 z-20 shadow-[0_0_10px_rgba(245,166,35,0.3)]"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[18px] bg-[#130E20] border border-primary text-primary rounded-full p-1 z-20 shadow-[0_0_10px_rgba(139,92,246,0.3)]"
                 >
                   <CheckCircle2 className="w-3 h-3" />
                 </motion.div>
@@ -296,7 +289,7 @@ export function LandingPage() {
                   <motion.div 
                     animate={{ scale: [1, 1, 1.8, 1.8], opacity: [0, 0, 0.5, 0] }}
                     transition={{ duration: 4, repeat: Infinity, times: [0, 0.38, 0.45, 1], ease: "easeOut" }}
-                    className="absolute inset-0 bg-[#F5A623] rounded-xl z-0"
+                    className="absolute inset-0 bg-primary rounded-xl z-0"
                   />
                   <CalendarDays className="w-6 h-6 text-[#9B8FC0] relative z-10" />
                 </div>
@@ -338,7 +331,7 @@ export function LandingPage() {
               <h3 className="text-xl font-bold text-white mb-4 font-outfit">Seu Link Próprio</h3>
               <div className="bg-[#0B0914] border border-[#2D214F] rounded-lg p-3 font-mono text-sm text-[#E2D9F3] shadow-inner flex items-center break-all">
                 <span className="text-[#5B4F81] select-none">syncou.app/p/</span>
-                <span className="text-[#F5A623] font-bold">voce</span>
+                <span className="text-primary font-bold">voce</span>
               </div>
             </motion.div>
 
@@ -351,8 +344,8 @@ export function LandingPage() {
               className="md:col-span-1 row-span-1 bg-[#130E20] border border-[#2D214F] rounded-2xl p-8 relative overflow-hidden flex flex-col justify-center"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-[#F5A623]/10 flex items-center justify-center">
-                  <Mail className="w-5 h-5 text-[#F5A623]" />
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-primary" />
                 </div>
                 <h3 className="text-xl font-bold text-white font-outfit">Notificações</h3>
               </div>
@@ -369,8 +362,7 @@ export function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
-            <Card className="border border-[#F5A623]/20 bg-gradient-to-br from-[#1A1105] to-[#0A0713] shadow-[0_0_50px_rgba(245,166,35,0.05)] overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#F5A623]/10 blur-[120px] rounded-full pointer-events-none translate-x-1/2 -translate-y-1/2" />
+            <Card className="border border-[#2D214F] bg-gradient-to-br from-[#130E20] to-[#0A0713] overflow-hidden relative">
               <CardContent className="p-12 md:p-16 flex flex-col items-center text-center relative z-10">
                 <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white tracking-tight font-outfit leading-tight">
                   Pare de perder clientes<br/>na DM.
@@ -378,7 +370,7 @@ export function LandingPage() {
                 <p className="text-lg text-[#9B8FC0] leading-relaxed max-w-xl mb-10 font-sans">
                   A configuração leva menos de 2 minutos. Resgate o controle do seu tempo e deixe sua agenda trabalhar para você.
                 </p>
-                <Button size="lg" className="bg-[#F5A623] text-[#0A0713] hover:bg-[#E09612] w-full sm:w-auto h-14 px-10 font-bold rounded-lg text-lg shadow-[0_0_30px_rgba(245,166,35,0.2)] transition-all" onClick={() => openAuthModal('register')}>
+                <Button size="lg" className="w-full sm:w-auto h-14 px-10 font-bold text-lg transition-all" onClick={() => openAuthModal('register')}>
                   Criar meu link grátis
                 </Button>
               </CardContent>
@@ -402,7 +394,7 @@ export function LandingPage() {
           <>
             <DialogHeader className="space-y-2">
               <div className="mx-auto flex items-center justify-center mb-4">
-                <Logo className="w-12 h-12 text-violet-400 drop-shadow-[0_0_12px_rgba(139,92,246,0.3)]" />
+                <Logo className="w-12 h-12 text-primary drop-shadow-[0_0_12px_rgba(139,92,246,0.3)]" />
               </div>
               <DialogTitle className="text-2xl font-semibold text-center text-white tracking-tight">
                 {authMode === 'login' 
@@ -457,7 +449,7 @@ export function LandingPage() {
                         value={otpCode}
                         onChange={(e) => setOtpCode(e.target.value)}
                         placeholder="Ex: 123456"
-                        className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] placeholder:text-[#5B4F81] pl-10 focus-visible:ring-violet-500 h-11 rounded-lg shadow-sm"
+                        className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] placeholder:text-[#5B4F81] pl-10 focus-visible:ring-primary h-11 rounded-lg shadow-sm"
                       />
                     </div>
                     <p className="text-xs text-[#9B8FC0] mt-2">Enviamos um código para {email}.</p>
@@ -477,7 +469,7 @@ export function LandingPage() {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="voce@exemplo.com"
-                          className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] placeholder:text-[#5B4F81] pl-10 focus-visible:ring-violet-500 h-11 rounded-lg shadow-sm"
+                          className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] placeholder:text-[#5B4F81] pl-10 focus-visible:ring-primary h-11 rounded-lg shadow-sm"
                         />
                       </div>
                     </div>
@@ -495,7 +487,7 @@ export function LandingPage() {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder={authMode === 'register' ? "Mínimo 6 caracteres" : "Sua senha"}
-                          className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] placeholder:text-[#5B4F81] pl-10 focus-visible:ring-violet-500 h-11 rounded-lg shadow-sm"
+                          className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] placeholder:text-[#5B4F81] pl-10 focus-visible:ring-primary h-11 rounded-lg shadow-sm"
                         />
                       </div>
                       
@@ -530,14 +522,14 @@ export function LandingPage() {
                       id="terms"
                       checked={hasAcceptedTerms}
                       onChange={(e) => setHasAcceptedTerms(e.target.checked)}
-                      className="mt-1 w-4 h-4 rounded border-[#2D214F] bg-[#1A1333] text-[#8B5CF6] focus:ring-[#8B5CF6] focus:ring-offset-[#130E20] focus:ring-offset-2 shrink-0 accent-[#8B5CF6] cursor-pointer"
+                      className="mt-1 w-4 h-4 rounded border-[#2D214F] bg-[#1A1333] text-primary focus:ring-primary focus:ring-offset-[#130E20] focus:ring-offset-2 shrink-0 accent-primary cursor-pointer"
                     />
                     <label
                       htmlFor="terms"
                       className="text-xs font-medium leading-relaxed text-[#9B8FC0] cursor-pointer"
                     >
                       Eu li e concordo com os{" "}
-                      <Link to="/termos" target="_blank" className="font-semibold text-violet-400 hover:text-white transition-colors">
+                      <Link to="/termos" target="_blank" className="font-semibold text-primary hover:text-white transition-colors">
                         Termos de Serviço e Política de Privacidade
                       </Link>.
                     </label>
@@ -547,7 +539,7 @@ export function LandingPage() {
                 <Button
                   type="submit"
                   disabled={isSubmitting || (authMode === 'register' && authStep === 'form' && (!isValidPassword || !hasAcceptedTerms))}
-                  className="w-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-medium h-11 rounded-lg shadow-[0_0_20px_rgba(139,92,246,0.25)] transition-all flex items-center justify-center gap-2 mt-4"
+                  className="w-full font-medium h-11 shadow-[0_0_20px_rgba(139,92,246,0.25)] transition-all flex items-center justify-center gap-2 mt-4"
                 >
                   {isSubmitting ? (
                     <>

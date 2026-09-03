@@ -298,7 +298,7 @@ export function ProviderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0914] text-[#E2D9F3] font-sans pb-24 selection:bg-violet-500/30">
+    <div className="min-h-screen bg-[#0B0914] text-[#E2D9F3] font-sans pb-24 selection:bg-primary/30">
       {/* Header Sticky */}
       {step < 4 && (
         <header className="bg-[#0B0914]/80 backdrop-blur-md border-b border-[#2D214F] sticky top-0 z-10 px-4 py-3 flex items-center shadow-sm">
@@ -347,7 +347,7 @@ export function ProviderPage() {
               return (
                 <Card 
                   key={svc.id} 
-                  className={`cursor-pointer transition-all duration-200 border bg-[#130E20] ${isSelected ? 'border-violet-500 shadow-[0_0_15px_rgba(139,92,246,0.15)] ring-1 ring-violet-500' : 'border-[#2D214F] shadow-sm hover:border-[#4B3B7A] hover:bg-[#1A1333]'}`}
+                  className={`cursor-pointer transition-all duration-200 border bg-[#130E20] ${isSelected ? 'border-primary shadow-[0_0_15px_rgba(139,92,246,0.15)] ring-1 ring-primary' : 'border-[#2D214F] shadow-sm hover:border-[#4B3B7A] hover:bg-[#1A1333]'}`}
                   onClick={() => toggleService(svc.id)}
                 >
                   <CardContent className="p-4 flex items-center justify-between">
@@ -360,7 +360,7 @@ export function ProviderPage() {
                     </div>
                     <div className="flex flex-col items-end gap-3">
                       <span className="font-medium text-white tracking-tight">R$ {svc.price.toFixed(2)}</span>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center border transition-colors ${isSelected ? 'bg-violet-500 border-violet-500 text-white' : 'bg-[#1A1333] border-[#2D214F] text-transparent'}`}>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center border transition-colors ${isSelected ? 'bg-primary border-primary text-white' : 'bg-[#1A1333] border-[#2D214F] text-transparent'}`}>
                         {isSelected ? <Check className="w-3.5 h-3.5"/> : <Plus className="w-3.5 h-3.5 text-[#5B4F81]"/>}
                       </div>
                     </div>
@@ -377,7 +377,7 @@ export function ProviderPage() {
                    <p className="text-xs text-[#9B8FC0] font-medium tracking-wide">{selectedServices.size} serviços • {totalDuration} min</p>
                    <p className="text-lg font-semibold text-white tracking-tight">Total: R$ {totalPrice.toFixed(2)}</p>
                  </div>
-                 <Button className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-8 h-12 rounded-lg font-medium shadow-[0_0_15px_rgba(139,92,246,0.2)] transition-all" onClick={() => setStep(2)}>
+                 <Button className="px-8 h-12 rounded-lg font-medium shadow-[0_0_15px_rgba(139,92,246,0.2)] transition-all" onClick={() => setStep(2)}>
                    Continuar <ArrowRight className="w-4 h-4 ml-2" />
                  </Button>
                </div>
@@ -459,7 +459,7 @@ export function ProviderPage() {
                       <Button 
                         key={time} 
                         variant={selectedTime === time ? 'default' : 'outline'}
-                        className={`h-11 rounded-lg font-medium transition-all ${selectedTime === time ? 'bg-[#8B5CF6] hover:bg-[#7C3AED] text-white shadow-md ring-1 ring-violet-500' : 'bg-[#1A1333] border-[#2D214F] text-[#E2D9F3] hover:border-[#4B3B7A] hover:bg-[#2D214F]/50 shadow-sm'}`}
+                        className={`h-11 rounded-lg font-medium transition-all ${selectedTime === time ? 'shadow-md ring-1 ring-primary' : 'bg-[#1A1333] border-[#2D214F] text-[#E2D9F3] hover:border-[#4B3B7A] hover:bg-[#2D214F]/50 shadow-sm'}`}
                         onClick={() => setSelectedTime(time)}
                       >
                         {time}
@@ -477,7 +477,7 @@ export function ProviderPage() {
           <div className="fixed bottom-0 left-0 w-full bg-[#0B0914] border-t border-[#2D214F] p-4 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.5)] z-20">
             <div className="max-w-xl mx-auto flex justify-between">
               <Button variant="ghost" onClick={() => setStep(1)} className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50 font-medium">Voltar</Button>
-              <Button disabled={!selectedTime} className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-8 rounded-lg shadow-sm font-medium transition-all" onClick={() => setStep(3)}>
+              <Button disabled={!selectedTime} className="px-8 rounded-lg shadow-sm font-medium transition-all" onClick={() => setStep(3)}>
                 Avançar
               </Button>
             </div>
@@ -520,15 +520,15 @@ export function ProviderPage() {
            <form id="booking-form" onSubmit={handleBooking} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-[#E2D9F3] font-medium">Seu nome completo</Label>
-                <Input id="name" required value={clientName} onChange={e => setClientName(e.target.value)} className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] text-base h-12 placeholder:text-[#5B4F81] focus-visible:ring-violet-500 shadow-sm rounded-lg" placeholder="Ex: Maria Silva" />
+                <Input id="name" required value={clientName} onChange={e => setClientName(e.target.value)} className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] text-base h-12 placeholder:text-[#5B4F81] focus-visible:ring-primary shadow-sm rounded-lg" placeholder="Ex: Maria Silva" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="whatsapp" className="text-[#E2D9F3] font-medium">WhatsApp</Label>
-                <Input id="whatsapp" required value={clientWhatsApp} onChange={e => setClientWhatsApp(maskWhatsApp(e.target.value))} placeholder="(00) 00000-0000" className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] text-base h-12 placeholder:text-[#5B4F81] focus-visible:ring-violet-500 shadow-sm rounded-lg" />
+                <Input id="whatsapp" required value={clientWhatsApp} onChange={e => setClientWhatsApp(maskWhatsApp(e.target.value))} placeholder="(00) 00000-0000" className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] text-base h-12 placeholder:text-[#5B4F81] focus-visible:ring-primary shadow-sm rounded-lg" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-[#E2D9F3] font-medium">E-mail <span className="text-[#5B4F81] font-normal">(opcional)</span></Label>
-                <Input id="email" type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] text-base h-12 placeholder:text-[#5B4F81] focus-visible:ring-violet-500 shadow-sm rounded-lg" placeholder="seu@email.com" />
+                <Input id="email" type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} className="bg-[#0A0713] border-[#2D214F] text-[#E2D9F3] text-base h-12 placeholder:text-[#5B4F81] focus-visible:ring-primary shadow-sm rounded-lg" placeholder="seu@email.com" />
               </div>
            </form>
 
@@ -538,7 +538,7 @@ export function ProviderPage() {
             </div>
             <div className="max-w-xl mx-auto flex justify-between">
               <Button variant="ghost" type="button" onClick={() => setStep(2)} className="text-[#9B8FC0] hover:text-white hover:bg-[#2D214F]/50 font-medium">Voltar</Button>
-              <Button type="submit" form="booking-form" disabled={isSubmitting} className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-8 rounded-lg shadow-[0_0_15px_rgba(139,92,246,0.2)] font-medium transition-all">
+              <Button type="submit" form="booking-form" disabled={isSubmitting} className="px-8 rounded-lg shadow-[0_0_15px_rgba(139,92,246,0.2)] font-medium transition-all">
                 {isSubmitting ? 'Confirmando...' : 'Confirmar Reserva'}
               </Button>
             </div>

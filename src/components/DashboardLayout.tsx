@@ -32,7 +32,7 @@ export function DashboardLayout() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0B0914] text-[#E2D9F3]">
         <div className="animate-pulse flex flex-col items-center">
-          <Logo className="w-16 h-16 text-violet-400 drop-shadow-[0_0_15px_rgba(139,92,246,0.5)] mb-4" />
+          <Logo className="w-16 h-16 text-primary drop-shadow-[0_0_15px_rgba(139,92,246,0.5)] mb-4" />
         </div>
       </div>
     );
@@ -50,12 +50,12 @@ export function DashboardLayout() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0B0914] text-[#E2D9F3] font-sans flex flex-col md:flex-row selection:bg-violet-500/30">
+    <div className="min-h-screen bg-[#0B0914] text-[#E2D9F3] font-sans flex flex-col md:flex-row selection:bg-primary/30">
       {/* Sidebar - Desktop */}
       <aside className="w-full md:w-64 bg-[#130E20]/80 backdrop-blur-xl border-r border-[#2D214F] flex-col hidden md:flex h-screen sticky top-0">
         <div className="p-6">
           <div className="flex items-center gap-2 mb-10">
-            <Logo className="w-8 h-8 text-violet-400 drop-shadow-[0_0_12px_rgba(139,92,246,0.3)]" />
+            <Logo className="w-8 h-8 text-primary drop-shadow-[0_0_12px_rgba(139,92,246,0.3)]" />
             <span className="font-semibold text-xl tracking-tight text-white font-outfit">Syncou</span>
           </div>
           
@@ -66,8 +66,8 @@ export function DashboardLayout() {
                   variant="ghost" 
                   className={`w-full justify-start font-medium h-10 rounded-lg transition-all relative overflow-hidden ${location.pathname === item.path ? 'text-white bg-white/5' : 'text-[#9B8FC0] hover:text-white hover:bg-white/5'}`}
                 >
-                  {location.pathname === item.path && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#F5A623] rounded-r-full" />}
-                  <item.icon className={`mr-3 w-4 h-4 ${location.pathname === item.path ? 'text-[#F5A623]' : ''}`} strokeWidth={2} />
+                  {location.pathname === item.path && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary rounded-r-full" />}
+                  <item.icon className={`mr-3 w-4 h-4 ${location.pathname === item.path ? 'text-primary' : ''}`} strokeWidth={2} />
                   {item.name}
                 </Button>
               </Link>
@@ -98,7 +98,7 @@ export function DashboardLayout() {
         {/* Mobile Header */}
         <header className="md:hidden flex items-center justify-between bg-[#0B0914]/80 backdrop-blur-xl border-b border-[#2D214F] p-4 sticky top-0 z-40">
           <div className="flex items-center gap-3">
-            <Logo className="w-8 h-8 text-violet-400 drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]" />
+            <Logo className="w-8 h-8 text-primary drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]" />
             <span className="font-bold text-xl tracking-tight text-white font-outfit">Syncou</span>
           </div>
           <button 
@@ -133,8 +133,8 @@ export function DashboardLayout() {
                           variant="ghost" 
                           className={`w-full justify-start font-medium h-14 text-lg rounded-xl transition-all relative overflow-hidden ${location.pathname === item.path ? 'text-white bg-white/5' : 'text-[#9B8FC0] hover:text-white hover:bg-white/5'}`}
                         >
-                          {location.pathname === item.path && <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-[#F5A623] rounded-r-full" />}
-                          <item.icon className={`mr-4 w-6 h-6 ${location.pathname === item.path ? 'text-[#F5A623]' : 'text-[#9B8FC0]'}`} strokeWidth={2} />
+                          {location.pathname === item.path && <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-primary rounded-r-full" />}
+                          <item.icon className={`mr-4 w-6 h-6 ${location.pathname === item.path ? 'text-primary' : 'text-[#9B8FC0]'}`} strokeWidth={2} />
                           {item.name}
                         </Button>
                       </Link>
@@ -151,7 +151,7 @@ export function DashboardLayout() {
                   <div className="flex items-center gap-4 mb-6 bg-[#130E20] p-4 rounded-2xl border border-[#2D214F]">
                     <Avatar className="w-12 h-12 ring-2 ring-[#2D214F] ring-offset-2 ring-offset-[#130E20]">
                       <AvatarImage src={currentUser?.avatarUrl || ''} />
-                      <AvatarFallback className="bg-[#8B5CF6] text-white font-medium">{currentUser?.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                      <AvatarFallback className="bg-primary text-primary-foreground font-medium">{currentUser?.displayName?.charAt(0) || 'U'}</AvatarFallback>
                     </Avatar>
                     <div className="overflow-hidden flex-1">
                       <p className="font-semibold text-white truncate text-base">{currentUser?.displayName}</p>

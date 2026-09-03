@@ -386,8 +386,7 @@ export function DashboardSettings() {
                   await onSubmit(data);
                   if (blocker.state === "blocked") blocker.proceed();
                 })();
-              }} 
-              className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white"
+              }}
             >
               Salvar alterações
             </Button>
@@ -416,14 +415,14 @@ export function DashboardSettings() {
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 items-center p-4 bg-[#0B0914] border border-[#2D214F] rounded-xl">
               <div className="flex-1 font-mono text-[#E2D9F3] text-sm sm:text-base break-all">
-                syncou.app/p/<span className="text-violet-400 font-bold">{currentSlug || 'sua-slug-aqui'}</span>
+                syncou.app/p/<span className="text-primary font-bold">{currentSlug || 'sua-slug-aqui'}</span>
               </div>
               <div className="flex gap-2 w-full sm:w-auto">
                  <Button onClick={copyLink} variant="secondary" className="flex-1 sm:flex-none bg-[#1A1333] hover:bg-[#2D214F] border border-[#2D214F] text-[#E2D9F3] hover:text-white">
                    <Copy className="w-4 h-4 mr-2" />
                    Copiar
                  </Button>
-                 <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center flex-1 sm:flex-none bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-md text-sm font-medium h-9 px-4 py-2">
+                 <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center flex-1 sm:flex-none bg-primary text-primary-foreground hover:bg-primary/80 rounded-md text-sm font-medium h-9 px-4 py-2">
                    <ExternalLink className="w-4 h-4 mr-2" />
                    Ver
                  </a>
@@ -445,7 +444,7 @@ export function DashboardSettings() {
                
               <div className="space-y-2">
                 <Label htmlFor="slug" className="text-[#E2D9F3]">Identificador URL (Slug)</Label>
-                <div className="flex bg-[#0B0914] rounded-lg border border-[#2D214F] focus-within:ring-1 focus-within:ring-violet-500 overflow-hidden">
+                <div className="flex bg-[#0B0914] rounded-lg border border-[#2D214F] focus-within:ring-1 focus-within:ring-primary overflow-hidden">
                   <span className="flex items-center px-4 bg-[#130E20] text-[#9B8FC0] border-r border-[#2D214F] text-sm">
                     syncou.app/p/
                   </span>
@@ -465,7 +464,7 @@ export function DashboardSettings() {
                 <Input
                   id="displayName"
                   {...register('displayName')}
-                  className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11"
+                  className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary h-11"
                 />
                 {errors.displayName && <p className="text-red-400 text-sm">{errors.displayName.message}</p>}
               </div>
@@ -475,7 +474,7 @@ export function DashboardSettings() {
                 <Textarea
                   id="bio"
                   {...register('bio')}
-                  className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 min-h-[100px] placeholder:text-[#5B4F81]"
+                  className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary min-h-[100px] placeholder:text-[#5B4F81]"
                   placeholder="Conte um pouco sobre você, sua formação ou seus serviços..."
                 />
                 {errors.bio && <p className="text-red-400 text-sm">{errors.bio.message}</p>}
@@ -487,7 +486,7 @@ export function DashboardSettings() {
                 <Input
                   id="whatsapp"
                   {...register('whatsapp')}
-                  className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 h-11 placeholder:text-[#5B4F81]"
+                  className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary h-11 placeholder:text-[#5B4F81]"
                   placeholder="Ex: 5511999999999"
                 />
                 <p className="text-xs text-[#5B4F81]">Adicione o DDI e DDD (ex: 5511999999999) para que clientes possam enviar mensagens.</p>
@@ -499,7 +498,7 @@ export function DashboardSettings() {
                 <Textarea
                   id="whatsappMessageTemplate"
                   {...register('whatsappMessageTemplate')}
-                  className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-[#8B5CF6] min-h-[100px] placeholder:text-[#5B4F81]"
+                  className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary min-h-[100px] placeholder:text-[#5B4F81]"
                   placeholder="Ex: Olá {NOME}, passando para confirmar seu agendamento de {SERVICOS} no dia {DATA} às {HORA}. Te aguardo!"
                 />
                 <p className="text-xs text-[#5B4F81]">Você pode usar as aspas dinâmicas: {"{NOME}"}, {"{SERVICOS}"}, {"{DATA}"} e {"{HORA}"}.</p>
@@ -523,7 +522,7 @@ export function DashboardSettings() {
                     id="workingHoursStart"
                     type="time"
                     {...register('workingHoursStart')}
-                    className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert h-11"
+                    className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert h-11"
                   />
                   {errors.workingHoursStart && <p className="text-red-400 text-sm">{errors.workingHoursStart.message}</p>}
                 </div>
@@ -534,7 +533,7 @@ export function DashboardSettings() {
                     id="workingHoursEnd"
                     type="time"
                     {...register('workingHoursEnd')}
-                    className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-violet-500 block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert h-11"
+                    className="bg-[#0B0914] border-[#2D214F] text-white focus-visible:ring-primary block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert h-11"
                   />
                   {errors.workingHoursEnd && <p className="text-red-400 text-sm">{errors.workingHoursEnd.message}</p>}
                 </div>
@@ -563,7 +562,7 @@ export function DashboardSettings() {
                          }}
                          className={`flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md border cursor-pointer transition-all ${
                            isSelected 
-                             ? 'bg-[#8B5CF6] border-[#8B5CF6] text-white shadow-sm' 
+                             ? 'bg-primary border-primary text-primary-foreground shadow-sm'
                              : 'bg-[#1A1333] border-[#2D214F] text-[#9B8FC0] hover:border-[#4B3B7A] hover:text-[#E2D9F3]'
                          }`}
                        >
@@ -586,8 +585,8 @@ export function DashboardSettings() {
                    <button
                      type="button"
                      onClick={() => setValue('workOnHolidays', !watch('workOnHolidays'), { shouldDirty: true, shouldValidate: true })}
-                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 focus:ring-offset-[#0A0713] ${
-                       watch('workOnHolidays') ? 'bg-[#8B5CF6]' : 'bg-[#2D214F]'
+                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#0A0713] ${
+                       watch('workOnHolidays') ? 'bg-primary' : 'bg-[#2D214F]'
                      }`}
                    >
                      <span
@@ -608,7 +607,7 @@ export function DashboardSettings() {
              <div className="text-sm text-[#9B8FC0]">
                 Lembre-se de salvar suas alterações para atualizar a página pública.
              </div>
-             <Button type="submit" disabled={loading} className="w-full sm:w-auto bg-[#8B5CF6] hover:bg-[#7C3AED] text-white min-w-[150px] shadow-sm">
+             <Button type="submit" disabled={loading} className="w-full sm:w-auto min-w-[150px] shadow-sm">
                {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : "Salvar Alterações"}
              </Button>
           </div>
@@ -618,7 +617,7 @@ export function DashboardSettings() {
         <Card className="bg-[#130E20] border-[#2D214F] shadow-sm">
           <CardHeader>
             <CardTitle className="text-xl text-white flex items-center gap-2">
-              <CalendarX2 className="w-5 h-5 text-violet-400" />
+              <CalendarX2 className="w-5 h-5 text-primary" />
               Horários Especiais
             </CardTitle>
             <CardDescription className="text-[#9B8FC0]">
@@ -635,7 +634,7 @@ export function DashboardSettings() {
                   type="date"
                   value={overrideDate}
                   onChange={(e) => setOverrideDate(e.target.value)}
-                  className="bg-[#130E20] border-[#2D214F] text-white focus-visible:ring-violet-500 block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert min-w-[150px] h-11"
+                  className="bg-[#130E20] border-[#2D214F] text-white focus-visible:ring-primary block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert min-w-[150px] h-11"
                 />
               </div>
               
@@ -648,7 +647,7 @@ export function DashboardSettings() {
                       type="time"
                       value={overrideStart}
                       onChange={(e) => setOverrideStart(e.target.value)}
-                      className="bg-[#130E20] border-[#2D214F] text-white focus-visible:ring-violet-500 block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert h-11"
+                      className="bg-[#130E20] border-[#2D214F] text-white focus-visible:ring-primary block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert h-11"
                     />
                   </div>
                   <div className="space-y-2 w-full md:w-auto">
@@ -658,7 +657,7 @@ export function DashboardSettings() {
                       type="time"
                       value={overrideEnd}
                       onChange={(e) => setOverrideEnd(e.target.value)}
-                      className="bg-[#130E20] border-[#2D214F] text-white focus-visible:ring-violet-500 block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert h-11"
+                      className="bg-[#130E20] border-[#2D214F] text-white focus-visible:ring-primary block [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert h-11"
                     />
                   </div>
                 </>
@@ -670,7 +669,7 @@ export function DashboardSettings() {
                   id="overrideIsClosed"
                   checked={overrideIsClosed}
                   onChange={(e) => setOverrideIsClosed(e.target.checked)}
-                  className="w-4 h-4 rounded border-[#2D214F] bg-[#130E20] text-violet-500 focus:ring-violet-500 focus:ring-offset-[#0B0914]"
+                  className="w-4 h-4 rounded border-[#2D214F] bg-[#130E20] text-primary focus:ring-primary focus:ring-offset-[#0B0914]"
                 />
                 <Label htmlFor="overrideIsClosed" className="text-sm font-medium text-[#E2D9F3] cursor-pointer">
                   Não trabalharei
@@ -762,7 +761,7 @@ export function DashboardSettings() {
         <Card id="google-calendar" className="bg-[#130E20] border-[#2D214F] shadow-sm mt-8 scroll-mt-24">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl font-bold text-white">
-               <CalendarIcon className="w-5 h-5 text-violet-400" />
+               <CalendarIcon className="w-5 h-5 text-primary" />
                Integrações
             </CardTitle>
             <CardDescription className="text-[#9B8FC0]">
@@ -813,7 +812,7 @@ export function DashboardSettings() {
       >
         <div className="sticky top-6">
           <Card className="bg-[#130E20] border-[#2D214F] overflow-hidden shadow-2xl">
-            <div className="h-28 bg-[#8B5CF6]/20 relative">
+            <div className="h-28 bg-primary/20 relative">
                <div className="absolute inset-0 bg-[#0B0914]/40" />
             </div>
             <CardContent className="px-6 pb-6 pt-0 relative flex flex-col items-center text-center">
@@ -825,7 +824,7 @@ export function DashboardSettings() {
               </Avatar>
               
               <h3 className="text-xl font-bold text-white mb-1">{watchedDisplayName || 'Seu Nome Aqui'}</h3>
-              <p className="text-sm font-medium text-violet-400 mb-4 bg-violet-400/10 px-3 py-1 rounded-full border border-violet-500/20 font-mono">
+              <p className="text-sm font-medium text-primary mb-4 bg-primary/10 px-3 py-1 rounded-full border border-primary/20 font-mono">
                 syncou.app/p/{watchedSlug || 'seu-link'}
               </p>
               
