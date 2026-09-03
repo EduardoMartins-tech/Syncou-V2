@@ -3,8 +3,11 @@
 ## Onde este trabalho está
 
 Worktree isolado: `E:\Syncou\Syncou-V2\.claude\worktrees\syncou-redesign-ficha`,
-branch `worktree-syncou-redesign-ficha`. **Nada desta leva foi commitado
-ainda** — mudanças estão no working tree, aguardando revisão do usuário.
+branch `worktree-syncou-redesign-ficha`. Todo o trabalho desta leva está
+no commit `9e0cca9`, commitado e já em **produção**: o usuário pediu push
+direto pra `main` (fast-forward a partir de `28e4168`, sem PR) pra testar
+no ambiente real do Railway. O checkout local de `main` em
+`E:\Syncou\Syncou-V2` ainda não recebeu esse `git pull`.
 
 ## Histórico da direção visual (3 tentativas)
 
