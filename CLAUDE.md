@@ -84,6 +84,26 @@ no Railway. Frontend React/Vite (PWA). Usado tanto em desktop quanto mobile
   "Caveman Cloud", que dependem de um gateway de observabilidade de LLM
   que este projeto não usa — o Syncou não tem nenhuma chamada de LLM em
   produção).
+- Ficha de cliente (CRM básico): tabela `clients` com chave
+  `(provider_id, phone)`, backfill a partir dos agendamentos existentes,
+  trava de "um nome por telefone" no agendamento público e aba Clientes no
+  dashboard. O telefone é a identidade do cliente — não existe login de
+  cliente. A mensagem de conflito **mascara o nome** (`M*** S***`) porque o
+  endpoint é público: devolver o nome completo entregava dado pessoal a
+  quem só chutou um telefone. `TEST_CLIENT_PHONES` isenta números de teste
+  da trava.
+- Auditoria lógica do backend e do fluxo de agendamento (relatório em
+  `AUDITORIA_LOGICA.md`): corrigido bypass total de login (`/api/auth/google`
+  emitia JWT confiando no e-mail do corpo da requisição, sem validar token do
+  Google), `JWT_SECRET` com fallback publicado no `.env.example`, plano Ouro
+  autoconcedível e status de agendamento com três definições divergentes de
+  "horário ocupado" (banco, servidor e grade pública) — a grade oferecia
+  horário que o servidor recusava. Status normalizados para o conjunto
+  canônico `Pendente | Confirmado | Concluído | Cancelado`, definido em
+  `APPOINTMENT_STATUSES` no `server.ts`. **Não reativar as checagens de plano
+  comentadas sem antes resolver a cobrança** — o upgrade não valida pagamento.
+  As ~40 checagens defensivas de status em inglês no frontend ficaram de
+  propósito (redundantes, mas corretas): não são esquecimento.
 
 ## Identidade visual atual
 
@@ -138,3 +158,10 @@ de UI para não perder ou reinventar o que já existe:
   (Landing desktop/mobile, 404) sem erros de console; o Dashboard e o
   fluxo de reserva completo do ProviderPage ainda precisam de validação
   visual real pós-deploy.
+- Telas ainda pedem o histórico inteiro de agendamentos; `GET /api/appointments`
+  já aceita `from`/`to`, falta o frontend usar.
+- Lembrete só alcança quem informou e-mail (campo opcional) — resolver de
+  verdade exige canal pago por mensagem (SMS ou WhatsApp Business API).
+- Lista de espera: desenho aprovado, implementação não começou. Espera por
+  dia (`wanted_date`), prestador é quem recebe o push e chama o cliente pelo
+  WhatsApp manualmente, e o calendário público passa a marcar dia lotado.
