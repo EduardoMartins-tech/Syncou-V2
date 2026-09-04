@@ -57,12 +57,34 @@ async function runExpirePendingAppointments() {
   }
   console.log('Running pending appointments expiration cron job...');
   try {
+    // Só expira agendamento que ainda está por vir. Cancelar como "expirado" algo que
+    // já passou não faz sentido — aquele horário foi (ou não) usado, não expirou.
     const result = await pool.query(
-      `UPDATE appointments 
+      `UPDATE appointments
        SET status = 'Cancelado', cancel_reason = 'Expirado (mais de 24h pendente)'
-       WHERE status = 'Pendente' 
-       AND created_at < NOW() - INTERVAL '24 hours'`
+       WHERE status = 'Pendente'
+       AND created_at < NOW() - INTERVAL '24 hours'
+       AND start_at > $1
+       RETURNING provider_id, client_name, start_at`,
+      [Date.now()]
     );
+
+    // Antes isso acontecia em silêncio: o cliente seguia achando que tinha horário
+    // e o prestador nunca ficava sabendo que a agenda tinha vagado.
+    const byProvider = new Map<string, number>();
+    for (const row of result.rows) {
+      byProvider.set(row.provider_id, (byProvider.get(row.provider_id) || 0) + 1);
+    }
+    for (const [providerId, count] of byProvider) {
+      await sendProviderPush(
+        providerId,
+        'Agendamento expirado',
+        count === 1
+          ? 'Um agendamento pendente há mais de 24h foi cancelado automaticamente.'
+          : `${count} agendamentos pendentes há mais de 24h foram cancelados automaticamente.`
+      );
+    }
+
     return { success: true, expiredCount: result.rowCount || 0 };
   } catch (e: any) {
     console.error('Error expiring appointments:', e);
@@ -92,12 +114,14 @@ async function runDailyReminders() {
     const startMs = tomorrowStart.getTime().toString();
     const endMs = tomorrowEnd.getTime().toString();
 
+    // Só lembra de agendamento confirmado: dizer "te aguardamos" para algo que o
+    // prestador ainda não confirmou (ou já cancelou/concluiu) engana o cliente.
     const result = await pool.query(
-      `SELECT a.*, u.display_name as provider_name 
-       FROM appointments a 
-       JOIN users u ON a.provider_id = u.id 
-       WHERE a.start_at >= $1 AND a.start_at <= $2 
-       AND a.status != 'cancelled' AND a.status != 'Cancelado'`,
+      `SELECT a.*, u.display_name as provider_name
+       FROM appointments a
+       JOIN users u ON a.provider_id = u.id
+       WHERE a.start_at >= $1 AND a.start_at <= $2
+       AND COALESCE(a.status, 'Pendente') = 'Confirmado'`,
       [startMs, endMs]
     );
 
@@ -186,7 +210,14 @@ app.use(helmet({
   crossOriginOpenerPolicy: false,
   crossOriginResourcePolicy: false,
 }));
-app.use(cors());
+// O SPA e a API são servidos pela mesma origem (express.static + fallback do index.html),
+// então nada precisa de CORS no uso normal. Antes estava liberado para qualquer origem.
+// Se algum consumidor externo legítimo precisar de acesso, liste-o em ALLOWED_ORIGINS.
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+app.use(cors({ origin: allowedOrigins.length > 0 ? allowedOrigins : false }));
 app.use(express.json({ limit: '5mb' }));
 
 // Initialize Rate Limiters (Slide-window on active memory)
@@ -337,61 +368,112 @@ async function runMigrations() {
       CREATE INDEX IF NOT EXISTS idx_services_provider ON services (provider_id);
       CREATE INDEX IF NOT EXISTS idx_appointments_provider_dates ON appointments (provider_id, start_at, end_at);
     `);
-    await client.query(`
-      ALTER TABLE appointments ADD COLUMN IF NOT EXISTS google_event_id VARCHAR(255);
-      
-      -- Corrige registros antigos com status NULL para evitar falhas silenciosas na validação de overlap
-      UPDATE appointments SET status = 'Pendente' WHERE status IS NULL;
-      
-      CREATE EXTENSION IF NOT EXISTS btree_gist;
-      
-      -- Remove and re-add constraint to ensure it's up to date
-      ALTER TABLE appointments DROP CONSTRAINT IF EXISTS no_overlapping_appointments;
-      ALTER TABLE appointments ADD CONSTRAINT no_overlapping_appointments EXCLUDE USING gist (
-        provider_id WITH =,
-        int8range(start_at, end_at) WITH &&
-      ) WHERE (COALESCE(status, 'Pendente') IN ('Pendente', 'Confirmado', 'scheduled', 'confirmed', 'pendente', 'confirmado'));
+    // Passos isolados: um bloco único faria um passo com erro derrubar todos os outros
+    // pelo rollback da transação implícita — foi assim que a constraint de sobreposição
+    // podia sumir levando junto a criação de tabelas.
+    const steps: Array<{ name: string; sql: string }> = [
+      {
+        name: 'appointments.google_event_id',
+        sql: `ALTER TABLE appointments ADD COLUMN IF NOT EXISTS google_event_id VARCHAR(255);`
+      },
+      {
+        name: 'normalizar status legados',
+        // Os status conviviam em português, inglês e minúsculas, e cada consulta listava
+        // as variantes na mão — origem das regras divergentes de "horário ocupado".
+        // Converge tudo para o conjunto canônico: Pendente | Confirmado | Concluído | Cancelado.
+        sql: `
+          UPDATE appointments SET status = 'Pendente'  WHERE status IS NULL OR status IN ('scheduled', 'pendente');
+          UPDATE appointments SET status = 'Confirmado' WHERE status IN ('confirmed', 'confirmado');
+          UPDATE appointments SET status = 'Cancelado'  WHERE status IN ('cancelled', 'canceled', 'cancelado');
+          UPDATE appointments SET status = 'Concluído'  WHERE status IN ('completed', 'concluido', 'concluído');
+        `
+      },
+      {
+        name: 'extensao btree_gist',
+        sql: `CREATE EXTENSION IF NOT EXISTS btree_gist;`
+      },
+      {
+        name: 'constraint de sobreposicao',
+        // 'Concluído' também ocupa o horário: o atendimento aconteceu. Antes ele ficava de
+        // fora daqui mas era bloqueado pela validação do servidor — regras em desacordo.
+        sql: `
+          ALTER TABLE appointments DROP CONSTRAINT IF EXISTS no_overlapping_appointments;
+          ALTER TABLE appointments ADD CONSTRAINT no_overlapping_appointments EXCLUDE USING gist (
+            provider_id WITH =,
+            int8range(start_at, end_at) WITH &&
+          ) WHERE (COALESCE(status, 'Pendente') <> 'Cancelado');
+        `
+      },
+      {
+        name: 'otp_codes',
+        sql: `
+          CREATE TABLE IF NOT EXISTS otp_codes (
+            email VARCHAR(255) PRIMARY KEY,
+            code VARCHAR(10) NOT NULL,
+            expires_at TIMESTAMP NOT NULL
+          );
+        `
+      },
+      {
+        name: 'fcm_tokens',
+        sql: `
+          CREATE TABLE IF NOT EXISTS fcm_tokens (
+            id SERIAL PRIMARY KEY,
+            provider_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
+            token TEXT UNIQUE NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `
+      },
+      {
+        name: 'clients',
+        sql: `
+          CREATE TABLE IF NOT EXISTS clients (
+            id VARCHAR(255) PRIMARY KEY,
+            provider_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            phone VARCHAR(50) NOT NULL,
+            name VARCHAR(255) NOT NULL,
+            notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (provider_id, phone)
+          );
 
-      CREATE TABLE IF NOT EXISTS otp_codes (
-        email VARCHAR(255) PRIMARY KEY,
-        code VARCHAR(10) NOT NULL,
-        expires_at TIMESTAMP NOT NULL
-      );
-      
-      CREATE TABLE IF NOT EXISTS fcm_tokens (
-        id SERIAL PRIMARY KEY,
-        provider_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
-        token TEXT UNIQUE NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
+          CREATE INDEX IF NOT EXISTS idx_clients_provider ON clients (provider_id);
+        `
+      },
+      {
+        name: 'backfill de clients',
+        sql: `
+          INSERT INTO clients (id, provider_id, phone, name)
+          SELECT DISTINCT ON (provider_id, client_phone)
+            'client_' || md5(provider_id || ':' || client_phone) AS id,
+            provider_id,
+            client_phone AS phone,
+            client_name AS name
+          FROM appointments
+          WHERE client_phone IS NOT NULL AND client_phone != ''
+          ORDER BY provider_id, client_phone, start_at DESC
+          ON CONFLICT (provider_id, phone) DO NOTHING;
+        `
+      }
+    ];
 
-      CREATE TABLE IF NOT EXISTS clients (
-        id VARCHAR(255) PRIMARY KEY,
-        provider_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        phone VARCHAR(50) NOT NULL,
-        name VARCHAR(255) NOT NULL,
-        notes TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE (provider_id, phone)
-      );
+    let failed = 0;
+    for (const step of steps) {
+      try {
+        await client.query(step.sql);
+      } catch (stepErr: any) {
+        failed++;
+        console.error(`[MIGRATION] Falha no passo "${step.name}": ${stepErr.message}`);
+      }
+    }
 
-      CREATE INDEX IF NOT EXISTS idx_clients_provider ON clients (provider_id);
-
-      -- Backfill: um cliente por telefone, usando o nome do agendamento mais recente daquele telefone
-      INSERT INTO clients (id, provider_id, phone, name)
-      SELECT DISTINCT ON (provider_id, client_phone)
-        'client_' || md5(provider_id || ':' || client_phone) AS id,
-        provider_id,
-        client_phone AS phone,
-        client_name AS name
-      FROM appointments
-      WHERE client_phone IS NOT NULL AND client_phone != ''
-      ORDER BY provider_id, client_phone, start_at DESC
-      ON CONFLICT (provider_id, phone) DO NOTHING;
-    `);
-
-    console.log("Banco de dados sincronizado e tabelas verificadas com sucesso! (PostgreSQL)");
+    if (failed > 0) {
+      console.error(`[MIGRATION] ${failed} passo(s) falharam. O servidor segue de pé, mas verifique os erros acima.`);
+    } else {
+      console.log("Banco de dados sincronizado e tabelas verificadas com sucesso! (PostgreSQL)");
+    }
   } catch (err: any) {
     console.error("================ ERRO CRÍTICO NO BANCO DE DADOS ================");
     console.error("Falha ao rodar migrations. Isso geralmente significa que a DATABASE_URL");
@@ -480,6 +562,32 @@ initFirebaseAdmin();
 
 function getFirebaseAdmin() {
   return firebaseAdminApp;
+}
+
+// Envia push para todos os dispositivos de um prestador. Nunca lança: notificação
+// que falha não pode derrubar a operação que a disparou.
+async function sendProviderPush(providerId: string, title: string, body: string) {
+  try {
+    const adminApp = getFirebaseAdmin();
+    if (!adminApp) return;
+
+    const fcmTokensRes = await pool.query('SELECT token FROM fcm_tokens WHERE provider_id = $1', [providerId]);
+    const tokens = fcmTokensRes.rows.map((r: any) => r.token);
+    if (tokens.length === 0) return;
+
+    const pushRes = await getMessaging(adminApp).sendEachForMulticast({
+      data: { title, body },
+      tokens
+    });
+
+    if (pushRes.failureCount > 0) {
+      pushRes.responses.forEach((resp, idx) => {
+        if (!resp.success) console.error(`Falha ao enviar push para o token ${tokens[idx]}:`, resp.error);
+      });
+    }
+  } catch (pushErr) {
+    console.error('Erro ao enviar push:', pushErr);
+  }
 }
 
 // ====== API ROUTES ====== //
@@ -863,60 +971,75 @@ app.post('/api/users/change-password', authenticateToken, authLimiter.middleware
   }
 });
 
+// Slug entra na URL pública (/p/:slug). Só duplicidade era checada — formato ficava
+// por conta do frontend, que não é validação nenhuma pra quem chama a API direto.
+const SLUG_RESERVADO = ['api', 'p', 'dashboard', 'login', 'admin', 'termos', 'assets', 'static'];
+const slugSchema = z.string()
+  .trim()
+  .toLowerCase()
+  .min(3, 'O link deve ter pelo menos 3 caracteres.')
+  .max(40, 'O link deve ter no máximo 40 caracteres.')
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use apenas letras minúsculas, números e hífen (sem acento, espaço ou barra).')
+  .refine(v => !SLUG_RESERVADO.includes(v), 'Este link é reservado. Escolha outro.');
+
+// Colunas que o próprio usuário pode alterar. Lista explícita: 'plan' e 'role' ficam
+// de fora de propósito, para não virarem escalada de privilégio pelo corpo da requisição.
+const CAMPOS_PERFIL: Record<string, string> = {
+  slug: 'slug',
+  displayName: 'display_name',
+  bio: 'bio',
+  workingHoursStart: 'working_hours_start',
+  workingHoursEnd: 'working_hours_end',
+  workingDays: 'working_days',
+  whatsapp: 'whatsapp',
+  scheduleOverrides: 'schedule_overrides',
+  avatarUrl: 'avatar_url',
+  whatsappMessageTemplate: 'whatsapp_message_template',
+  workOnHolidays: 'work_on_holidays'
+};
+
 app.put('/api/users/me', authenticateToken, async (req: any, res: any) => {
   try {
-    const data = req.body;
+    const data = req.body || {};
     const id = req.user.id;
-    console.log("PUT /api/users/me req.body:", data);
-    
-    if (data.slug) {
-      const existing = await pool.query('SELECT id FROM users WHERE slug = $1 AND id != $2', [data.slug, id]);
+
+    let slugNormalizado: string | undefined;
+    if (data.slug !== undefined && data.slug !== null) {
+      const validatedSlug = slugSchema.safeParse(data.slug);
+      if (!validatedSlug.success) {
+        return res.status(400).json({ error: validatedSlug.error.issues[0].message });
+      }
+      slugNormalizado = validatedSlug.data;
+
+      const existing = await pool.query('SELECT id FROM users WHERE slug = $1 AND id != $2', [slugNormalizado, id]);
       if (existing.rows.length > 0) {
         return res.status(400).json({ error: 'Este link já está em uso.' });
       }
     }
-    
-    // Carefully handle workingDays (must stringify even if empty array)
-    let workingDaysStr = null;
-    if (data.workingDays !== undefined && data.workingDays !== null) {
-       workingDaysStr = typeof data.workingDays === 'string' ? data.workingDays : JSON.stringify(data.workingDays);
+
+    // Monta o SET só com o que veio no corpo. Com COALESCE fixo era impossível limpar
+    // um campo opcional: mandar null mantinha silenciosamente o valor antigo.
+    const sets: string[] = [];
+    const values: any[] = [];
+
+    for (const [campo, coluna] of Object.entries(CAMPOS_PERFIL)) {
+      if (!(campo in data)) continue;
+
+      let valor = data[campo];
+      if (campo === 'slug') valor = slugNormalizado;
+      if ((campo === 'workingDays' || campo === 'scheduleOverrides') && valor !== null && typeof valor !== 'string') {
+        valor = JSON.stringify(valor);
+      }
+
+      values.push(valor ?? null);
+      sets.push(`${coluna} = $${values.length}`);
     }
-    
-    // Convert scheduleOverrides to a string if it's an object
-    let scheduleOverridesStr = null;
-    if (data.scheduleOverrides !== undefined && data.scheduleOverrides !== null) {
-       scheduleOverridesStr = typeof data.scheduleOverrides === 'string' ? data.scheduleOverrides : JSON.stringify(data.scheduleOverrides);
-    }
-    
-    await pool.query(`
-      UPDATE users SET 
-        slug = COALESCE($1, slug),
-        display_name = COALESCE($2, display_name),
-        bio = COALESCE($3, bio),
-        working_hours_start = COALESCE($4, working_hours_start),
-        working_hours_end = COALESCE($5, working_hours_end),
-        working_days = COALESCE($6, working_days),
-        whatsapp = COALESCE($7, whatsapp),
-        schedule_overrides = COALESCE($8, schedule_overrides),
-        avatar_url = COALESCE($9, avatar_url),
-        whatsapp_message_template = COALESCE($10, whatsapp_message_template),
-        work_on_holidays = COALESCE($11, work_on_holidays)
-      WHERE id = $12
-    `, [
-      data.slug ?? null, 
-      data.displayName ?? null, 
-      data.bio ?? null, 
-      data.workingHoursStart ?? null, 
-      data.workingHoursEnd ?? null, 
-      workingDaysStr, 
-      data.whatsapp ?? null, 
-      scheduleOverridesStr,
-      data.avatarUrl ?? null,
-      data.whatsappMessageTemplate ?? null,
-      data.workOnHolidays ?? null,
-      id
-    ]);
-    
+
+    if (sets.length === 0) return res.json({ success: true });
+
+    values.push(id);
+    await pool.query(`UPDATE users SET ${sets.join(', ')} WHERE id = $${values.length}`, values);
+
     res.json({ success: true });
   } catch (error: any) {
     console.error("Erro interno no PUT /api/users/me:", error);
@@ -1009,9 +1132,20 @@ app.delete('/api/services/:id', authenticateToken, async (req: any, res) => {
 
 app.get('/api/appointments', authenticateToken, async (req: any, res) => {
    try {
+     // Filtro de período opcional. Sem ele a resposta segue sendo o histórico inteiro
+     // (comportamento atual, que as telas dependem) — mas isso cresce sem limite, então
+     // as telas devem passar a informar a janela que realmente exibem.
+     const { from, to } = req.query;
+     const filtros: string[] = ['provider_id = $1'];
+     const valores: any[] = [req.user.id];
+
+     if (from) { valores.push(Number(from)); filtros.push(`start_at >= $${valores.length}`); }
+     if (to) { valores.push(Number(to)); filtros.push(`start_at <= $${valores.length}`); }
+
      const result = await pool.query(
-       'SELECT id, client_name as "clientName", client_whatsapp as "clientWhatsApp", client_phone as "clientPhone", client_email as "clientEmail", services, total_price as "totalPrice", total_duration as "totalDuration", booking_source as "bookingSource", status, cancel_reason as "cancelReason", start_at as "startAt", end_at as "endAt", created_at as "createdAt" FROM appointments WHERE provider_id = $1 ORDER BY start_at ASC',
-       [req.user.id]
+       `SELECT id, client_name as "clientName", client_whatsapp as "clientWhatsApp", client_phone as "clientPhone", client_email as "clientEmail", services, total_price as "totalPrice", total_duration as "totalDuration", booking_source as "bookingSource", status, cancel_reason as "cancelReason", start_at as "startAt", end_at as "endAt", created_at as "createdAt"
+        FROM appointments WHERE ${filtros.join(' AND ')} ORDER BY start_at ASC`,
+       valores
      );
      res.json(result.rows.map(r => ({
         ...r,
@@ -1025,10 +1159,25 @@ app.get('/api/appointments', authenticateToken, async (req: any, res) => {
    }
 });
 
+// Conjunto canônico de status. Qualquer outro valor era aceito e gravado antes,
+// quebrando silenciosamente todo filtro e contagem que dependem desses nomes.
+const APPOINTMENT_STATUSES = ['Pendente', 'Confirmado', 'Concluído', 'Cancelado'] as const;
+
+const appointmentUpdateSchema = z.object({
+  status: z.enum(APPOINTMENT_STATUSES).optional(),
+  cancelReason: z.string().max(500).optional().nullable(),
+  startAt: z.union([z.string(), z.number()]).optional().nullable(),
+  endAt: z.union([z.string(), z.number()]).optional().nullable()
+});
+
 app.put('/api/appointments/:id', authenticateToken, async (req: any, res) => {
    try {
-      const { status, cancelReason, startAt, endAt } = req.body;
-      
+      const validatedUpdate = appointmentUpdateSchema.safeParse(req.body);
+      if (!validatedUpdate.success) {
+        return res.status(400).json({ error: validatedUpdate.error.issues[0].message });
+      }
+      const { status, cancelReason, startAt, endAt } = validatedUpdate.data;
+
       if (startAt && endAt) {
          // Validate working hours
          const providerUser = await pool.query('SELECT working_hours_start as "workingHoursStart", working_hours_end as "workingHoursEnd", working_days as "workingDays", work_on_holidays as "workOnHolidays", schedule_overrides as "scheduleOverrides" FROM users WHERE id = $1', [req.user.id]);
@@ -1083,12 +1232,13 @@ app.put('/api/appointments/:id', authenticateToken, async (req: any, res) => {
          }
 
          // Check for overlapping appointments
+         // Mesma regra da constraint no banco: só 'Cancelado' libera o horário.
          const overlapCheck = await pool.query(
-           `SELECT id FROM appointments 
-            WHERE provider_id = $1 
+           `SELECT id FROM appointments
+            WHERE provider_id = $1
             AND id != $2
-            AND COALESCE(status, 'Pendente') NOT IN ('cancelled', 'Cancelado')
-            AND start_at < $3 
+            AND COALESCE(status, 'Pendente') <> 'Cancelado'
+            AND start_at < $3
             AND end_at > $4`,
            [req.user.id, req.params.id, Number(endAt), Number(startAt)]
          );
@@ -1141,7 +1291,7 @@ app.put('/api/appointments/:id', authenticateToken, async (req: any, res) => {
          );
          
          // Delete from Google Calendar if cancelled
-         if (status === 'cancelled' || status === 'Cancelado') {
+         if (status === 'Cancelado') {
              try {
                 const aptRes = await pool.query('SELECT google_event_id FROM appointments WHERE id = $1 AND provider_id = $2', [req.params.id, req.user.id]);
                 const googleEventId = aptRes.rows[0]?.google_event_id;
@@ -1184,8 +1334,10 @@ app.post('/api/appointments/sync-all', authenticateToken, async (req: any, res: 
       }
 
       const result = await pool.query(
-        'SELECT * FROM appointments WHERE provider_id = $1 AND (status IS NULL OR status = $2 OR status = $3 OR status = $4) AND google_event_id IS NULL',
-        [req.user.id, 'scheduled', 'Pendente', 'Confirmado']
+        `SELECT * FROM appointments WHERE provider_id = $1
+         AND COALESCE(status, 'Pendente') IN ('Pendente', 'Confirmado')
+         AND google_event_id IS NULL`,
+        [req.user.id]
       );
 
       let syncedCount = 0;
@@ -1351,9 +1503,13 @@ app.get('/api/provider/:slug/appointments', async (req, res) => {
      const { startAt, endAt } = req.query;
      if (!startAt || !endAt) return res.json([]);
 
+     // Usa end_at > início da janela para não perder atendimento que começou antes
+     // dela e ainda está em curso — senão a grade ofereceria um horário já ocupado.
      const resultApts = await pool.query(
-       'SELECT start_at as "startAt", end_at as "endAt", status FROM appointments WHERE provider_id = $1 AND start_at >= $2 AND start_at <= $3 AND COALESCE(status, \'Pendente\') NOT IN ($4, $5)',
-       [user.id, Number(startAt), Number(endAt), 'cancelled', 'Cancelado']
+       `SELECT start_at as "startAt", end_at as "endAt", status FROM appointments
+        WHERE provider_id = $1 AND end_at > $2 AND start_at <= $3
+        AND COALESCE(status, 'Pendente') <> 'Cancelado'`,
+       [user.id, Number(startAt), Number(endAt)]
      );
      
      res.json(resultApts.rows.map(r => ({ ...r, startAt: Number(r.startAt), endAt: Number(r.endAt) })));
@@ -1367,7 +1523,9 @@ const bookingSchema = z.object({
   providerId: z.string().min(1, 'O ID do provedor é obrigatório'),
   clientName: z.string().min(2, 'O nome do cliente é obrigatório'),
   clientWhatsApp: z.string().optional().nullable(),
-  clientPhone: z.string().optional().nullable(),
+  // Obrigatório: é a chave de identidade do cliente. Quando era opcional, uma chamada
+  // direta à API sem telefone escapava do limite de pendentes E da trava de nome.
+  clientPhone: z.string().trim().regex(/^\d{10,15}$/, 'Telefone inválido. Informe DDD + número, apenas dígitos.'),
   clientEmail: z.string().email('E-mail inválido').optional().nullable().or(z.literal('')),
   services: z.array(z.any()).min(1, 'Pelo menos um serviço é obrigatório'),
   startAt: z.union([z.string(), z.number()]),
@@ -1384,7 +1542,7 @@ app.post('/api/provider/:slug/book', bookingLimiter.middleware(), async (req, re
   try {
     const validated = bookingSchema.safeParse(req.body);
     if (!validated.success) return res.status(400).json({ error: validated.error.issues[0].message });
-    const { providerId, clientName, clientWhatsApp, clientPhone, clientEmail, services, totalPrice, totalDuration, bufferTime, bookingSource, status, startAt, endAt, captchaToken } = validated.data;
+    const { providerId, clientName, clientWhatsApp, clientPhone, clientEmail, services, totalPrice, totalDuration, bufferTime, bookingSource, startAt, endAt, captchaToken } = validated.data;
     
     try {
       const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
@@ -1502,11 +1660,12 @@ app.post('/api/provider/:slug/book', bookingLimiter.middleware(), async (req, re
     }
 
     // Check for overlapping appointments
+    // Mesma regra da constraint no banco: só 'Cancelado' libera o horário.
     const overlapCheck = await pool.query(
-      `SELECT id FROM appointments 
-       WHERE provider_id = $1 
-       AND COALESCE(status, 'Pendente') NOT IN ('cancelled', 'Cancelado')
-       AND start_at < $2 
+      `SELECT id FROM appointments
+       WHERE provider_id = $1
+       AND COALESCE(status, 'Pendente') <> 'Cancelado'
+       AND start_at < $2
        AND end_at > $3`,
       [providerId, Number(endAt), Number(startAt)]
     );
@@ -1540,7 +1699,10 @@ app.post('/api/provider/:slug/book', bookingLimiter.middleware(), async (req, re
     try {
       await pool.query(
         'INSERT INTO appointments (id, provider_id, client_name, client_whatsapp, client_phone, client_email, services, total_price, total_duration, buffer_time, booking_source, status, start_at, end_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)',
-        [id, providerId, clientName, clientWhatsApp, clientPhone, clientEmail, JSON.stringify(services || []), totalPrice, totalDuration, bufferTime || 0, bookingSource, status || 'Pendente', startAt, endAt]
+        // Status é sempre 'Pendente': quem agenda pela página pública não pode se
+        // autoconfirmar. Antes vinha do corpo da requisição, então bastava mandar
+        // status: 'Confirmado' para pular a confirmação do prestador.
+        [id, providerId, clientName, clientWhatsApp, clientPhone, clientEmail, JSON.stringify(services || []), totalPrice, totalDuration, bufferTime || 0, bookingSource, 'Pendente', startAt, endAt]
       );
     } catch (insertError: any) {
       if (insertError.code === '23P01') {

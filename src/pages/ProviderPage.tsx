@@ -73,8 +73,9 @@ export function ProviderPage() {
         // To keep it simple, we just pretend there's no overlapping bookings for now directly
         const res = await fetch(`/api/provider/${provider.slug}/appointments?startAt=${startDay}&endAt=${endDay}`);
         if(res.ok) {
-           const fetched = await res.json();
-           setAppointments(fetched.filter((app: any) => app.status === 'Pendente' || app.status === 'Confirmado' || app.status === 'scheduled' || app.status === 'confirmed' || !app.status));
+           // O servidor já exclui os cancelados. Filtrar de novo aqui derrubava os
+           // 'Concluído', fazendo a grade oferecer horário que o servidor recusa.
+           setAppointments(await res.json());
         } else {
            setAppointments([]);
         }
@@ -183,15 +184,12 @@ export function ProviderPage() {
       const exceedsClosingTime = slotEndAt > end.getTime();
       
       if (!isPast && !exceedsClosingTime) {
-        // Check for overlaps with existing appointments
-        // Added a 5 minute overlap tolerance (5 * 60000 ms) so that if an appointment 
-        // ends up to 5 mins into a slot (e.g. 17:31 ending at 17:30 slot), it won't block the next slot.
-        const tolerance = 5 * 60000;
-        
+        // Sobreposição estrita, igual à validação do servidor e à constraint do banco.
+        // Havia aqui uma tolerância de 5 minutos que não existia nos outros dois: a grade
+        // oferecia um horário que o servidor recusava, e o cliente batia num erro sem saída.
         const isOccupied = appointments.some(app => {
-          // An appointment overlaps if it starts before our slot ends AND ends after our slot starts
-          const isValidStatus = app.status === 'Pendente' || app.status === 'Confirmado' || app.status === 'scheduled' || app.status === 'confirmed' || !app.status;
-          return isValidStatus && app.startAt < (slotEndAt - tolerance) && app.endAt > (slotTime + tolerance);
+          const ocupaHorario = app.status !== 'Cancelado';
+          return ocupaHorario && app.startAt < slotEndAt && app.endAt > slotTime;
         });
 
         if (!isOccupied) {
