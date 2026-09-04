@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Plus, Check, ChevronLeft, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { format, isSameDay, addMinutes, isAfter, startOfDay, addDays, getHours, setHours, setMinutes } from 'date-fns';
+import { format, isSameDay, addMinutes, isAfter, startOfDay, addDays, subDays, startOfMonth, endOfMonth, eachDayOfInterval, getHours, setHours, setMinutes } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useNotification } from '../hooks/useNotification';
@@ -38,6 +38,89 @@ interface Service {
   price: number;
 }
 
+const FERIADOS_NACIONAIS = [
+  '01-01', // Confraternização Universal
+  '04-21', // Tiradentes
+  '05-01', // Dia do Trabalhador
+  '09-07', // Independência do Brasil
+  '10-12', // Nossa Sra. Aparecida
+  '11-02', // Finados
+  '11-15', // Proclamação da República
+  '12-25'  // Natal
+];
+
+// Função pura para poder rodar por dia e descobrir quais estão lotados no calendário,
+// não só para a data selecionada. Antes essa lógica vivia presa ao estado do componente.
+function gerarHorarios(
+  data: Date,
+  agendamentos: any[],
+  provider: Provider,
+  duracaoComRespiro: number
+): string[] {
+  if (!data || duracaoComRespiro <= 0) return [];
+
+  let workingStart = provider.workingHoursStart || '09:00';
+  let workingEnd = provider.workingHoursEnd || '18:00';
+  let isClosed = false;
+
+  const dateKey = format(data, 'yyyy-MM-dd');
+  const monthDay = format(data, 'MM-dd');
+
+  if (FERIADOS_NACIONAIS.includes(monthDay) && !provider.workOnHolidays) {
+    isClosed = true;
+  }
+
+  if (provider.scheduleOverrides && provider.scheduleOverrides[dateKey]) {
+    const override = provider.scheduleOverrides[dateKey];
+    if (override.isClosed) {
+      isClosed = true;
+    } else {
+      workingStart = override.start;
+      workingEnd = override.end;
+    }
+  } else {
+    let diasDeTrabalho: number[] = [1, 2, 3, 4, 5];
+    if (Array.isArray(provider.workingDays)) {
+      diasDeTrabalho = provider.workingDays.map(Number);
+    } else if (typeof provider.workingDays === 'string') {
+      try { diasDeTrabalho = JSON.parse(provider.workingDays).map(Number); } catch (e) {}
+    }
+    if (!diasDeTrabalho.includes(data.getDay())) isClosed = true;
+  }
+
+  if (isClosed) return [];
+
+  const [startHour, startMin] = workingStart.split(':').map(Number);
+  const [endHour, endMin] = workingEnd.split(':').map(Number);
+
+  let start = setMinutes(setHours(data, startHour), startMin);
+  const end = setMinutes(setHours(data, endHour), endMin);
+  const slots: string[] = [];
+  const now = new Date();
+
+  while (isAfter(end, start)) {
+    const slotTime = start.getTime();
+    const slotEndAt = slotTime + (duracaoComRespiro * 60000);
+
+    const isPast = isSameDay(data, now) && isAfter(now, start);
+    const exceedsClosingTime = slotEndAt > end.getTime();
+
+    if (!isPast && !exceedsClosingTime) {
+      // Sobreposição estrita, igual à validação do servidor e à constraint do banco.
+      const isOccupied = agendamentos.some(app => {
+        const ocupaHorario = app.status !== 'Cancelado';
+        return ocupaHorario && app.startAt < slotEndAt && app.endAt > slotTime;
+      });
+
+      if (!isOccupied) slots.push(format(start, 'HH:mm'));
+    }
+
+    start = addMinutes(start, 30);
+  }
+
+  return slots;
+}
+
 export function ProviderPage() {
   const { slug } = useParams();
   const { notifySuccess, notifyError, notifyLoading, dismiss, notifyInfo } = useNotification();
@@ -51,6 +134,14 @@ export function ProviderPage() {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [isFetchingAppointments, setIsFetchingAppointments] = useState(false);
+  const [visibleMonth, setVisibleMonth] = useState<Date>(new Date());
+
+  // Lista de espera
+  const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
+  const [waitlistName, setWaitlistName] = useState('');
+  const [waitlistPhone, setWaitlistPhone] = useState('');
+  const [isJoiningWaitlist, setIsJoiningWaitlist] = useState(false);
+  const [joinedWaitlist, setJoinedWaitlist] = useState(false);
   
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1); // 1: services, 2: datetime, 3: checkout, 4: success
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,18 +151,18 @@ export function ProviderPage() {
   const [clientWhatsApp, setClientWhatsApp] = useState('');
   const [clientEmail, setClientEmail] = useState('');
 
-  // Fetch appointments for selected date
+  // Busca o mês visível inteiro, não só o dia selecionado: é o que permite marcar
+  // dia lotado no calendário. Com folga nas bordas porque a grade mostra dias dos
+  // meses vizinhos. Trocar de dia dentro do mesmo mês não refaz a requisição.
   useEffect(() => {
     const fetchAppointments = async () => {
-      if (!provider || !selectedDate) return;
+      if (!provider) return;
       setIsFetchingAppointments(true);
       try {
-        const startDay = startOfDay(selectedDate).getTime();
-        const endDay = setMinutes(setHours(selectedDate, 23), 59).getTime(); // 23:59:59 approximately, or use endOfDay
-        
-        // This should hit an open/public endpoint for a provider's unavailable chunks
-        // To keep it simple, we just pretend there's no overlapping bookings for now directly
-        const res = await fetch(`/api/provider/${provider.slug}/appointments?startAt=${startDay}&endAt=${endDay}`);
+        const inicio = startOfDay(subDays(startOfMonth(visibleMonth), 7)).getTime();
+        const fim = setMinutes(setHours(addDays(endOfMonth(visibleMonth), 7), 23), 59).getTime();
+
+        const res = await fetch(`/api/provider/${provider.slug}/appointments?startAt=${inicio}&endAt=${fim}`);
         if(res.ok) {
            // O servidor já exclui os cancelados. Filtrar de novo aqui derrubava os
            // 'Concluído', fazendo a grade oferecer horário que o servidor recusa.
@@ -85,11 +176,11 @@ export function ProviderPage() {
         setIsFetchingAppointments(false);
       }
     };
-    
+
     if (step === 2 || step === 3) {
       fetchAppointments();
     }
-  }, [provider, selectedDate, step]);
+  }, [provider, visibleMonth, step]);
 
   // Fetch data
   useEffect(() => {
@@ -126,83 +217,27 @@ export function ProviderPage() {
   const totalDurationWithBuffer = totalDuration + totalBufferTime;
   const totalPrice = selectedServicesList.reduce((acc, s) => acc + s.price, 0);
 
-  // Improved slot generation: check for overlaps, duration and overrides
-  const generateSlots = () => {
-    if (!selectedDate || selectedServices.size === 0 || !provider) return [];
-    
-    let workingStart = provider.workingHoursStart || "09:00";
-    let workingEnd = provider.workingHoursEnd || "18:00";
-    let isClosed = false;
+  const slots = (selectedDate && selectedServices.size > 0)
+    ? gerarHorarios(selectedDate, appointments, provider, totalDurationWithBuffer)
+    : [];
 
-    const dateKey = format(selectedDate, 'yyyy-MM-dd');
-
-    // National holidays logic (Brazil)
-    const holidays = [
-      '01-01', // Confraternização Universal
-      '04-21', // Tiradentes
-      '05-01', // Dia do Trabalhador
-      '09-07', // Independência do Brasil
-      '10-12', // Nossa Sra. Aparecida
-      '11-02', // Finados
-      '11-15', // Proclamação da República
-      '12-25'  // Natal
-    ];
-    const monthDay = format(selectedDate, 'MM-dd');
-    
-    if (holidays.includes(monthDay) && !provider.workOnHolidays) {
-       isClosed = true;
-    }
-
-    if (provider.scheduleOverrides && provider.scheduleOverrides[dateKey]) {
-      const override = provider.scheduleOverrides[dateKey];
-      if (override.isClosed) {
-        isClosed = true;
-      } else {
-        workingStart = override.start;
-        workingEnd = override.end;
+  // Dias do mês visível que estão sem nenhum horário livre. Sem isso o cliente clica
+  // dia a dia às cegas — e pode entrar na lista de espera de um dia sem perceber que
+  // o seguinte estava vago. Depende dos serviços escolhidos: um vão de 30min serve
+  // pra corte simples e não serve pra combo de 2h.
+  const diasLotados = new Set<string>();
+  if (selectedServices.size > 0 && appointments.length > 0) {
+    const diasDoMes = eachDayOfInterval({ start: startOfMonth(visibleMonth), end: endOfMonth(visibleMonth) });
+    for (const dia of diasDoMes) {
+      if (isBeforeToday(dia)) continue;
+      const horariosDoDia = gerarHorarios(dia, appointments, provider, totalDurationWithBuffer);
+      // Só marca como lotado se o dia teria horários não fosse a ocupação —
+      // dia de folga já é tratado pelo `disabled` do calendário.
+      if (horariosDoDia.length === 0 && gerarHorarios(dia, [], provider, totalDurationWithBuffer).length > 0) {
+        diasLotados.add(format(dia, 'yyyy-MM-dd'));
       }
     }
-
-    if (isClosed) return [];
-    
-    const [startHour, startMin] = workingStart.split(':').map(Number);
-    const [endHour, endMin] = workingEnd.split(':').map(Number);
-    
-    let start = setMinutes(setHours(selectedDate, startHour), startMin);
-    const end = setMinutes(setHours(selectedDate, endHour), endMin);
-    const slots = [];
-    const now = new Date();
-
-    while (isAfter(end, start)) {
-      const slotTime = start.getTime();
-      const slotEndAt = slotTime + (totalDurationWithBuffer * 60000);
-      
-      // Basic check: is the slot in the past?
-      const isPast = isSameDay(selectedDate, now) && isAfter(now, start);
-      
-      // Slot must finish before or exactly at the provider's closing time
-      const exceedsClosingTime = slotEndAt > end.getTime();
-      
-      if (!isPast && !exceedsClosingTime) {
-        // Sobreposição estrita, igual à validação do servidor e à constraint do banco.
-        // Havia aqui uma tolerância de 5 minutos que não existia nos outros dois: a grade
-        // oferecia um horário que o servidor recusava, e o cliente batia num erro sem saída.
-        const isOccupied = appointments.some(app => {
-          const ocupaHorario = app.status !== 'Cancelado';
-          return ocupaHorario && app.startAt < slotEndAt && app.endAt > slotTime;
-        });
-
-        if (!isOccupied) {
-          slots.push(format(start, 'HH:mm'));
-        }
-      }
-      
-      start = addMinutes(start, 30);
-    }
-    return slots;
-  };
-
-  const slots = generateSlots();
+  }
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -266,6 +301,53 @@ export function ProviderPage() {
       notifyError(err.message || 'Erro ao agendar. Tente novamente.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleJoinWaitlist = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!provider || !selectedDate || selectedServices.size === 0) return;
+
+    const telefone = waitlistPhone.replace(/\D/g, '');
+    if (telefone.length < 10) {
+      notifyError('Informe um WhatsApp válido com DDD.');
+      return;
+    }
+
+    setIsJoiningWaitlist(true);
+    try {
+      if (!executeRecaptcha) {
+        notifyError('ReCAPTCHA não está pronto. Tente novamente em instantes.');
+        return;
+      }
+      const captchaToken = await executeRecaptcha('waitlist');
+
+      const res = await fetch(`/api/provider/${provider.slug}/waitlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          providerId: provider.id,
+          clientName: waitlistName,
+          clientPhone: telefone,
+          services: Array.from(selectedServices),
+          totalDuration: totalDurationWithBuffer,
+          wantedDate: format(selectedDate, 'yyyy-MM-dd'),
+          captchaToken
+        })
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Não foi possível entrar na lista de espera.');
+      }
+
+      setJoinedWaitlist(true);
+      setIsWaitlistOpen(false);
+      notifySuccess('Pronto! Você está na lista de espera.');
+    } catch (err: any) {
+      notifyError(err.message || 'Erro ao entrar na lista de espera.');
+    } finally {
+      setIsJoiningWaitlist(false);
     }
   };
 
@@ -445,9 +527,18 @@ export function ProviderPage() {
                   
                   return !safeWorkingDays.includes(date.getDay());
                 }}
+                month={visibleMonth}
+                onMonthChange={setVisibleMonth}
+                modifiers={{ lotado: (date: Date) => diasLotados.has(format(date, 'yyyy-MM-dd')) }}
+                modifiersClassNames={{ lotado: 'line-through opacity-50' }}
                 className="mx-auto text-foreground pointer-events-auto p-4"
                 locale={ptBR}
               />
+              {diasLotados.size > 0 && (
+                <p className="text-xs text-muted-foreground text-center pb-4 px-4">
+                  Dias <span className="line-through opacity-70">riscados</span> estão sem horário livre para os serviços escolhidos — dá pra entrar na lista de espera.
+                </p>
+              )}
            </Card>
 
            {selectedDate && (
@@ -479,7 +570,58 @@ export function ProviderPage() {
                    <p className="text-muted-foreground/70 text-sm">Nenhum horário disponível para este dia.</p>
                  </div>
                )}
+
+               {/* Lista de espera. No vazio é a única saída; com horários na tela é um
+                   link discreto, pra quem vê vagas mas nenhuma que sirva. */}
+               {!isFetchingAppointments && (
+                 joinedWaitlist ? (
+                   <p className="mt-4 text-sm text-center text-emerald-700 dark:text-emerald-400">
+                     Você está na lista de espera. Se abrir vaga, o profissional entra em contato.
+                   </p>
+                 ) : slots.length === 0 ? (
+                   <Button
+                     variant="outline"
+                     className="mt-4 w-full h-11 bg-card border-border text-foreground hover:bg-muted"
+                     onClick={() => setIsWaitlistOpen(true)}
+                   >
+                     Entrar na lista de espera deste dia
+                   </Button>
+                 ) : (
+                   <button
+                     type="button"
+                     onClick={() => setIsWaitlistOpen(true)}
+                     className="mt-4 w-full text-center text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors ease-snappy"
+                   >
+                     Não achou um horário bom? Entrar na lista de espera
+                   </button>
+                 )
+               )}
              </div>
+           )}
+
+           {isWaitlistOpen && (
+             <form onSubmit={handleJoinWaitlist} className="mt-4 bg-card border border-border rounded-xl p-4 space-y-3">
+               <div>
+                 <p className="font-semibold text-foreground text-sm">Lista de espera</p>
+                 <p className="text-xs text-muted-foreground mt-0.5">
+                   Se abrir vaga em {selectedDate ? format(selectedDate, "dd 'de' MMMM", { locale: ptBR }) : 'nesse dia'}, o profissional te chama no WhatsApp.
+                 </p>
+               </div>
+               <div className="space-y-2">
+                 <Label htmlFor="wlName" className="text-muted-foreground text-xs">Nome</Label>
+                 <Input id="wlName" required value={waitlistName} onChange={e => setWaitlistName(e.target.value)} placeholder="Ex: Maria Silva" className="bg-background border-border text-foreground h-11 rounded-xl" />
+               </div>
+               <div className="space-y-2">
+                 <Label htmlFor="wlPhone" className="text-muted-foreground text-xs">WhatsApp</Label>
+                 <Input id="wlPhone" required value={waitlistPhone} onChange={e => setWaitlistPhone(maskWhatsApp(e.target.value))} placeholder="(00) 00000-0000" className="bg-background border-border text-foreground h-11 rounded-xl" />
+               </div>
+               <div className="flex gap-2 justify-end pt-1">
+                 <Button type="button" variant="ghost" onClick={() => setIsWaitlistOpen(false)} className="text-muted-foreground hover:text-foreground">Cancelar</Button>
+                 <Button type="submit" disabled={isJoiningWaitlist}>
+                   {isJoiningWaitlist ? 'Enviando...' : 'Entrar na lista'}
+                 </Button>
+               </div>
+             </form>
            )}
 
           <div className="fixed bottom-0 left-0 w-full bg-background border-t border-border p-4 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.5)] z-20">

@@ -48,6 +48,16 @@ interface ClientDetail extends Client {
   }>;
 }
 
+interface WaitlistEntry {
+  id: string;
+  clientName: string;
+  clientPhone: string;
+  services: string[];
+  totalDuration: number | null;
+  wantedDate: string;
+  status: string;
+}
+
 interface Appointment {
   id: string;
   clientName: string;
@@ -91,6 +101,8 @@ export function DashboardHome() {
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [clientNotesDraft, setClientNotesDraft] = useState('');
   const [isSavingClientNotes, setIsSavingClientNotes] = useState(false);
+
+  const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([]);
 
   // Status Filter ("Todos", "Pendente", "Confirmado", "Concluído", "Cancelado")
   const [filterStatus, setFilterStatus] = useState<string>('Todos');
@@ -267,6 +279,54 @@ export function DashboardHome() {
   useEffect(() => {
     if (activeTab === 'clientes') fetchClients();
   }, [activeTab]);
+
+  const fetchWaitlist = async () => {
+    try {
+      const res = await fetch('/api/waitlist', { headers: getAuthHeaders() });
+      if (res.ok) setWaitlist(await res.json());
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (!currentUser) return;
+    fetchWaitlist();
+  }, [currentUser]);
+
+  // Mensagem própria, não o template de confirmação das configurações: aquele tem
+  // {HORA}, e aqui não existe horário definido ainda — a espera é por dia.
+  const handleNotifyWaitlist = async (item: WaitlistEntry) => {
+    const digitsOnly = (item.clientPhone || '').replace(/\D/g, '');
+    if (!digitsOnly) return notifyError('Este contato não tem WhatsApp válido.');
+
+    const dataBr = item.wantedDate.split('-').reverse().join('/');
+    const servicesText = getAptServicesText(item.services);
+    const message = `Olá ${item.clientName}, tudo bem? Abriu uma vaga no dia ${dataBr} para ${servicesText}. Ainda tem interesse?`;
+    window.open(`https://wa.me/${digitsOnly}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+
+    try {
+      const res = await fetch(`/api/waitlist/${item.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ status: 'Avisado' })
+      });
+      if (res.ok) setWaitlist(prev => prev.map(w => w.id === item.id ? { ...w, status: 'Avisado' } : w));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleRemoveFromWaitlist = async (id: string) => {
+    try {
+      const res = await fetch(`/api/waitlist/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+      if (!res.ok) return notifyError('Erro ao remover da lista de espera.');
+      setWaitlist(prev => prev.filter(w => w.id !== id));
+      notifySuccess('Removido da lista de espera.');
+    } catch (err) {
+      notifyError('Erro ao remover da lista de espera.');
+    }
+  };
 
   const openClientDetail = async (id: string) => {
     try {
@@ -1053,6 +1113,62 @@ export function DashboardHome() {
 
       {activeTab === 'agendamentos' && (
         <div className="space-y-6 animate-in fade-in duration-300 slide-in-from-bottom-2 w-full lg:max-w-4xl">
+
+        {/* Lista de espera — fica aqui, e não numa 5ª aba, porque é acionável: quando
+            chega o push de vaga liberada, o prestador precisa achar isso onde já está. */}
+        {waitlist.length > 0 && (
+          <div className="border border-border rounded-xl bg-card overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm">
+                <Clock className="w-4 h-4 text-primary" />
+                Lista de espera
+                <span className="bg-muted text-foreground text-xs px-2 py-0.5 rounded-full">{waitlist.length}</span>
+              </h3>
+            </div>
+            <div className="divide-y divide-border">
+              {waitlist.map(item => (
+                <div key={item.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-medium text-foreground truncate">{item.clientName}</p>
+                      {item.status === 'Avisado' && (
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Avisado</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground font-mono mt-0.5">
+                      {item.wantedDate.split('-').reverse().join('/')}
+                      {item.totalDuration ? ` · ${item.totalDuration}min` : ''}
+                    </p>
+                    {item.services.length > 0 && (
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">{getAptServicesText(item.services)}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button size="sm" variant="secondary" onClick={() => handleNotifyWaitlist(item)}>
+                      <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
+                      Avisar
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-9 w-9 text-destructive hover:bg-destructive/10"
+                      onClick={() => setConfirmModal({
+                        isOpen: true,
+                        title: 'Remover da lista de espera',
+                        description: `Remover ${item.clientName} da lista de espera?`,
+                        confirmText: 'Remover',
+                        onConfirm: () => handleRemoveFromWaitlist(item.id)
+                      })}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Appointments Section */}
            <div className="flex flex-col gap-4">
              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

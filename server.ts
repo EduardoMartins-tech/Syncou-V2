@@ -443,6 +443,27 @@ async function runMigrations() {
         `
       },
       {
+        name: 'waitlist',
+        // wanted_date é texto 'YYYY-MM-DD' de propósito: agendamento é um instante
+        // (start_at BIGINT), mas espera é um dia de calendário. Guardar como timestamp
+        // abriria brecha de fuso. Mesmo formato que scheduleOverrides já usa.
+        sql: `
+          CREATE TABLE IF NOT EXISTS waitlist (
+            id VARCHAR(255) PRIMARY KEY,
+            provider_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            client_name VARCHAR(255) NOT NULL,
+            client_phone VARCHAR(50) NOT NULL,
+            services TEXT NOT NULL,
+            total_duration INTEGER,
+            wanted_date VARCHAR(10) NOT NULL,
+            status VARCHAR(50) DEFAULT 'Aguardando',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+
+          CREATE INDEX IF NOT EXISTS idx_waitlist_provider_date ON waitlist (provider_id, wanted_date);
+        `
+      },
+      {
         name: 'backfill de clients',
         sql: `
           INSERT INTO clients (id, provider_id, phone, name)
@@ -525,6 +546,49 @@ function maskClientName(name: string) {
     .split(/\s+/)
     .map(part => part.charAt(0).toUpperCase() + '***')
     .join(' ');
+}
+
+// Valida o reCAPTCHA de um endpoint público. Devolve o erro a responder, ou null se passou.
+async function verificarCaptcha(req: express.Request, captchaToken: string): Promise<{ status: number; error: string } | null> {
+  const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
+  if (!recaptchaSecret) {
+    console.error('CRITICAL ERROR: RECAPTCHA_SECRET_KEY is not defined. Blocking public submission.');
+    return { status: 500, error: 'Erro de configuração do servidor (Captcha ausente).' };
+  }
+
+  try {
+    const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ secret: recaptchaSecret, response: captchaToken }).toString()
+    });
+
+    const verifyData = await verifyRes.json();
+    if (!verifyData.success) {
+      logSecurityEvent('CAPTCHA_FAILED', req, { verifyData });
+      return { status: 400, error: 'Falha na verificação de segurança (Captcha inválido).' };
+    }
+    return null;
+  } catch (e) {
+    console.error('Error verifying captcha:', e);
+    return { status: 500, error: 'Erro de conectividade ao validar captcha. Tente novamente mais tarde.' };
+  }
+}
+
+// Trava de "um nome por telefone", por prestador. Devolve a mensagem de conflito, ou
+// null quando pode seguir. O nome vai mascarado porque quem chama é endpoint público.
+async function conflitoDeIdentidade(providerId: string, clientPhone: string, clientName: string): Promise<string | null> {
+  const testPhones = (process.env.TEST_CLIENT_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
+  if (testPhones.includes(clientPhone)) return null;
+
+  const existente = await pool.query(
+    'SELECT name FROM clients WHERE provider_id = $1 AND phone = $2',
+    [providerId, clientPhone]
+  );
+  if (existente.rows.length === 0) return null;
+  if (existente.rows[0].name === clientName) return null;
+
+  return `Esse telefone já está cadastrado como "${maskClientName(existente.rows[0].name)}". Use o mesmo nome do cadastro anterior ou entre em contato com o profissional.`;
 }
 
 
@@ -1316,6 +1380,37 @@ app.put('/api/appointments/:id', authenticateToken, async (req: any, res) => {
              } catch (e) {
                 console.error("Error deleting from GCal:", e);
              }
+
+             // Vaga liberada: se alguém espera por esse dia, avisa o prestador — é ele
+             // quem chama o cliente (não existe canal automático e gratuito até o cliente).
+             try {
+                const aptDateRes = await pool.query(
+                  'SELECT start_at FROM appointments WHERE id = $1 AND provider_id = $2',
+                  [req.params.id, req.user.id]
+                );
+                const startAtMs = aptDateRes.rows[0]?.start_at;
+                if (startAtMs) {
+                   const d = new Date(Number(startAtMs));
+                   const pad = (n: number) => n.toString().padStart(2, '0');
+                   const dataVaga = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+                   const esperando = await pool.query(
+                     `SELECT count(*) FROM waitlist
+                      WHERE provider_id = $1 AND wanted_date = $2 AND status = 'Aguardando'`,
+                     [req.user.id, dataVaga]
+                   );
+                   const total = parseInt(esperando.rows[0].count, 10);
+                   if (total > 0) {
+                      await sendProviderPush(
+                        req.user.id,
+                        'Vaga liberada',
+                        `Abriu vaga em ${dataVaga.split('-').reverse().join('/')} — ${total} ${total === 1 ? 'pessoa está' : 'pessoas estão'} na lista de espera.`
+                      );
+                   }
+                }
+             } catch (e) {
+                console.error('Erro ao checar lista de espera após cancelamento:', e);
+             }
          }
       }
       res.json({ success: true });
@@ -1464,6 +1559,121 @@ app.put('/api/clients/:id', authenticateToken, async (req: any, res: any) => {
   }
 });
 
+// Lista de espera
+const waitlistSchema = z.object({
+  providerId: z.string().min(1, 'O ID do provedor é obrigatório'),
+  clientName: z.string().trim().min(2, 'O nome do cliente é obrigatório'),
+  clientPhone: z.string().trim().regex(/^\d{10,15}$/, 'Telefone inválido. Informe DDD + número, apenas dígitos.'),
+  services: z.array(z.any()).min(1, 'Pelo menos um serviço é obrigatório'),
+  totalDuration: z.number().positive().optional(),
+  wantedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Data inválida.'),
+  captchaToken: z.string().trim().min(1, 'Captcha obrigatório').refine(val => val !== 'undefined' && val !== 'null', 'Falha na verificação de segurança (Captcha ausente ou inválido).')
+});
+
+app.post('/api/provider/:slug/waitlist', bookingLimiter.middleware(), async (req, res) => {
+  try {
+    const validated = waitlistSchema.safeParse(req.body);
+    if (!validated.success) return res.status(400).json({ error: validated.error.issues[0].message });
+    const { providerId, clientName, clientPhone, services, totalDuration, wantedDate, captchaToken } = validated.data;
+
+    const erroCaptcha = await verificarCaptcha(req, captchaToken);
+    if (erroCaptcha) return res.status(erroCaptcha.status).json({ error: erroCaptcha.error });
+
+    const provider = await pool.query('SELECT id FROM users WHERE id = $1 AND slug = $2', [providerId, req.params.slug]);
+    if (provider.rows.length === 0) return res.status(404).json({ error: 'Profissional não encontrado.' });
+
+    // Data no passado não faz sentido esperar. Comparação em texto funciona porque
+    // o formato é YYYY-MM-DD, que ordena lexicograficamente igual a cronologicamente.
+    const hoje = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const hojeStr = `${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}-${pad(hoje.getDate())}`;
+    if (wantedDate < hojeStr) {
+      return res.status(400).json({ error: 'Não é possível entrar na lista de espera para uma data que já passou.' });
+    }
+
+    const conflito = await conflitoDeIdentidade(providerId, clientPhone, clientName);
+    if (conflito) return res.status(400).json({ error: conflito });
+
+    const jaNaLista = await pool.query(
+      `SELECT id FROM waitlist WHERE provider_id = $1 AND client_phone = $2 AND wanted_date = $3 AND status = 'Aguardando'`,
+      [providerId, clientPhone, wantedDate]
+    );
+    if (jaNaLista.rows.length > 0) {
+      return res.status(400).json({ error: 'Você já está na lista de espera para este dia.' });
+    }
+
+    await pool.query(
+      `INSERT INTO waitlist (id, provider_id, client_name, client_phone, services, total_duration, wanted_date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [generateId(), providerId, clientName, clientPhone, JSON.stringify(services || []), totalDuration ?? null, wantedDate]
+    );
+
+    await sendProviderPush(
+      providerId,
+      'Novo nome na lista de espera',
+      `${clientName} quer ser encaixado(a) em ${wantedDate.split('-').reverse().join('/')}.`
+    );
+
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error('Waitlist join error:', error);
+    res.status(500).json({ error: 'Erro ao entrar na lista de espera.' });
+  }
+});
+
+app.get('/api/waitlist', authenticateToken, async (req: any, res) => {
+  try {
+    const hoje = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const hojeStr = `${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}-${pad(hoje.getDate())}`;
+
+    const result = await pool.query(
+      `SELECT id, client_name as "clientName", client_phone as "clientPhone", services,
+              total_duration as "totalDuration", wanted_date as "wantedDate", status, created_at as "createdAt"
+       FROM waitlist
+       WHERE provider_id = $1 AND wanted_date >= $2
+       ORDER BY wanted_date ASC, created_at ASC`,
+      [req.user.id, hojeStr]
+    );
+
+    res.json(result.rows.map(r => ({ ...r, services: JSON.parse(r.services || '[]') })));
+  } catch (error: any) {
+    console.error('Get waitlist error:', error);
+    res.status(500).json({ error: 'Erro ao buscar a lista de espera.' });
+  }
+});
+
+app.put('/api/waitlist/:id', authenticateToken, async (req: any, res: any) => {
+  try {
+    const validated = z.object({ status: z.enum(['Aguardando', 'Avisado']) }).safeParse(req.body);
+    if (!validated.success) return res.status(400).json({ error: validated.error.issues[0].message });
+
+    const result = await pool.query(
+      'UPDATE waitlist SET status = $1 WHERE id = $2 AND provider_id = $3',
+      [validated.data.status, req.params.id, req.user.id]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Registro não encontrado.' });
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error('Update waitlist error:', error);
+    res.status(500).json({ error: 'Erro ao atualizar a lista de espera.' });
+  }
+});
+
+app.delete('/api/waitlist/:id', authenticateToken, async (req: any, res) => {
+  try {
+    const result = await pool.query(
+      'DELETE FROM waitlist WHERE id = $1 AND provider_id = $2',
+      [req.params.id, req.user.id]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Registro não encontrado.' });
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error('Delete waitlist error:', error);
+    res.status(500).json({ error: 'Erro ao remover da lista de espera.' });
+  }
+});
+
 // Public Provider Data
 app.get('/api/provider/:slug', async (req, res) => {
   try {
@@ -1544,31 +1754,8 @@ app.post('/api/provider/:slug/book', bookingLimiter.middleware(), async (req, re
     if (!validated.success) return res.status(400).json({ error: validated.error.issues[0].message });
     const { providerId, clientName, clientWhatsApp, clientPhone, clientEmail, services, totalPrice, totalDuration, bufferTime, bookingSource, startAt, endAt, captchaToken } = validated.data;
     
-    try {
-      const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
-      if (!recaptchaSecret) {
-        console.error('CRITICAL ERROR: RECAPTCHA_SECRET_KEY is not defined. Blocking appointment creation.');
-        return res.status(500).json({ error: 'Erro de configuração do servidor (Captcha ausente).' });
-      }
-      
-      const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          secret: recaptchaSecret,
-          response: captchaToken
-        }).toString()
-      });
-      
-      const verifyData = await verifyRes.json();
-      if (!verifyData.success) {
-        logSecurityEvent('CAPTCHA_FAILED', req, { verifyData });
-        return res.status(400).json({ error: 'Falha na verificação de segurança (Captcha inválido).' });
-      }
-    } catch (e) {
-      console.error('Error verifying captcha:', e);
-      return res.status(500).json({ error: 'Erro de conectividade ao validar captcha. Tente novamente mais tarde.' });
-    }
+    const erroCaptcha = await verificarCaptcha(req, captchaToken);
+    if (erroCaptcha) return res.status(erroCaptcha.status).json({ error: erroCaptcha.error });
 
     // 2) Valida se o telefone já tem 2+ agendamentos pendentes
     const pendingByPhone = await pool.query(
@@ -1674,25 +1861,16 @@ app.post('/api/provider/:slug/book', bookingLimiter.middleware(), async (req, re
       return res.status(400).json({ error: 'Conflito de agenda: Já existe um agendamento para este horário.' });
     }
 
-    // Ficha de cliente: um nome por telefone (por prestador). Números em TEST_CLIENT_PHONES pulam a trava.
-    if (clientPhone) {
-      const testPhones = (process.env.TEST_CLIENT_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
-      const isTestPhone = testPhones.includes(clientPhone);
-      const existingClient = await pool.query(
-        'SELECT name FROM clients WHERE provider_id = $1 AND phone = $2',
-        [providerId, clientPhone]
-      );
-      if (existingClient.rows.length > 0) {
-        if (!isTestPhone && existingClient.rows[0].name !== clientName) {
-          return res.status(400).json({ error: `Esse telefone já está cadastrado como "${maskClientName(existingClient.rows[0].name)}". Use o mesmo nome do cadastro anterior ou entre em contato com o profissional.` });
-        }
-      } else {
-        await pool.query(
-          'INSERT INTO clients (id, provider_id, phone, name) VALUES ($1, $2, $3, $4) ON CONFLICT (provider_id, phone) DO NOTHING',
-          [generateId(), providerId, clientPhone, clientName]
-        );
-      }
-    }
+    // Ficha de cliente: um nome por telefone (por prestador).
+    const conflito = await conflitoDeIdentidade(providerId, clientPhone, clientName);
+    if (conflito) return res.status(400).json({ error: conflito });
+
+    // Só agendamento de verdade cria cliente — entrar na lista de espera não cria,
+    // senão a aba Clientes encheria de gente que nunca foi atendida.
+    await pool.query(
+      'INSERT INTO clients (id, provider_id, phone, name) VALUES ($1, $2, $3, $4) ON CONFLICT (provider_id, phone) DO NOTHING',
+      [generateId(), providerId, clientPhone, clientName]
+    );
 
     const id = generateId();
 
