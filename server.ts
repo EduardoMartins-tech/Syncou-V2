@@ -2,6 +2,7 @@ process.env.TZ = 'America/Sao_Paulo';
 
 import express from 'express';
 import path from 'path';
+import { randomBytes } from 'crypto';
 import cors from 'cors';
 import helmet from 'helmet';
 import { createServer as createViteServer } from 'vite';
@@ -9,6 +10,7 @@ import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { getMessaging } from 'firebase-admin/messaging';
+import { getAuth as getFirebaseAuth } from 'firebase-admin/auth';
 import { initializeApp, cert } from 'firebase-admin/app';
 import nodemailer from 'nodemailer';
 import cron from 'node-cron';
@@ -143,7 +145,14 @@ setupCronJobs();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'syncou-super-secret-key-has-to-be-secure-1234';
+// JWT_SECRET nunca pode cair num valor conhecido: o default antigo estava publicado
+// no .env.example, o que permitiria forjar token de qualquer usuário. Sem a variável
+// configurada, gera um segredo aleatório por boot — as sessões morrem a cada restart
+// (sintoma visível), mas ninguém consegue forjar token.
+if (!process.env.JWT_SECRET) {
+  console.error('⚠️ ERRO CRÍTICO: JWT_SECRET não configurado. Usando segredo aleatório temporário — TODAS as sessões serão invalidadas a cada reinício. Configure JWT_SECRET no ambiente.');
+}
+const JWT_SECRET = process.env.JWT_SECRET || randomBytes(48).toString('hex');
 
 app.use(helmet({
   contentSecurityPolicy: {
@@ -570,9 +579,34 @@ app.post('/api/auth/send-otp', otpLimiter.middleware(), async (req, res) => {
 
 app.post('/api/auth/google', authLimiter.middleware(), async (req, res) => {
   try {
-    const { email, displayName } = req.body;
-    if (!email) return res.status(400).json({ error: 'Email não encontrado' });
-    
+    // O e-mail NUNCA vem do corpo da requisição: só do ID token assinado pelo Google,
+    // validado pelo Firebase Admin. Confiar no corpo permitiria login como qualquer usuário.
+    const { idToken } = req.body;
+    if (!idToken) return res.status(400).json({ error: 'Token de autenticação do Google ausente.' });
+
+    const adminApp = getFirebaseAdmin();
+    if (!adminApp) {
+      // Falha fechada: sem como validar, não autentica.
+      console.error('CRITICAL: Firebase Admin não inicializado — login com Google indisponível.');
+      return res.status(503).json({ error: 'Login com Google indisponível no momento. Use e-mail e senha.' });
+    }
+
+    let decodedToken;
+    try {
+      decodedToken = await getFirebaseAuth(adminApp).verifyIdToken(idToken);
+    } catch (verifyErr: any) {
+      logSecurityEvent('GOOGLE_IDTOKEN_INVALID', req, { error_message: verifyErr.message });
+      return res.status(401).json({ error: 'Falha na verificação do login com Google.' });
+    }
+
+    const email = decodedToken.email;
+    if (!email) return res.status(400).json({ error: 'A conta Google não possui e-mail.' });
+    if (decodedToken.email_verified === false) {
+      logSecurityEvent('GOOGLE_EMAIL_UNVERIFIED', req, { email });
+      return res.status(403).json({ error: 'O e-mail desta conta Google não está verificado.' });
+    }
+    const displayName = decodedToken.name || null;
+
     // Check if user exists
     const existing = await pool.query('SELECT id, email FROM users WHERE email = $1', [email]);
     let id;
@@ -693,29 +727,10 @@ app.get('/api/users/me', authenticateToken, async (req: any, res) => {
   }
 });
 
-app.post('/api/subscription/upgrade', authenticateToken, async (req: any, res: any) => {
-  try {
-    const { plan } = req.body;
-    if (plan !== 'gold') {
-      return res.status(400).json({ error: 'Plano inválido.' });
-    }
-    await pool.query('UPDATE users SET plan = $1 WHERE id = $2', [plan, req.user.id]);
-    res.json({ success: true, plan });
-  } catch (error: any) {
-    console.error('Upgrade plan error:', error);
-    res.status(500).json({ error: 'Erro ao atualizar plano.' });
-  }
-});
-
-app.post('/api/subscription/downgrade', authenticateToken, async (req: any, res: any) => {
-  try {
-    await pool.query("UPDATE users SET plan = 'free' WHERE id = $1", [req.user.id]);
-    res.json({ success: true, plan: 'free' });
-  } catch (error: any) {
-    console.error('Downgrade plan error:', error);
-    res.status(500).json({ error: 'Erro ao atualizar plano.' });
-  }
-});
+// Endpoints de upgrade/downgrade de plano foram removidos: nenhuma tela os chamava e
+// o upgrade concedia o plano Ouro sem qualquer verificação de pagamento. Quando existir
+// integração de cobrança, o upgrade deve ser consequência do pagamento confirmado
+// (webhook do provedor), nunca um POST que o próprio usuário dispara.
 
 app.post('/api/users/google-token', authenticateToken, async (req: any, res: any) => {
   try {

@@ -68,11 +68,7 @@ export function LandingPage() {
     try {
       const result = await googleSignInBasic();
       if (result) {
-        const { user } = result;
-        const success = await loginWithGoogle(
-          user.email || '',
-          user.displayName || ''
-        );
+        const success = await loginWithGoogle(result.idToken);
         if (success) {
           notifySuccess('Login efetuado com sucesso!');
           setIsAuthModalOpen(false);

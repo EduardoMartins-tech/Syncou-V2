@@ -6,13 +6,15 @@ import firebaseConfig from '../../firebase-applet-config.json';
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
-export const googleSignInBasic = async (): Promise<{ user: User; accessToken: string } | null> => {
+export const googleSignInBasic = async (): Promise<{ user: User; accessToken: string; idToken: string } | null> => {
   try {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     const result = await signInWithPopup(auth, provider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
-    return { user: result.user, accessToken: credential?.accessToken || '' };
+    // idToken é o que o backend valida — o e-mail é extraído de lá, não enviado por nós.
+    const idToken = await result.user.getIdToken();
+    return { user: result.user, accessToken: credential?.accessToken || '', idToken };
   } catch (error: any) {
     console.error('Sign in error:', error);
     throw error;
