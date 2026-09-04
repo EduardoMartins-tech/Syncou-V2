@@ -104,6 +104,13 @@ no Railway. Frontend React/Vite (PWA). Usado tanto em desktop quanto mobile
   comentadas sem antes resolver a cobrança** — o upgrade não valida pagamento.
   As ~40 checagens defensivas de status em inglês no frontend ficaram de
   propósito (redundantes, mas corretas): não são esquecimento.
+- Lista de espera (commit `2cacefc`): espera por dia de calendário, não por
+  horário. O prestador é quem recebe o push e chama o cliente pelo WhatsApp
+  manualmente — não existe canal automático e gratuito até o cliente, que não
+  tem conta nem push. Entrar na lista **não** cria cliente: só agendamento de
+  verdade cria, pra aba Clientes seguir significando "quem foi atendido".
+  O calendário público marca dia lotado, e a marcação depende dos serviços
+  escolhidos (um vão de 30min serve pra corte, não pra combo de 2h).
 
 ## Identidade visual atual
 
@@ -162,6 +169,6 @@ de UI para não perder ou reinventar o que já existe:
   já aceita `from`/`to`, falta o frontend usar.
 - Lembrete só alcança quem informou e-mail (campo opcional) — resolver de
   verdade exige canal pago por mensagem (SMS ou WhatsApp Business API).
-- Lista de espera: desenho aprovado, implementação não começou. Espera por
-  dia (`wanted_date`), prestador é quem recebe o push e chama o cliente pelo
-  WhatsApp manualmente, e o calendário público passa a marcar dia lotado.
+- Lista de espera: entrar na lista não notifica o cliente automaticamente —
+  depende do prestador ver o push e chamar pelo WhatsApp. Automatizar isso
+  exige canal pago por mensagem.
