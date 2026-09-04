@@ -425,6 +425,17 @@ function generateId() {
   return Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
 }
 
+// Mascara o nome do cliente antes de expor em endpoint público (agendamento).
+// "Maria Silva" -> "M*** S***": a inicial basta pro cliente legítimo se
+// reconhecer, sem entregar o nome nem o tamanho dele pra quem só chutou o telefone.
+function maskClientName(name: string) {
+  return (name || '')
+    .trim()
+    .split(/\s+/)
+    .map(part => part.charAt(0).toUpperCase() + '***')
+    .join(' ');
+}
+
 
 let firebaseAdminApp: any = null;
 
@@ -1499,7 +1510,7 @@ app.post('/api/provider/:slug/book', bookingLimiter.middleware(), async (req, re
       );
       if (existingClient.rows.length > 0) {
         if (!isTestPhone && existingClient.rows[0].name !== clientName) {
-          return res.status(400).json({ error: `Esse telefone já está cadastrado como "${existingClient.rows[0].name}". Use o mesmo nome ou corrija o telefone.` });
+          return res.status(400).json({ error: `Esse telefone já está cadastrado como "${maskClientName(existingClient.rows[0].name)}". Use o mesmo nome do cadastro anterior ou entre em contato com o profissional.` });
         }
       } else {
         await pool.query(
