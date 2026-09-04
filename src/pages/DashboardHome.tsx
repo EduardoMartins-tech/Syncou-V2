@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Plus, Clock, DollarSign, Calendar as CalendarIcon, Edit2, Trash2, MessageSquare, TrendingUp, CheckCircle, RefreshCcw, Check, CheckCircle2, XCircle, Download, Bell } from 'lucide-react';
+import { ExternalLink, Plus, Clock, DollarSign, Calendar as CalendarIcon, Edit2, Trash2, MessageSquare, TrendingUp, CheckCircle, RefreshCcw, Check, CheckCircle2, XCircle, Download, Bell, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,6 +26,26 @@ interface Service {
   price: number;
   active: boolean;
   title?: string;
+}
+
+interface Client {
+  id: string;
+  phone: string;
+  name: string;
+  notes: string | null;
+  appointmentCount: number;
+  lastAppointmentAt: number | null;
+}
+
+interface ClientDetail extends Client {
+  appointments: Array<{
+    id: string;
+    services: { name?: string; title?: string }[];
+    totalPrice: number;
+    status: string;
+    startAt: number;
+    endAt: number;
+  }>;
 }
 
 interface Appointment {
@@ -63,7 +83,14 @@ export function DashboardHome() {
 
   // Tabs State
   const [analyticsPeriod, setAnalyticsPeriod] = useState<"today" | "7days" | "30days" | "all">("30days");
-  const [activeTab, setActiveTab] = useState<'agendamentos' | 'servicos' | 'analytics'>('agendamentos');
+  const [activeTab, setActiveTab] = useState<'agendamentos' | 'servicos' | 'analytics' | 'clientes'>('agendamentos');
+
+  const [clients, setClients] = useState<Client[]>([]);
+  const [isFetchingClients, setIsFetchingClients] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<ClientDetail | null>(null);
+  const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+  const [clientNotesDraft, setClientNotesDraft] = useState('');
+  const [isSavingClientNotes, setIsSavingClientNotes] = useState(false);
 
   // Status Filter ("Todos", "Pendente", "Confirmado", "Concluído", "Cancelado")
   const [filterStatus, setFilterStatus] = useState<string>('Todos');
@@ -222,6 +249,55 @@ export function DashboardHome() {
       if (res.ok) setServices(await res.json());
     } catch(err) {
       console.error(err);
+    }
+  };
+
+  const fetchClients = async () => {
+    setIsFetchingClients(true);
+    try {
+      const res = await fetch('/api/clients', { headers: getAuthHeaders() });
+      if (res.ok) setClients(await res.json());
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsFetchingClients(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'clientes') fetchClients();
+  }, [activeTab]);
+
+  const openClientDetail = async (id: string) => {
+    try {
+      const res = await fetch(`/api/clients/${id}`, { headers: getAuthHeaders() });
+      if (!res.ok) return notifyError('Erro ao carregar cliente.');
+      const data = await res.json();
+      setSelectedClient(data);
+      setClientNotesDraft(data.notes || '');
+      setIsClientModalOpen(true);
+    } catch (err) {
+      notifyError('Erro ao carregar cliente.');
+    }
+  };
+
+  const saveClientNotes = async () => {
+    if (!selectedClient) return;
+    setIsSavingClientNotes(true);
+    try {
+      const res = await fetch(`/api/clients/${selectedClient.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ notes: clientNotesDraft })
+      });
+      if (!res.ok) return notifyError('Erro ao salvar observações.');
+      notifySuccess('Observações salvas!');
+      setClients(prev => prev.map(c => c.id === selectedClient.id ? { ...c, notes: clientNotesDraft } : c));
+      setSelectedClient(prev => prev ? { ...prev, notes: clientNotesDraft } : prev);
+    } catch (err) {
+      notifyError('Erro ao salvar observações.');
+    } finally {
+      setIsSavingClientNotes(false);
     }
   };
 
@@ -808,6 +884,13 @@ export function DashboardHome() {
           <TrendingUp className="w-4 h-4 inline-block mr-2 mb-0.5" />
           Analytics
         </button>
+        <button
+          onClick={() => setActiveTab('clientes')}
+          className={`flex-1 rounded-lg py-2.5 px-3 text-sm font-medium transition-colors ease-snappy whitespace-nowrap focus-ring ${activeTab === 'clientes' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+        >
+          <Users className="w-4 h-4 inline-block mr-2 mb-0.5" />
+          Clientes
+        </button>
       </div>
 
       {activeTab === 'analytics' && (
@@ -1370,6 +1453,47 @@ export function DashboardHome() {
         </div>
       )}
 
+      {activeTab === 'clientes' && (
+        <div className="space-y-4 animate-in fade-in duration-300 slide-in-from-bottom-2 w-full lg:max-w-4xl">
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary" />
+            Clientes
+          </h2>
+
+          {isFetchingClients ? (
+            <div className="text-center py-12 text-muted-foreground">Carregando clientes...</div>
+          ) : clients.length === 0 ? (
+            <div className="text-center p-8 border border-dashed border-border rounded-xl bg-card">
+              <Users className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
+              <p className="text-muted-foreground">Nenhum cliente ainda. Assim que alguém agendar, aparece aqui.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {clients.map(client => (
+                <Card
+                  key={client.id}
+                  className="bg-card border-border hover:border-primary/30 transition ease-snappy cursor-pointer"
+                  onClick={() => openClientDetail(client.id)}
+                >
+                  <CardContent className="p-4 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-foreground truncate">{client.name}</p>
+                      <p className="text-xs text-muted-foreground font-mono">{client.phone}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-sm font-semibold text-primary">{client.appointmentCount}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                        {client.appointmentCount === 1 ? 'agend.' : 'agends.'}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Generic Confirm Modal */}
       <Dialog open={confirmModal.isOpen} onOpenChange={(open) => !open && setConfirmModal(prev => ({ ...prev, isOpen: false }))}>
         <DialogContent className="sm:max-w-[425px] bg-card border-border text-foreground">
@@ -1479,6 +1603,64 @@ export function DashboardHome() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Client Detail Modal */}
+      <Dialog open={isClientModalOpen} onOpenChange={setIsClientModalOpen}>
+        <DialogContent className="sm:max-w-[500px] bg-card border-border text-foreground max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              {selectedClient?.name}
+            </DialogTitle>
+            <CardDescription className="text-muted-foreground font-mono">
+              {selectedClient?.phone}
+            </CardDescription>
+          </DialogHeader>
+
+          <div className="space-y-5 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="clientNotes" className="text-muted-foreground">Observações</Label>
+              <textarea
+                id="clientNotes"
+                value={clientNotesDraft}
+                onChange={e => setClientNotesDraft(e.target.value)}
+                placeholder="Preferências, alergias, observações gerais sobre o cliente..."
+                className="w-full h-20 bg-muted border border-border rounded-lg p-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+              />
+              <div className="flex justify-end">
+                <Button size="sm" onClick={saveClientNotes} disabled={isSavingClientNotes}>
+                  {isSavingClientNotes ? 'Salvando...' : 'Salvar observações'}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-muted-foreground">Histórico de agendamentos</Label>
+              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                {selectedClient?.appointments.length === 0 && (
+                  <p className="text-sm text-muted-foreground">Nenhum agendamento registrado.</p>
+                )}
+                {selectedClient?.appointments.map(apt => (
+                  <div key={apt.id} className="flex items-center justify-between bg-muted border border-border rounded-lg p-3 text-sm">
+                    <div className="min-w-0">
+                      <p className="text-foreground truncate">
+                        {apt.services.map(s => s.name || s.title).filter(Boolean).join(', ') || 'Serviço'}
+                      </p>
+                      <p className="text-xs text-muted-foreground font-mono">
+                        {new Date(apt.startAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                      </p>
+                    </div>
+                    <div className="text-right flex-shrink-0 ml-2">
+                      <p className="text-emerald-700 dark:text-emerald-400 font-medium font-mono">R$ {Number(apt.totalPrice || 0).toFixed(2)}</p>
+                      <p className="text-[10px] text-muted-foreground">{apt.status}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

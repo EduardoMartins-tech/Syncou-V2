@@ -355,6 +355,31 @@ async function runMigrations() {
         token TEXT UNIQUE NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+
+      CREATE TABLE IF NOT EXISTS clients (
+        id VARCHAR(255) PRIMARY KEY,
+        provider_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        phone VARCHAR(50) NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (provider_id, phone)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_clients_provider ON clients (provider_id);
+
+      -- Backfill: um cliente por telefone, usando o nome do agendamento mais recente daquele telefone
+      INSERT INTO clients (id, provider_id, phone, name)
+      SELECT DISTINCT ON (provider_id, client_phone)
+        'client_' || md5(provider_id || ':' || client_phone) AS id,
+        provider_id,
+        client_phone AS phone,
+        client_name AS name
+      FROM appointments
+      WHERE client_phone IS NOT NULL AND client_phone != ''
+      ORDER BY provider_id, client_phone, start_at DESC
+      ON CONFLICT (provider_id, phone) DO NOTHING;
     `);
 
     console.log("Banco de dados sincronizado e tabelas verificadas com sucesso! (PostgreSQL)");
@@ -1189,6 +1214,78 @@ app.post('/api/appointments/sync-all', authenticateToken, async (req: any, res: 
       res.status(500).json({ error: 'Erro ao excluir agendamento.' });
    }
 });
+
+// Clientes (ficha de cliente / CRM básico)
+const clientNotesSchema = z.object({ notes: z.string().max(2000).optional().nullable() });
+
+app.get('/api/clients', authenticateToken, async (req: any, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT c.id, c.phone, c.name, c.notes,
+              COUNT(a.id) AS "appointmentCount",
+              MAX(a.start_at) AS "lastAppointmentAt"
+       FROM clients c
+       LEFT JOIN appointments a ON a.provider_id = c.provider_id AND a.client_phone = c.phone
+       WHERE c.provider_id = $1
+       GROUP BY c.id
+       ORDER BY "lastAppointmentAt" DESC NULLS LAST`,
+      [req.user.id]
+    );
+    res.json(result.rows.map(r => ({
+      ...r,
+      appointmentCount: Number(r.appointmentCount),
+      lastAppointmentAt: r.lastAppointmentAt ? Number(r.lastAppointmentAt) : null
+    })));
+  } catch (error: any) {
+    console.error('Get clients error:', error);
+    res.status(500).json({ error: 'Erro ao buscar clientes.' });
+  }
+});
+
+app.get('/api/clients/:id', authenticateToken, async (req: any, res) => {
+  try {
+    const clientRes = await pool.query('SELECT id, phone, name, notes FROM clients WHERE id = $1 AND provider_id = $2', [req.params.id, req.user.id]);
+    if (clientRes.rows.length === 0) return res.status(404).json({ error: 'Cliente não encontrado.' });
+    const clientRow = clientRes.rows[0];
+
+    const appointmentsRes = await pool.query(
+      `SELECT id, services, total_price as "totalPrice", status, start_at as "startAt", end_at as "endAt"
+       FROM appointments WHERE provider_id = $1 AND client_phone = $2 ORDER BY start_at DESC`,
+      [req.user.id, clientRow.phone]
+    );
+
+    res.json({
+      ...clientRow,
+      appointments: appointmentsRes.rows.map(r => ({
+        ...r,
+        startAt: Number(r.startAt),
+        endAt: Number(r.endAt),
+        services: JSON.parse(r.services || '[]')
+      }))
+    });
+  } catch (error: any) {
+    console.error('Get client detail error:', error);
+    res.status(500).json({ error: 'Erro ao buscar cliente.' });
+  }
+});
+
+app.put('/api/clients/:id', authenticateToken, async (req: any, res: any) => {
+  try {
+    const validated = clientNotesSchema.safeParse(req.body);
+    if (!validated.success) return res.status(400).json({ error: validated.error.issues[0].message });
+
+    const result = await pool.query(
+      'UPDATE clients SET notes = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND provider_id = $3',
+      [validated.data.notes ?? null, req.params.id, req.user.id]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Cliente não encontrado.' });
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error('Update client error:', error);
+    res.status(500).json({ error: 'Erro ao atualizar cliente.' });
+  }
+});
+
 // Public Provider Data
 app.get('/api/provider/:slug', async (req, res) => {
   try {
@@ -1392,8 +1489,28 @@ app.post('/api/provider/:slug/book', bookingLimiter.middleware(), async (req, re
       return res.status(400).json({ error: 'Conflito de agenda: Já existe um agendamento para este horário.' });
     }
 
+    // Ficha de cliente: um nome por telefone (por prestador). Números em TEST_CLIENT_PHONES pulam a trava.
+    if (clientPhone) {
+      const testPhones = (process.env.TEST_CLIENT_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
+      const isTestPhone = testPhones.includes(clientPhone);
+      const existingClient = await pool.query(
+        'SELECT name FROM clients WHERE provider_id = $1 AND phone = $2',
+        [providerId, clientPhone]
+      );
+      if (existingClient.rows.length > 0) {
+        if (!isTestPhone && existingClient.rows[0].name !== clientName) {
+          return res.status(400).json({ error: `Esse telefone já está cadastrado como "${existingClient.rows[0].name}". Use o mesmo nome ou corrija o telefone.` });
+        }
+      } else {
+        await pool.query(
+          'INSERT INTO clients (id, provider_id, phone, name) VALUES ($1, $2, $3, $4) ON CONFLICT (provider_id, phone) DO NOTHING',
+          [generateId(), providerId, clientPhone, clientName]
+        );
+      }
+    }
+
     const id = generateId();
-    
+
     try {
       await pool.query(
         'INSERT INTO appointments (id, provider_id, client_name, client_whatsapp, client_phone, client_email, services, total_price, total_duration, buffer_time, booking_source, status, start_at, end_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)',
