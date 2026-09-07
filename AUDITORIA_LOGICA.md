@@ -298,3 +298,82 @@ Em ordem de risco:
    horário oferecido tem que ser reservável.
 5. **CORS.** Se algum consumidor externo da API parar de funcionar, é aqui —
    resolve listando a origem em `ALLOWED_ORIGINS`.
+
+Todos os cinco foram verificados em produção após o deploy e passaram.
+
+---
+
+## 8. Segunda rodada (laudo externo + suíte de testes)
+
+Depois desta auditoria, o projeto passou por uma varredura automatizada externa
+("Bancada de Avaliação"). Ela devolveu veredito **"não apto", nota 16.9**, com
+quatro achados bloqueantes. **Os quatro eram falsos positivos** e o registro
+disso importa mais que o veredito, porque tende a se repetir a cada varredura.
+
+### 8.1 — Os falsos positivos
+
+Os quatro bloqueantes apontavam `GET /api/provider/:slug`,
+`GET /api/provider/:slug/appointments`, `POST /api/provider/:slug/book` e
+`POST /api/provider/:slug/waitlist` como "expostas sem exigir autenticação".
+
+Essas quatro rotas **são** o produto: o Syncou existe para que o cliente final,
+que não tem conta, agende por um link público. Exigir autenticação nelas
+eliminaria o produto, não o risco. A ferramenta aplicou a heurística "rota sem
+middleware de auth = bloqueante" sem conhecer o domínio.
+
+Elas também não estão desprotegidas — apenas não usam login, que é diferente:
+reCAPTCHA v3, `bookingLimiter`, limite de pendentes por telefone, trava de
+um-nome-por-telefone, e projeção estrita de colunas nas duas rotas de leitura
+(a de disponibilidade devolve só `startAt`, `endAt` e `status`; a de perfil não
+devolve e-mail, `password_hash`, `google_access_token`, `plan` nem `role`).
+
+Um quinto achado, `POST /api/cron/expire-pending`, saiu pelo mesmo motivo, e o
+próprio laudo entregou a causa: *"middleware `verifyCronSecret` não reconhecido"*.
+Ele existe, valida o segredo e falha fechado em produção.
+
+Para reduzir a reincidência, o repositório passou a declarar essas rotas em
+**`.bancada.json`**, com o motivo e as mitigações de cada uma. Ressalva honesta:
+não há confirmação de que a ferramenta leia esse arquivo — o formato foi
+fornecido pelo usuário, não por especificação publicada.
+
+### 8.2 — O que o laudo acertou
+
+- **Escrita composta sem transação.** Real. `INSERT` em `clients` seguido de
+  `INSERT` em `appointments` sem transação: quando o segundo falhava por colisão
+  de horário (`23P01`), sobrava um cliente cadastrado que nunca teve atendimento
+  — o oposto da regra "só agendamento cria cliente". **Corrigido:** os dois
+  inserts agora compartilham `BEGIN`/`COMMIT`, com `ROLLBACK` no erro.
+- **Ausência de testes automatizados.** Era verdade. **Corrigido** — ver 8.3.
+- **Complexidade e duplicação.** `DashboardHome` com complexidade 285,
+  `ProviderPage` com 88, ~30% de duplicação na base. Continua verdade;
+  quebrar esses componentes segue pendente.
+- **Ausência de esteira de CI.** Continua verdade.
+
+### 8.3 — Suíte de testes
+
+As regras de agenda e validação foram extraídas para `shared/agenda.ts` e
+`shared/validacao.ts`. O motivo é prático, não estético: importar `server.ts`
+roda migrations, conecta no Postgres e abre porta; importar `ProviderPage.tsx`
+puxa React. Nenhum dos dois é importável em teste.
+
+São 58 testes (Vitest, `npm test`) fixando as regressões desta auditoria:
+sobreposição estrita sem tolerância, `Concluído` ocupando o horário, status
+restrito ao conjunto canônico, telefone obrigatório no agendamento, e a mensagem
+de conflito nunca revelando o nome guardado.
+
+**Limite declarado:** o `23P01` é a constraint do Postgres e só se prova contra
+um Postgres. Sem banco local, o que está coberto é a lógica JavaScript de
+sobreposição — que é onde o defeito real estava. A constraint em si segue
+**não coberta por teste**.
+
+### 8.4 — A quarta cópia da regra
+
+Extrair as regras revelou algo que a auditoria original não pegou: o item 4.1
+falava em **três** definições de "horário ocupado", mas havia uma quarta. O
+`disabled` do calendário público tratava dia com exceção de agenda como sempre
+aberto, mesmo quando a exceção o marcava como fechado — o dia ficava clicável só
+para informar "nenhum horário disponível" depois do clique.
+
+Agora `disabled` chama a mesma `janelaDeTrabalho()` que gera os horários. A lição
+se repete: enquanto a regra estiver escrita em mais de um lugar, contar quantas
+cópias existem é sempre subestimar.

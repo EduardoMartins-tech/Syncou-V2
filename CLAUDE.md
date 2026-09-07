@@ -111,6 +111,30 @@ no Railway. Frontend React/Vite (PWA). Usado tanto em desktop quanto mobile
   verdade cria, pra aba Clientes seguir significando "quem foi atendido".
   O calendário público marca dia lotado, e a marcação depende dos serviços
   escolhidos (um vão de 30min serve pra corte, não pra combo de 2h).
+- Regras de agenda extraídas para `shared/agenda.ts` e `shared/validacao.ts`,
+  com suíte de testes (Vitest, `npm test`, 58 testes — ver seção 8 da
+  `AUDITORIA_LOGICA.md`). O motivo da extração é prático: importar `server.ts`
+  roda migrations, conecta no Postgres e abre porta; importar `ProviderPage.tsx`
+  puxa React — nenhum dos dois é testável. **Regra de agenda nova vai em
+  `shared/agenda.ts`, não inline**: `ocupaHorario()` e `janelaDeTrabalho()` são
+  a definição única, e já houve quatro cópias divergentes dela no projeto.
+  O `23P01` (constraint do Postgres) segue sem teste — só se prova contra um
+  banco de verdade, que o ambiente local não tem.
+- Varredura automatizada externa ("Bancada de Avaliação") deu veredito "não
+  apto" com 4 bloqueantes que são **falsos positivos**: as rotas
+  `/api/provider/:slug/*` são públicas por design (o cliente final não tem
+  conta) e já têm reCAPTCHA, rate limit e projeção estrita de colunas. Um 5º
+  achado saiu porque a ferramenta não reconheceu o middleware `verifyCronSecret`,
+  que existe e falha fechado. O `.bancada.json` na raiz declara essas rotas e
+  suas mitigações. **Não "corrigir" esses achados adicionando autenticação** —
+  isso eliminaria o produto.
+- Gerenciador de pacotes: **npm**. O `bun.lock` foi removido de propósito
+  (commit `26b6229`). Sem `railway.json`/`nixpacks.toml` no repo, o Nixpacks
+  escolhe o gerenciador pela presença do lockfile e `bun.lock` tinha
+  precedência — então o projeto era mantido com npm e buildado com
+  `bun install --frozen-lockfile`, e toda instalação de dependência quebrava o
+  deploy. Ao mexer em dependência: `npm install` e commitar o
+  `package-lock.json` junto. Não reintroduzir `bun.lock`.
 
 ## Identidade visual atual
 
@@ -172,3 +196,13 @@ de UI para não perder ou reinventar o que já existe:
 - Lista de espera: entrar na lista não notifica o cliente automaticamente —
   depende do prestador ver o push e chamar pelo WhatsApp. Automatizar isso
   exige canal pago por mensagem.
+- Cobertura de teste é parcial e concentrada em `shared/`: rotas, acesso a banco
+  e a constraint `23P01` não têm teste (exigem Postgres, que não há local).
+- Sem esteira de CI — nada garante que `npm test` e `npm run lint` rodaram antes
+  de um deploy.
+- `DashboardHome.tsx` (complexidade 285) e `ProviderPage.tsx` (88) continuam
+  grandes demais; quebrar em componentes menores ainda não foi feito, e agora há
+  testes em `shared/` que dão alguma rede para começar.
+- Checagens de plano seguem comentadas no `server.ts` (limite de serviços, limite
+  mensal de agendamentos, Google Calendar). Reativar é decisão de produto e
+  depende de cobrança existir antes.
