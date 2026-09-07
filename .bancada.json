@@ -1,0 +1,68 @@
+{
+  "versao": "1.0",
+  "projeto": "syncou_v2",
+  "observacao": "O Syncou é uma plataforma de agendamento onde o cliente final NÃO tem conta. O prestador divulga um link público e qualquer pessoa agenda por ele. As rotas abaixo são abertas por especificação de design: exigir autenticação nelas eliminaria o produto, não o risco.",
+  "rotas_publicas_por_design": [
+    {
+      "rota": "GET /api/provider/:slug",
+      "motivo": "Carregamento de perfil público do prestador para página de agendamento.",
+      "mitigacoes": [
+        "Projeção estrita de colunas: retorna apenas slug, displayName, avatarUrl, bio, horário de trabalho, dias de trabalho, workOnHolidays, whatsapp e scheduleOverrides.",
+        "Não expõe email, password_hash, google_access_token, plan nem role."
+      ],
+      "arquivo": "server.ts",
+      "simbolo": "app.get('/api/provider/:slug')"
+    },
+    {
+      "rota": "GET /api/provider/:slug/appointments",
+      "motivo": "Consulta pública de disponibilidade (retorna apenas startAt, endAt e status).",
+      "mitigacoes": [
+        "Retorna somente startAt, endAt e status — sem nome, telefone, serviço ou preço do cliente.",
+        "Exclui agendamentos cancelados."
+      ],
+      "arquivo": "server.ts",
+      "simbolo": "app.get('/api/provider/:slug/appointments')"
+    },
+    {
+      "rota": "POST /api/provider/:slug/book",
+      "motivo": "Criação de agendamento anônimo pelo cliente final. Mitigado por reCAPTCHA v3 e bookingLimiter.",
+      "mitigacoes": [
+        "reCAPTCHA v3 obrigatório; sem RECAPTCHA_SECRET_KEY configurada a rota falha fechada.",
+        "bookingLimiter: 8 requisições por IP a cada 10 minutos.",
+        "Limite de 2 agendamentos pendentes por telefone.",
+        "Trava de um nome por telefone, com o nome mascarado na mensagem de conflito para não vazar dado pessoal.",
+        "Status gravado é sempre 'Pendente': o cliente não consegue se autoconfirmar.",
+        "Constraint EXCLUDE USING gist no Postgres impede sobreposição de horário mesmo sob concorrência."
+      ],
+      "arquivo": "server.ts",
+      "simbolo": "app.post('/api/provider/:slug/book')"
+    },
+    {
+      "rota": "POST /api/provider/:slug/waitlist",
+      "motivo": "Inscrição anônima na lista de espera. Mitigado por rate limit.",
+      "mitigacoes": [
+        "reCAPTCHA v3 obrigatório.",
+        "bookingLimiter: 8 requisições por IP a cada 10 minutos.",
+        "Trava de um nome por telefone, igual ao agendamento.",
+        "Impede inscrição duplicada do mesmo telefone para o mesmo dia.",
+        "Impede inscrição para data já passada.",
+        "Não cria registro de cliente: apenas agendamento efetivo cria."
+      ],
+      "arquivo": "server.ts",
+      "simbolo": "app.post('/api/provider/:slug/waitlist')"
+    }
+  ],
+  "middlewares_de_autenticacao": [
+    {
+      "nome": "authenticateToken",
+      "tipo": "JWT Bearer",
+      "descricao": "Valida o token JWT do prestador. Aplicado em todas as rotas do dashboard."
+    },
+    {
+      "nome": "verifyCronSecret",
+      "tipo": "segredo compartilhado por cabeçalho",
+      "descricao": "Compara o cabeçalho x-cron-secret (ou Authorization Bearer) com CRON_SECRET. Falha fechada em produção quando CRON_SECRET não está configurado. Aplicado em POST /api/cron/send-reminders e POST /api/cron/expire-pending.",
+      "arquivo": "server.ts"
+    }
+  ]
+}

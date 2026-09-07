@@ -13,6 +13,7 @@ import { format, isSameDay, addMinutes, isAfter, startOfDay, addDays, subDays, s
 import { ptBR } from 'date-fns/locale';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useNotification } from '../hooks/useNotification';
+import { gerarHorarios, diaLotado, janelaDeTrabalho } from '@/shared/agenda';
 
 interface Provider {
   id: string;
@@ -38,88 +39,9 @@ interface Service {
   price: number;
 }
 
-const FERIADOS_NACIONAIS = [
-  '01-01', // Confraternização Universal
-  '04-21', // Tiradentes
-  '05-01', // Dia do Trabalhador
-  '09-07', // Independência do Brasil
-  '10-12', // Nossa Sra. Aparecida
-  '11-02', // Finados
-  '11-15', // Proclamação da República
-  '12-25'  // Natal
-];
-
-// Função pura para poder rodar por dia e descobrir quais estão lotados no calendário,
-// não só para a data selecionada. Antes essa lógica vivia presa ao estado do componente.
-function gerarHorarios(
-  data: Date,
-  agendamentos: any[],
-  provider: Provider,
-  duracaoComRespiro: number
-): string[] {
-  if (!data || duracaoComRespiro <= 0) return [];
-
-  let workingStart = provider.workingHoursStart || '09:00';
-  let workingEnd = provider.workingHoursEnd || '18:00';
-  let isClosed = false;
-
-  const dateKey = format(data, 'yyyy-MM-dd');
-  const monthDay = format(data, 'MM-dd');
-
-  if (FERIADOS_NACIONAIS.includes(monthDay) && !provider.workOnHolidays) {
-    isClosed = true;
-  }
-
-  if (provider.scheduleOverrides && provider.scheduleOverrides[dateKey]) {
-    const override = provider.scheduleOverrides[dateKey];
-    if (override.isClosed) {
-      isClosed = true;
-    } else {
-      workingStart = override.start;
-      workingEnd = override.end;
-    }
-  } else {
-    let diasDeTrabalho: number[] = [1, 2, 3, 4, 5];
-    if (Array.isArray(provider.workingDays)) {
-      diasDeTrabalho = provider.workingDays.map(Number);
-    } else if (typeof provider.workingDays === 'string') {
-      try { diasDeTrabalho = JSON.parse(provider.workingDays).map(Number); } catch (e) {}
-    }
-    if (!diasDeTrabalho.includes(data.getDay())) isClosed = true;
-  }
-
-  if (isClosed) return [];
-
-  const [startHour, startMin] = workingStart.split(':').map(Number);
-  const [endHour, endMin] = workingEnd.split(':').map(Number);
-
-  let start = setMinutes(setHours(data, startHour), startMin);
-  const end = setMinutes(setHours(data, endHour), endMin);
-  const slots: string[] = [];
-  const now = new Date();
-
-  while (isAfter(end, start)) {
-    const slotTime = start.getTime();
-    const slotEndAt = slotTime + (duracaoComRespiro * 60000);
-
-    const isPast = isSameDay(data, now) && isAfter(now, start);
-    const exceedsClosingTime = slotEndAt > end.getTime();
-
-    if (!isPast && !exceedsClosingTime) {
-      // Sobreposição estrita, igual à validação do servidor e à constraint do banco.
-      const isOccupied = agendamentos.some(app => {
-        const ocupaHorario = app.status !== 'Cancelado';
-        return ocupaHorario && app.startAt < slotEndAt && app.endAt > slotTime;
-      });
-
-      if (!isOccupied) slots.push(format(start, 'HH:mm'));
-    }
-
-    start = addMinutes(start, 30);
-  }
-
-  return slots;
-}
+// As regras de agenda vivem em `shared/agenda.ts` para existirem uma vez só e serem
+// cobertas por teste — antes a mesma regra estava escrita aqui, no servidor e na
+// constraint do banco, com valores diferentes entre si.
 
 export function ProviderPage() {
   const { slug } = useParams();
@@ -221,19 +143,16 @@ export function ProviderPage() {
     ? gerarHorarios(selectedDate, appointments, provider, totalDurationWithBuffer)
     : [];
 
-  // Dias do mês visível que estão sem nenhum horário livre. Sem isso o cliente clica
-  // dia a dia às cegas — e pode entrar na lista de espera de um dia sem perceber que
-  // o seguinte estava vago. Depende dos serviços escolhidos: um vão de 30min serve
-  // pra corte simples e não serve pra combo de 2h.
+  // Dias do mês visível sem nenhum horário livre. Sem isso o cliente clica dia a dia
+  // às cegas — e pode entrar na lista de espera de um dia sem perceber que o seguinte
+  // estava vago. Depende dos serviços escolhidos: um vão de 30min serve pra corte
+  // simples e não serve pra combo de 2h.
   const diasLotados = new Set<string>();
   if (selectedServices.size > 0 && appointments.length > 0) {
     const diasDoMes = eachDayOfInterval({ start: startOfMonth(visibleMonth), end: endOfMonth(visibleMonth) });
     for (const dia of diasDoMes) {
       if (isBeforeToday(dia)) continue;
-      const horariosDoDia = gerarHorarios(dia, appointments, provider, totalDurationWithBuffer);
-      // Só marca como lotado se o dia teria horários não fosse a ocupação —
-      // dia de folga já é tratado pelo `disabled` do calendário.
-      if (horariosDoDia.length === 0 && gerarHorarios(dia, [], provider, totalDurationWithBuffer).length > 0) {
+      if (diaLotado(dia, appointments, provider, totalDurationWithBuffer)) {
         diasLotados.add(format(dia, 'yyyy-MM-dd'));
       }
     }
@@ -493,39 +412,12 @@ export function ProviderPage() {
                 selected={selectedDate}
                 onSelect={(date: Date | undefined) => { if(date) setSelectedDate(date)}}
                 disabled={(date) => {
+                  // Mesma função que gera os horários decide se o dia é atendível.
+                  // Antes esta lógica era uma terceira cópia da regra e discordava dela:
+                  // um dia marcado como fechado por exceção de agenda seguia clicável,
+                  // só para mostrar "nenhum horário disponível" depois do clique.
                   if (isBeforeToday(date)) return true;
-                  
-                  // National holidays logic (Brazil)
-                  const holidays = [
-                    '01-01', // Confraternização Universal
-                    '04-21', // Tiradentes
-                    '05-01', // Dia do Trabalhador
-                    '09-07', // Independência do Brasil
-                    '10-12', // Nossa Sra. Aparecida
-                    '11-02', // Finados
-                    '11-15', // Proclamação da República
-                    '12-25'  // Natal
-                  ];
-                  const monthDay = format(date, 'MM-dd');
-                  if (holidays.includes(monthDay) && !provider?.workOnHolidays) {
-                     return true;
-                  }
-
-                  const dateKey = format(date, 'yyyy-MM-dd');
-                  if (provider?.scheduleOverrides && provider.scheduleOverrides[dateKey]) {
-                    return false;
-                  }
-                  
-                  let safeWorkingDays = [1, 2, 3, 4, 5];
-                  if (Array.isArray(provider?.workingDays)) {
-                     safeWorkingDays = provider.workingDays.map(Number);
-                  } else if (typeof provider?.workingDays === 'string') {
-                     try {
-                       safeWorkingDays = JSON.parse(provider.workingDays).map(Number);
-                     } catch(e) {}
-                  }
-                  
-                  return !safeWorkingDays.includes(date.getDay());
+                  return janelaDeTrabalho(date, provider) === null;
                 }}
                 month={visibleMonth}
                 onMonthChange={setVisibleMonth}

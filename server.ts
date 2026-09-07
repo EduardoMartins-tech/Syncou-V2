@@ -17,6 +17,19 @@ import cron from 'node-cron';
 import { z } from 'zod';
 import { RateLimiter } from './server/rateLimiter';
 import { logSecurityEvent } from './server/securityLogger';
+import { APPOINTMENT_STATUSES } from './shared/agenda';
+import {
+  bookingSchema,
+  waitlistSchema,
+  appointmentUpdateSchema,
+  waitlistUpdateSchema,
+  clientNotesSchema,
+  slugSchema,
+  CAMPOS_PERFIL,
+  maskClientName,
+  telefonesDeTeste,
+  mensagemDeConflito
+} from './shared/validacao';
 
 let transporter: nodemailer.Transporter | null = null;
 async function setupEmail() {
@@ -537,17 +550,6 @@ function generateId() {
   return Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
 }
 
-// Mascara o nome do cliente antes de expor em endpoint público (agendamento).
-// "Maria Silva" -> "M*** S***": a inicial basta pro cliente legítimo se
-// reconhecer, sem entregar o nome nem o tamanho dele pra quem só chutou o telefone.
-function maskClientName(name: string) {
-  return (name || '')
-    .trim()
-    .split(/\s+/)
-    .map(part => part.charAt(0).toUpperCase() + '***')
-    .join(' ');
-}
-
 // Valida o reCAPTCHA de um endpoint público. Devolve o erro a responder, ou null se passou.
 async function verificarCaptcha(req: express.Request, captchaToken: string): Promise<{ status: number; error: string } | null> {
   const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
@@ -575,20 +577,19 @@ async function verificarCaptcha(req: express.Request, captchaToken: string): Pro
   }
 }
 
-// Trava de "um nome por telefone", por prestador. Devolve a mensagem de conflito, ou
-// null quando pode seguir. O nome vai mascarado porque quem chama é endpoint público.
+// Trava de "um nome por telefone", por prestador. Busca o cadastro e delega a decisão
+// para `mensagemDeConflito`, que é pura e coberta por teste.
 async function conflitoDeIdentidade(providerId: string, clientPhone: string, clientName: string): Promise<string | null> {
-  const testPhones = (process.env.TEST_CLIENT_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
-  if (testPhones.includes(clientPhone)) return null;
-
   const existente = await pool.query(
     'SELECT name FROM clients WHERE provider_id = $1 AND phone = $2',
     [providerId, clientPhone]
   );
-  if (existente.rows.length === 0) return null;
-  if (existente.rows[0].name === clientName) return null;
-
-  return `Esse telefone já está cadastrado como "${maskClientName(existente.rows[0].name)}". Use o mesmo nome do cadastro anterior ou entre em contato com o profissional.`;
+  return mensagemDeConflito(
+    existente.rows[0],
+    clientName,
+    clientPhone,
+    telefonesDeTeste(process.env.TEST_CLIENT_PHONES)
+  );
 }
 
 
@@ -1035,33 +1036,6 @@ app.post('/api/users/change-password', authenticateToken, authLimiter.middleware
   }
 });
 
-// Slug entra na URL pública (/p/:slug). Só duplicidade era checada — formato ficava
-// por conta do frontend, que não é validação nenhuma pra quem chama a API direto.
-const SLUG_RESERVADO = ['api', 'p', 'dashboard', 'login', 'admin', 'termos', 'assets', 'static'];
-const slugSchema = z.string()
-  .trim()
-  .toLowerCase()
-  .min(3, 'O link deve ter pelo menos 3 caracteres.')
-  .max(40, 'O link deve ter no máximo 40 caracteres.')
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use apenas letras minúsculas, números e hífen (sem acento, espaço ou barra).')
-  .refine(v => !SLUG_RESERVADO.includes(v), 'Este link é reservado. Escolha outro.');
-
-// Colunas que o próprio usuário pode alterar. Lista explícita: 'plan' e 'role' ficam
-// de fora de propósito, para não virarem escalada de privilégio pelo corpo da requisição.
-const CAMPOS_PERFIL: Record<string, string> = {
-  slug: 'slug',
-  displayName: 'display_name',
-  bio: 'bio',
-  workingHoursStart: 'working_hours_start',
-  workingHoursEnd: 'working_hours_end',
-  workingDays: 'working_days',
-  whatsapp: 'whatsapp',
-  scheduleOverrides: 'schedule_overrides',
-  avatarUrl: 'avatar_url',
-  whatsappMessageTemplate: 'whatsapp_message_template',
-  workOnHolidays: 'work_on_holidays'
-};
-
 app.put('/api/users/me', authenticateToken, async (req: any, res: any) => {
   try {
     const data = req.body || {};
@@ -1221,17 +1195,6 @@ app.get('/api/appointments', authenticateToken, async (req: any, res) => {
      console.error('Get appointments error:', error);
      res.status(500).json({ error: 'Erro ao buscar agendamentos.' });
    }
-});
-
-// Conjunto canônico de status. Qualquer outro valor era aceito e gravado antes,
-// quebrando silenciosamente todo filtro e contagem que dependem desses nomes.
-const APPOINTMENT_STATUSES = ['Pendente', 'Confirmado', 'Concluído', 'Cancelado'] as const;
-
-const appointmentUpdateSchema = z.object({
-  status: z.enum(APPOINTMENT_STATUSES).optional(),
-  cancelReason: z.string().max(500).optional().nullable(),
-  startAt: z.union([z.string(), z.number()]).optional().nullable(),
-  endAt: z.union([z.string(), z.number()]).optional().nullable()
 });
 
 app.put('/api/appointments/:id', authenticateToken, async (req: any, res) => {
@@ -1489,8 +1452,6 @@ app.post('/api/appointments/sync-all', authenticateToken, async (req: any, res: 
 });
 
 // Clientes (ficha de cliente / CRM básico)
-const clientNotesSchema = z.object({ notes: z.string().max(2000).optional().nullable() });
-
 app.get('/api/clients', authenticateToken, async (req: any, res) => {
   try {
     const result = await pool.query(
@@ -1560,16 +1521,6 @@ app.put('/api/clients/:id', authenticateToken, async (req: any, res: any) => {
 });
 
 // Lista de espera
-const waitlistSchema = z.object({
-  providerId: z.string().min(1, 'O ID do provedor é obrigatório'),
-  clientName: z.string().trim().min(2, 'O nome do cliente é obrigatório'),
-  clientPhone: z.string().trim().regex(/^\d{10,15}$/, 'Telefone inválido. Informe DDD + número, apenas dígitos.'),
-  services: z.array(z.any()).min(1, 'Pelo menos um serviço é obrigatório'),
-  totalDuration: z.number().positive().optional(),
-  wantedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Data inválida.'),
-  captchaToken: z.string().trim().min(1, 'Captcha obrigatório').refine(val => val !== 'undefined' && val !== 'null', 'Falha na verificação de segurança (Captcha ausente ou inválido).')
-});
-
 app.post('/api/provider/:slug/waitlist', bookingLimiter.middleware(), async (req, res) => {
   try {
     const validated = waitlistSchema.safeParse(req.body);
@@ -1645,7 +1596,7 @@ app.get('/api/waitlist', authenticateToken, async (req: any, res) => {
 
 app.put('/api/waitlist/:id', authenticateToken, async (req: any, res: any) => {
   try {
-    const validated = z.object({ status: z.enum(['Aguardando', 'Avisado']) }).safeParse(req.body);
+    const validated = waitlistUpdateSchema.safeParse(req.body);
     if (!validated.success) return res.status(400).json({ error: validated.error.issues[0].message });
 
     const result = await pool.query(
@@ -1727,25 +1678,6 @@ app.get('/api/provider/:slug/appointments', async (req, res) => {
      console.error('Fetch provider appointments error:', error);
      res.status(500).json({ error: 'Erro ao carregar a agenda.' });
    }
-});
-
-const bookingSchema = z.object({
-  providerId: z.string().min(1, 'O ID do provedor é obrigatório'),
-  clientName: z.string().min(2, 'O nome do cliente é obrigatório'),
-  clientWhatsApp: z.string().optional().nullable(),
-  // Obrigatório: é a chave de identidade do cliente. Quando era opcional, uma chamada
-  // direta à API sem telefone escapava do limite de pendentes E da trava de nome.
-  clientPhone: z.string().trim().regex(/^\d{10,15}$/, 'Telefone inválido. Informe DDD + número, apenas dígitos.'),
-  clientEmail: z.string().email('E-mail inválido').optional().nullable().or(z.literal('')),
-  services: z.array(z.any()).min(1, 'Pelo menos um serviço é obrigatório'),
-  startAt: z.union([z.string(), z.number()]),
-  endAt: z.union([z.string(), z.number()]),
-  totalPrice: z.number().nonnegative(),
-  totalDuration: z.number().positive(),
-  bufferTime: z.number().nonnegative().optional(),
-  bookingSource: z.string().optional(),
-  status: z.string().optional(),
-  captchaToken: z.string().trim().min(1, 'Captcha obrigatório').refine(val => val !== 'undefined' && val !== 'null', 'Falha na verificação de segurança (Captcha ausente ou inválido).')
 });
 
 app.post('/api/provider/:slug/book', bookingLimiter.middleware(), async (req, res) => {
@@ -1865,28 +1797,40 @@ app.post('/api/provider/:slug/book', bookingLimiter.middleware(), async (req, re
     const conflito = await conflitoDeIdentidade(providerId, clientPhone, clientName);
     if (conflito) return res.status(400).json({ error: conflito });
 
-    // Só agendamento de verdade cria cliente — entrar na lista de espera não cria,
-    // senão a aba Clientes encheria de gente que nunca foi atendida.
-    await pool.query(
-      'INSERT INTO clients (id, provider_id, phone, name) VALUES ($1, $2, $3, $4) ON CONFLICT (provider_id, phone) DO NOTHING',
-      [generateId(), providerId, clientPhone, clientName]
-    );
-
     const id = generateId();
 
+    // Cliente e agendamento gravam na mesma transação. Sem isso, um insert de
+    // agendamento que falha (colisão de horário, 23P01) deixava para trás um cliente
+    // cadastrado que nunca teve atendimento — o oposto de "só agendamento cria cliente".
+    // Só agendamento de verdade cria cliente: entrar na lista de espera não cria.
+    const dbClient = await pool.connect();
     try {
-      await pool.query(
+      await dbClient.query('BEGIN');
+
+      await dbClient.query(
+        'INSERT INTO clients (id, provider_id, phone, name) VALUES ($1, $2, $3, $4) ON CONFLICT (provider_id, phone) DO NOTHING',
+        [generateId(), providerId, clientPhone, clientName]
+      );
+
+      await dbClient.query(
         'INSERT INTO appointments (id, provider_id, client_name, client_whatsapp, client_phone, client_email, services, total_price, total_duration, buffer_time, booking_source, status, start_at, end_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)',
         // Status é sempre 'Pendente': quem agenda pela página pública não pode se
         // autoconfirmar. Antes vinha do corpo da requisição, então bastava mandar
         // status: 'Confirmado' para pular a confirmação do prestador.
         [id, providerId, clientName, clientWhatsApp, clientPhone, clientEmail, JSON.stringify(services || []), totalPrice, totalDuration, bufferTime || 0, bookingSource, 'Pendente', startAt, endAt]
       );
+
+      await dbClient.query('COMMIT');
     } catch (insertError: any) {
+      await dbClient.query('ROLLBACK').catch(rollbackErr => {
+        console.error('Falha ao desfazer transação de agendamento:', rollbackErr);
+      });
       if (insertError.code === '23P01') {
         return res.status(409).json({ error: 'Este horário acabou de ser reservado, escolha outro horário disponível' });
       }
       throw insertError;
+    } finally {
+      dbClient.release();
     }
 
     // Sync to Google Calendar if provider has connected it
